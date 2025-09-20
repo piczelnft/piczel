@@ -9,9 +9,10 @@ export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [token, setToken] = useState(null);
+  const [authVersion, setAuthVersion] = useState(0); // Force re-renders
   const router = useRouter();
 
-  // Check for existing token on mount
+  // Check for existing token on mount and when storage changes
   useEffect(() => {
     const storedToken = localStorage.getItem("token");
     const storedUser = localStorage.getItem("user");
@@ -24,6 +25,25 @@ export function AuthProvider({ children }) {
     } else {
       setIsLoading(false);
     }
+
+    // Listen for storage changes (useful for multiple tabs)
+    const handleStorageChange = (e) => {
+      if (e.key === "token" || e.key === "user") {
+        const newToken = localStorage.getItem("token");
+        const newUser = localStorage.getItem("user");
+
+        if (newToken && newUser) {
+          setToken(newToken);
+          setUser(JSON.parse(newUser));
+        } else {
+          setUser(null);
+          setToken(null);
+        }
+      }
+    };
+
+    window.addEventListener("storage", handleStorageChange);
+    return () => window.removeEventListener("storage", handleStorageChange);
   }, []);
 
   const verifyToken = async (tokenToVerify) => {
@@ -38,6 +58,7 @@ export function AuthProvider({ children }) {
         const data = await response.json();
         setUser(data.user);
         setToken(tokenToVerify);
+        setAuthVersion((prev) => prev + 1); // Force re-render
       } else {
         // Token is invalid, clear stored data
         logout();
@@ -63,15 +84,24 @@ export function AuthProvider({ children }) {
       const data = await response.json();
 
       if (response.ok) {
+        console.log("Login successful, updating state:", data.user);
         setUser(data.user);
         setToken(data.token);
+        setAuthVersion((prev) => prev + 1); // Force re-render
         localStorage.setItem("token", data.token);
         localStorage.setItem("user", JSON.stringify(data.user));
+
+        // Force immediate state update
+        setTimeout(() => {
+          setIsLoading(false);
+        }, 100);
+
         return { success: true, user: data.user };
       } else {
         return { success: false, error: data.error };
       }
     } catch (error) {
+      console.error("Login error in context:", error);
       return { success: false, error: "Network error. Please try again." };
     }
   };
@@ -89,15 +119,24 @@ export function AuthProvider({ children }) {
       const data = await response.json();
 
       if (response.ok) {
+        console.log("Signup successful, updating state:", data.user);
         setUser(data.user);
         setToken(data.token);
+        setAuthVersion((prev) => prev + 1); // Force re-render
         localStorage.setItem("token", data.token);
         localStorage.setItem("user", JSON.stringify(data.user));
+
+        // Force immediate state update
+        setTimeout(() => {
+          setIsLoading(false);
+        }, 100);
+
         return { success: true, user: data.user };
       } else {
         return { success: false, error: data.error };
       }
     } catch (error) {
+      console.error("Signup error in context:", error);
       return { success: false, error: "Network error. Please try again." };
     }
   };
@@ -105,6 +144,7 @@ export function AuthProvider({ children }) {
   const logout = () => {
     setUser(null);
     setToken(null);
+    setAuthVersion((prev) => prev + 1); // Force re-render
     localStorage.removeItem("token");
     localStorage.removeItem("user");
     router.push("/login");
@@ -122,6 +162,7 @@ export function AuthProvider({ children }) {
     token,
     isLoading,
     isAuthenticated,
+    authVersion, // Include version for debugging
     login,
     signup,
     logout,

@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { useAuth } from "@/contexts/AuthContext";
 
 export default function SignupPage() {
   const [formData, setFormData] = useState({
@@ -15,6 +16,7 @@ export default function SignupPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [message, setMessage] = useState("");
   const router = useRouter();
+  const { signup } = useAuth();
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -73,31 +75,19 @@ export default function SignupPage() {
     setIsLoading(true);
 
     try {
-      const response = await fetch("/api/auth/signup", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          name: formData.name,
-          email: formData.email,
-          password: formData.password,
-        }),
-      });
+      const result = await signup(
+        formData.name,
+        formData.email,
+        formData.password
+      );
 
-      const data = await response.json();
-
-      if (response.ok) {
-        // Store token in localStorage
-        localStorage.setItem("token", data.token);
-        localStorage.setItem("user", JSON.stringify(data.user));
-
+      if (result.success) {
         setMessage("Account created successfully! Redirecting...");
         setTimeout(() => {
           router.push("/");
-        }, 2000);
+        }, 1500);
       } else {
-        setErrors({ general: data.error || "Something went wrong" });
+        setErrors({ general: result.error || "Something went wrong" });
       }
     } catch (error) {
       console.error("Signup error:", error);
