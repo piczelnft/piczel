@@ -2,6 +2,12 @@ import mongoose from "mongoose";
 import bcrypt from "bcryptjs";
 
 const UserSchema = new mongoose.Schema({
+  // Unique public identifier a user can share for sponsorship validation
+  memberId: {
+    type: String,
+    unique: true,
+    index: true,
+  },
   name: {
     type: String,
     required: [true, "Please provide a name"],
@@ -28,6 +34,38 @@ const UserSchema = new mongoose.Schema({
     type: String,
     enum: ["user", "admin"],
     default: "user",
+  },
+  // Binary plan placement fields
+  sponsor: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "User",
+    default: null,
+    index: true,
+  },
+  placementParent: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "User",
+    default: null,
+    index: true,
+  },
+  placementSide: {
+    type: String,
+    enum: ["L", "R"],
+    default: undefined,
+  },
+  // Activation happens only after user clicks Buy on the buy page
+  isActivated: {
+    type: Boolean,
+    default: false,
+    index: true,
+  },
+  activatedAt: {
+    type: Date,
+    default: null,
+  },
+  package: {
+    type: String,
+    default: "",
   },
   isVerified: {
     type: Boolean,
@@ -67,8 +105,32 @@ const UserSchema = new mongoose.Schema({
   },
 });
 
+// Helper to generate a unique memberId (e.g., M + base36 timestamp + random)
+async function generateUniqueMemberId(model) {
+  let attempt = 0;
+  while (attempt < 5) {
+    const candidate = `M${Date.now().toString(36)}${Math.random()
+      .toString(36)
+      .slice(2, 6)}`.toUpperCase();
+    const exists = await model.exists({ memberId: candidate });
+    if (!exists) return candidate;
+    attempt += 1;
+  }
+  // Fallback to a more random long id if collisions persist
+  return `M${Math.random().toString(36).slice(2, 12).toUpperCase()}`;
+}
+
 // Hash password before saving
 UserSchema.pre("save", async function (next) {
+  // Auto-generate memberId on first save if missing
+  if (!this.memberId) {
+    try {
+      this.memberId = await generateUniqueMemberId(this.constructor);
+    } catch (err) {
+      return next(err);
+    }
+  }
+
   if (!this.isModified("password")) return next();
 
   try {
@@ -97,5 +159,17 @@ UserSchema.methods.toJSON = function () {
   delete userObject.password;
   return userObject;
 };
+
+// Ensure only one child per side under a parent (when placement is set)
+UserSchema.index(
+  { placementParent: 1, placementSide: 1 },
+  {
+    unique: true,
+    partialFilterExpression: {
+      placementParent: { $type: "objectId" },
+      placementSide: { $exists: true },
+    },
+  }
+);
 
 export default mongoose.models.User || mongoose.model("User", UserSchema);
