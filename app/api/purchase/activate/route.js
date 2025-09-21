@@ -15,54 +15,45 @@ function getAuthUserId(request) {
   }
 }
 
-async function findPlacementSlot(rootParentId) {
-  // BFS to find first available L/R slot under rootParentId
-  const queue = [rootParentId];
-  const visited = new Set();
+async function findPlacementSlot(sponsorId) {
+  // Simple binary tree insertion: find the first available slot level by level
+  // This ensures each user appears only once and follows standard binary tree structure
+
+  const queue = [sponsorId];
   let iterations = 0;
 
-  while (queue.length) {
-    const parentId = queue.shift();
-    const key = String(parentId);
-    if (visited.has(key)) continue;
-    visited.add(key);
+  while (queue.length && iterations < 1000) {
+    const currentParentId = queue.shift();
+    iterations++;
 
-    // Check left
-    const leftExists = await User.exists({
-      placementParent: parentId,
+    // Check if left slot is available
+    const leftChild = await User.findOne({
+      placementParent: currentParentId,
       placementSide: "L",
-    });
-    if (!leftExists) {
-      return { parentId, side: "L" };
+      isActivated: true,
+    }).select("_id");
+
+    if (!leftChild) {
+      return { parentId: currentParentId, side: "L" };
     }
 
-    // Check right
-    const rightExists = await User.exists({
-      placementParent: parentId,
+    // Check if right slot is available
+    const rightChild = await User.findOne({
+      placementParent: currentParentId,
       placementSide: "R",
-    });
-    if (!rightExists) {
-      return { parentId, side: "R" };
+      isActivated: true,
+    }).select("_id");
+
+    if (!rightChild) {
+      return { parentId: currentParentId, side: "R" };
     }
 
-    // Enqueue children ordered by activation time (oldest first)
-    const children = await User.find({ placementParent: parentId })
-      .select("_id activatedAt createdAt placementSide")
-      .sort({ activatedAt: 1, createdAt: 1 })
-      .lean();
-
-    for (const c of children) {
-      queue.push(c._id);
-    }
-
-    iterations += 1;
-    if (iterations > 10000) {
-      throw new Error("Placement search exceeded iteration limit");
-    }
+    // Both slots filled, add children to queue for next level
+    queue.push(leftChild._id);
+    queue.push(rightChild._id);
   }
 
-  // If sponsor tree is empty (only possible if sponsor not found), caller should handle before
-  throw new Error("No placement slot found");
+  throw new Error("No placement slot found - tree may be too deep");
 }
 
 export async function POST(request) {
@@ -114,6 +105,9 @@ export async function POST(request) {
     while (retries <= maxRetries) {
       try {
         const { parentId, side } = await findPlacementSlot(sponsor._id);
+        const activationTime = new Date();
+        console.log("Setting activatedAt to:", activationTime);
+
         updated = await User.findOneAndUpdate(
           { _id: buyer._id, isActivated: false },
           {
@@ -122,12 +116,14 @@ export async function POST(request) {
               placementParent: parentId,
               placementSide: side,
               isActivated: true,
-              activatedAt: new Date(),
+              activatedAt: activationTime,
               ...(pkg ? { package: pkg } : {}),
             },
           },
           { new: true }
         );
+
+        console.log("User updated - activatedAt:", updated?.activatedAt);
 
         if (!updated) {
           return NextResponse.json(

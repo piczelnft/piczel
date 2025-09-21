@@ -4,8 +4,16 @@ import jwt from "jsonwebtoken";
 import { NextResponse } from "next/server";
 
 // Build a subtree up to a given depth for activated users only
-async function buildSubtree(root, depth) {
+async function buildSubtree(root, depth, visitedNodes = new Set()) {
   if (!root || depth < 0) return null;
+
+  // Prevent infinite loops and duplicate nodes
+  const nodeKey = String(root._id);
+  if (visitedNodes.has(nodeKey)) {
+    console.warn(`Duplicate node detected: ${root.memberId || nodeKey}`);
+    return null;
+  }
+  visitedNodes.add(nodeKey);
 
   const base = {
     id: root.memberId,
@@ -27,21 +35,40 @@ async function buildSubtree(root, depth) {
     return { ...base, left: null, right: null };
   }
 
-  // Find children by placement
+  // Find direct children by placement (only activated users)
   const children = await User.find({
     placementParent: root._id,
     isActivated: true,
-  }).lean();
+  })
+    .select(
+      "_id memberId name profile package sponsor activatedAt isActivated placementSide"
+    )
+    .lean();
 
+  console.log(
+    `Children of ${root.memberId}:`,
+    children.map((c) => ({
+      memberId: c.memberId,
+      placementSide: c.placementSide,
+      activatedAt: c.activatedAt,
+    }))
+  );
+
+  // Ensure we only get one child per side
   const leftChild = children.find((c) => c.placementSide === "L") || null;
   const rightChild = children.find((c) => c.placementSide === "R") || null;
 
+  // Build subtrees recursively with visited tracking
   const [leftTree, rightTree] = await Promise.all([
-    leftChild ? buildSubtree(leftChild, depth - 1) : Promise.resolve(null),
-    rightChild ? buildSubtree(rightChild, depth - 1) : Promise.resolve(null),
+    leftChild
+      ? buildSubtree(leftChild, depth - 1, new Set(visitedNodes))
+      : Promise.resolve(null),
+    rightChild
+      ? buildSubtree(rightChild, depth - 1, new Set(visitedNodes))
+      : Promise.resolve(null),
   ]);
 
-  // Compute directs and counts
+  // Compute metrics
   const directs = children.length;
 
   function countNodes(node) {
