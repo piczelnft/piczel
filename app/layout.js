@@ -15,9 +15,9 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata = {
-  title: "DGtek - Advanced Crypto Exchange",
+  title: "PICZEL - Meme NFT platform",
   description:
-    "Professional cryptocurrency trading platform with advanced features",
+    "Meme NFT platform and investment company",
 };
 
 export default function RootLayout({ children }) {

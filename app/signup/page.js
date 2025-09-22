@@ -105,7 +105,7 @@ export default function SignupPage() {
             Create Your Account
           </h2>
           <p className="mt-2 text-sm text-gray-300">
-            Join DGtek and start your crypto journey
+            Join PICZEL and start your crypto journey
           </p>
         </div>
 

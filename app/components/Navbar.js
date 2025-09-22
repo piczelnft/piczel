@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import Image from "next/image";
 import Link from "next/link";
 import { useAuth } from "@/contexts/AuthContext";
 import Sidebar from "./Sidebar";
@@ -49,14 +48,8 @@ export default function Navbar() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             <div className="flex items-center space-x-2">
-              <div className="w-30 h-10 relative">
-                <Image
-                  src="/DGlogo.png"
-                  alt="DGtek Logo"
-                  fill
-                  className="object-contain"
-                  priority
-                />
+              <div className="text-2xl font-bold bg-gradient-to-r from-purple-400 to-cyan-400 bg-clip-text text-transparent">
+                PICZEL
               </div>
             </div>
             <div className="animate-pulse bg-slate-700 h-8 w-20 rounded"></div>
@@ -75,14 +68,8 @@ export default function Navbar() {
             <div className="flex items-center space-x-4">
               {/* Logo */}
               <div className="flex items-center space-x-2">
-                <div className="w-30 h-10 relative">
-                  <Image
-                    src="/DGlogo.png"
-                    alt="DGtek Logo"
-                    fill
-                    className="object-contain"
-                    priority
-                  />
+                <div className="text-2xl font-bold bg-gradient-to-r from-purple-400 to-cyan-400 bg-clip-text text-transparent">
+                  PICZEL
                 </div>
               </div>
 

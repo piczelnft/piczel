@@ -72,11 +72,17 @@ const GenealogyPage = () => {
               isHovered ? "scale-110 shadow-xl" : ""
             } ${isClicked ? "ring-4 ring-purple-400 ring-opacity-50" : ""}`}
           >
-            <img
-              src={node.profile}
-              alt={node.name}
-              className="w-full h-full rounded-full object-cover"
-            />
+            {node.profile ? (
+              <img
+                src={node.profile}
+                alt={node.name}
+                className="w-full h-full rounded-full object-cover"
+              />
+            ) : (
+              <div className="w-full h-full rounded-full bg-gradient-to-br from-cyan-400 to-purple-500 flex items-center justify-center text-white font-bold text-lg">
+                {node.name?.charAt(0)?.toUpperCase() || '?'}
+              </div>
+            )}
           </div>
           <div
             className={`text-center bg-gradient-to-br from-slate-700/80 to-purple-700/80 backdrop-blur-sm px-3 py-2 md:px-4 md:py-2 rounded-lg shadow-md min-w-32 md:min-w-40 border border-purple-500/30 transition-all duration-300 ${
@@ -165,11 +171,17 @@ const GenealogyPage = () => {
               </h3>
               <div className="flex items-center gap-4">
                 <div className="w-15 h-15 rounded-full bg-gradient-to-br from-cyan-500 to-purple-600 flex items-center justify-center shadow-lg border-3 border-white">
-                  <img
-                    src={selectedMember.profile}
-                    alt={selectedMember.name}
-                    className="w-full h-full rounded-full object-cover"
-                  />
+                  {selectedMember.profile ? (
+                    <img
+                      src={selectedMember.profile}
+                      alt={selectedMember.name}
+                      className="w-full h-full rounded-full object-cover"
+                    />
+                  ) : (
+                    <div className="w-full h-full rounded-full bg-gradient-to-br from-cyan-400 to-purple-500 flex items-center justify-center text-white font-bold text-sm">
+                      {selectedMember.name?.charAt(0)?.toUpperCase() || '?'}
+                    </div>
+                  )}
                 </div>
                 <div>
                   <div className="font-semibold text-white">
@@ -216,11 +228,17 @@ const GenealogyPage = () => {
                 <div className="space-y-4">
                   <div className="flex items-center gap-4">
                     <div className="w-16 h-16 rounded-full bg-gradient-to-br from-cyan-500 to-purple-600 flex items-center justify-center shadow-lg border-3 border-white">
-                      <img
-                        src={clickedNode.profile}
-                        alt={clickedNode.name}
-                        className="w-full h-full rounded-full object-cover"
-                      />
+                      {clickedNode.profile ? (
+                        <img
+                          src={clickedNode.profile}
+                          alt={clickedNode.name}
+                          className="w-full h-full rounded-full object-cover"
+                        />
+                      ) : (
+                        <div className="w-full h-full rounded-full bg-gradient-to-br from-cyan-400 to-purple-500 flex items-center justify-center text-white font-bold text-sm">
+                          {clickedNode.name?.charAt(0)?.toUpperCase() || '?'}
+                        </div>
+                      )}
                     </div>
                     <div>
                       <div className="font-semibold text-white text-lg">

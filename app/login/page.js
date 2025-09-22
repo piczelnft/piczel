@@ -85,7 +85,7 @@ export default function LoginPage() {
         <div className="text-center">
           <h2 className="mt-6 text-3xl font-bold text-white">Welcome Back</h2>
           <p className="mt-2 text-sm text-gray-300">
-            Sign in to your DGtek account
+            Sign in to your PICZEL account
           </p>
         </div>
 
@@ -191,7 +191,7 @@ export default function LoginPage() {
             </div>
 
             <div className="text-center">
-              <span className="text-gray-400">Don't have an account? </span>
+              <span className="text-gray-400">Don&apos;t have an account? </span>
               <Link
                 href="/signup"
                 className="text-purple-400 hover:text-purple-300 font-medium transition-colors duration-200"

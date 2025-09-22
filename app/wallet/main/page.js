@@ -35,7 +35,7 @@ const WalletMainPage = () => {
       <div className="max-w-4xl mx-auto">
         <div className="text-center mb-12">
           <h1 className="text-4xl font-bold text-white mb-2">Wallet</h1>
-          <p className="text-lg text-gray-300">DGTEK Wallet Balance</p>
+          <p className="text-lg text-gray-300">PICZEL Wallet Balance</p>
         </div>
 
         {/* Wallet Balance Cards */}
@@ -43,7 +43,7 @@ const WalletMainPage = () => {
           {/* Main Balance */}
           <div className="bg-gradient-to-br from-slate-800/50 to-purple-800/50 backdrop-blur-sm rounded-2xl p-6 border border-purple-500/20 shadow-lg">
             <div className="text-center">
-              <div className="text-gray-300 text-sm mb-2">DGTEK Wallet Balance</div>
+              <div className="text-gray-300 text-sm mb-2">PICZEL Wallet Balance</div>
               <div className="text-white font-bold text-2xl">{walletData.balance}</div>
             </div>
           </div>
@@ -67,7 +67,7 @@ const WalletMainPage = () => {
           {/* Today's Withdrawal */}
           <div className="bg-gradient-to-br from-slate-800/50 to-yellow-800/50 backdrop-blur-sm rounded-2xl p-6 border border-yellow-500/20 shadow-lg">
             <div className="text-center">
-              <div className="text-gray-300 text-sm mb-2">Today's Withdrawal</div>
+              <div className="text-gray-300 text-sm mb-2">Today&apos;s Withdrawal</div>
               <div className="text-yellow-400 font-bold text-2xl">{walletData.todaysWithdrawal}</div>
             </div>
           </div>

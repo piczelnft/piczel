@@ -1,7 +1,6 @@
 'use client';
 
 import { useState } from 'react';
-import Image from 'next/image';
 import Link from 'next/link';
 
 export default function Sidebar({ isOpen, onClose }) {
@@ -10,6 +9,7 @@ export default function Sidebar({ isOpen, onClose }) {
 
   const menuItems = [
     { name: 'Dashboard', icon: '📊', href: '/' },
+    { name: 'About', icon: 'ℹ️', href: '/about' },
     { 
       name: 'Profile', 
       icon: '👤',
@@ -55,7 +55,6 @@ export default function Sidebar({ isOpen, onClose }) {
       dropdownItems: [
         { name: 'Main Wallet', icon: '💳', href: '/wallet/main' },
         { name: 'Wallet History', icon: '📜', href: '/wallet/history' },
-        { name: 'All Transactions', icon: '📋', href: '/wallet/transactions' }
       ]
     },
     { 
@@ -117,20 +116,11 @@ export default function Sidebar({ isOpen, onClose }) {
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b border-purple-500/20">
           <div className="flex items-center space-x-3">
-            <div className="w-12 h-12 relative">
-              <Image
-                src="/DGlogo.png"
-                alt="DGtek Logo"
-                fill
-                className="object-contain"
-                priority
-              />
-            </div>
             <div>
               <h2 className="font-bold text-xl bg-gradient-to-r from-cyan-400 to-purple-400 bg-clip-text text-transparent">
-                DGtek
+                PICZEL
               </h2>
-              <p className="text-gray-400 text-sm">Crypto Exchange</p>
+              <p className="text-gray-400 text-sm">Meme NFT</p>
             </div>
           </div>
           <button

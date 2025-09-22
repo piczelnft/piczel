@@ -12,7 +12,7 @@ export default function Home() {
             <div className="flex justify-center mb-8">
               <Link href="/swap">
                 <div className="bg-gradient-to-r from-cyan-500 to-purple-600 text-white font-bold text-2xl px-8 py-4 rounded-xl shadow-lg hover:from-cyan-600 hover:to-purple-700 hover:scale-105 transition-all duration-300 cursor-pointer">
-                  🚀 DGTEK SWAP
+                  🚀 PICZEL SWAP
                 </div>
               </Link>
             </div>
@@ -258,7 +258,7 @@ export default function Home() {
                 <span className="text-red-400 font-medium">USDG 82.19</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-gray-300">Today's Withdrawal:</span>
+                <span className="text-gray-300">Today&apos;s Withdrawal:</span>
                 <span className="text-white font-medium">USDG 0</span>
               </div>
             </div>
@@ -292,7 +292,7 @@ export default function Home() {
               <div className="flex items-center space-x-2">
                 <input 
                   type="text" 
-                  value="http://dgtekelite.com/member/register/DGT123456/ClubA" 
+                  value="http://piczelite.com/member/register/PIC123456/ClubA" 
                   readOnly 
                   className="flex-1 bg-slate-700/50 text-white px-3 py-2 rounded-lg border border-purple-500/30 text-sm"
                 />
@@ -306,7 +306,7 @@ export default function Home() {
               <div className="flex items-center space-x-2">
                 <input 
                   type="text" 
-                  value="http://dgtekelite.com/member/register/DGT123456/ClubB" 
+                  value="http://piczelite.com/member/register/PIC123456/ClubB" 
                   readOnly 
                   className="flex-1 bg-slate-700/50 text-white px-3 py-2 rounded-lg border border-purple-500/30 text-sm"
                 />

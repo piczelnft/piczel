@@ -233,7 +233,7 @@ export default function SwapPage() {
               ← Back to Dashboard
             </Link>
             <div className="text-center">
-              <h1 className="text-2xl font-bold text-white">🚀 DGTEK SWAP</h1>
+              <h1 className="text-2xl font-bold text-white">🚀 PICZEL SWAP</h1>
               <p className="text-gray-300 text-sm">Trade Binance Coin (BNB)</p>
             </div>
             <div className="w-24"></div> {/* Spacer for centering */}
