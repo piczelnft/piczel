@@ -2,29 +2,29 @@
 
 export default function AboutPage() {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 p-8">
+    <div className="min-h-screen p-8" style={{background: 'linear-gradient(to bottom right, var(--default-body-bg-color) 0%, var(--theme-bg-gradient) 25%, var(--default-body-bg-color) 100%)', fontFamily: 'var(--default-font-family)'}}>
       <div className="max-w-4xl mx-auto">
         {/* Header */}
         <div className="text-center mb-12">
-          <h1 className="text-4xl font-bold text-white mb-4">
+          <h1 className="text-4xl font-bold text-white mb-4 gradient-text-enhanced animate-fadeInUp">
             About PICZEL
           </h1>
-          <div className="w-24 h-1 bg-gradient-to-r from-cyan-400 to-purple-400 mx-auto rounded-full"></div>
+          <div className="w-24 h-1 mx-auto rounded-full animate-fadeInUp" style={{background: 'linear-gradient(to right, var(--primary-color), var(--secondary-color))', animationDelay: '0.2s'}}></div>
         </div>
 
         {/* Main Content */}
-        <div className="bg-gradient-to-br from-slate-800/50 to-purple-800/50 backdrop-blur-sm rounded-2xl p-8 border border-purple-500/20 shadow-2xl">
+        <div className="card-enhanced rounded-2xl p-8 shadow-2xl animate-fadeInUp" style={{animationDelay: '0.4s'}}>
           {/* Company Description */}
           <div className="mb-8">
-            <h2 className="text-2xl font-semibold text-white mb-6 text-center">
+            <h2 className="text-2xl font-semibold text-white mb-6 text-center gradient-text-enhanced">
               Our Mission
             </h2>
             <div className="prose prose-lg max-w-none">
-              <p className="text-gray-300 leading-relaxed text-lg mb-6">
-                PICZEL is a <strong className="text-cyan-400">Meme NFT platform and investment company</strong>. 
+              <p className="leading-relaxed text-lg mb-6" style={{color: 'rgba(255, 255, 255, 0.8)'}}>
+                PICZEL is a <strong style={{color: 'var(--primary-color)'}}>Meme NFT platform and investment company</strong>. 
                 Our aim is to elevate memes from simple entertainment to valuable{" "}
-                <strong className="text-purple-400">digital assets</strong> that also provide{" "}
-                <strong className="text-green-400">profit-making opportunities</strong>. 
+                <strong style={{color: 'var(--secondary-color)'}}>digital assets</strong> that also provide{" "}
+                <strong style={{color: 'rgb(var(--success-rgb))'}}>profit-making opportunities</strong>. 
                 Members can receive profits from the company while creators and collectors around the world 
                 can create, collect, and trade memes in an open marketplace.
               </p>
@@ -48,14 +48,14 @@ export default function AboutPage() {
                 </p>
               </div>
               
-              <div className="bg-gradient-to-br from-purple-600/20 to-pink-600/20 backdrop-blur-sm rounded-xl p-6 border border-purple-500/30">
+              <div className="backdrop-blur-sm rounded-xl p-6" style={{background: 'linear-gradient(to bottom right, rgba(0, 227, 210, 0.2), rgba(143, 0, 255, 0.2))', border: '1px solid rgba(0, 227, 210, 0.3)'}}>
                 <h3 className="text-xl font-semibold text-white mb-4 flex items-center">
                   <span className="text-2xl mr-3">🚀</span>
                   Our Mission
                 </h3>
                 <p className="text-gray-300 leading-relaxed">
                   Our mission is to provide members with secure, transparent, blockchain-based{" "}
-                  <strong className="text-purple-400">profit-sharing opportunities</strong>, 
+                  <strong style={{color: 'var(--secondary-color)'}}>profit-sharing opportunities</strong>, 
                   ensure community-driven growth, and maximise the value of memes as a digital asset.
                 </p>
               </div>
@@ -67,7 +67,7 @@ export default function AboutPage() {
             <h2 className="text-2xl font-semibold text-white mb-6 text-center">
               What is a Meme NFT?
             </h2>
-            <div className="bg-gradient-to-br from-slate-700/50 to-purple-700/50 backdrop-blur-sm rounded-xl p-6 border border-purple-500/30">
+            <div className="backdrop-blur-sm rounded-xl p-6" style={{background: 'linear-gradient(to bottom right, rgba(29, 68, 67, 0.8), rgba(143, 0, 255, 0.5))', border: '1px solid rgba(0, 227, 210, 0.3)'}}>
               <p className="text-gray-300 leading-relaxed text-lg">
                 A Meme NFT is a digital asset that transforms memes into unique, verifiable items on the blockchain. 
                 Each meme carries its own value, ownership, and tradeability. This is not merely entertainment; 
@@ -95,12 +95,12 @@ export default function AboutPage() {
                 NFT drops, company profits, and referral rewards. As members bring in new participants, the 
                 community expands, increasing overall profit opportunities.
               </p>
-              <div className="bg-gradient-to-br from-slate-700/50 to-purple-700/50 backdrop-blur-sm rounded-lg p-4 border border-purple-500/30">
+              <div className="backdrop-blur-sm rounded-lg p-4" style={{background: 'linear-gradient(to bottom right, rgba(29, 68, 67, 0.8), rgba(143, 0, 255, 0.5))', border: '1px solid rgba(0, 227, 210, 0.3)'}}>
                 <p className="text-white font-medium text-center">
                   By joining the PICZEL community, members can{" "}
                   <strong className="text-green-400">invest in Meme NFTs</strong>,{" "}
                   <strong className="text-cyan-400">grow with the community</strong>, and{" "}
-                  <strong className="text-purple-400">share in the profits</strong>.
+                  <strong style={{color: 'var(--secondary-color)'}}>share in the profits</strong>.
                 </p>
               </div>
             </div>
@@ -116,7 +116,7 @@ export default function AboutPage() {
               </p>
             </div>
             
-            <div className="bg-gradient-to-br from-purple-600/20 to-pink-600/20 backdrop-blur-sm rounded-xl p-6 border border-purple-500/30 text-center">
+            <div className="backdrop-blur-sm rounded-xl p-6 text-center" style={{background: 'linear-gradient(to bottom right, rgba(0, 227, 210, 0.2), rgba(143, 0, 255, 0.2))', border: '1px solid rgba(0, 227, 210, 0.3)'}}>
               <div className="text-4xl mb-4">💎</div>
               <h3 className="text-xl font-semibold text-white mb-3">Collect</h3>
               <p className="text-gray-300 text-sm">
@@ -134,13 +134,13 @@ export default function AboutPage() {
           </div>
 
           {/* Benefits Section */}
-          <div className="bg-gradient-to-br from-slate-700/50 to-purple-700/50 backdrop-blur-sm rounded-xl p-6 border border-purple-500/30">
+          <div className="backdrop-blur-sm rounded-xl p-6" style={{background: 'linear-gradient(to bottom right, rgba(29, 68, 67, 0.8), rgba(143, 0, 255, 0.5))', border: '1px solid rgba(0, 227, 210, 0.3)'}}>
             <h3 className="text-xl font-semibold text-white mb-4 text-center">
               Why Choose PICZEL?
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="flex items-start space-x-3">
-                <div className="w-6 h-6 bg-gradient-to-r from-cyan-400 to-purple-400 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
+                <div className="w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 mt-1" style={{background: 'linear-gradient(to right, var(--primary-color), var(--secondary-color))', color: 'white'}}>
                   <span className="text-white text-sm">✓</span>
                 </div>
                 <div>
@@ -152,7 +152,7 @@ export default function AboutPage() {
               </div>
               
               <div className="flex items-start space-x-3">
-                <div className="w-6 h-6 bg-gradient-to-r from-cyan-400 to-purple-400 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
+                <div className="w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 mt-1" style={{background: 'linear-gradient(to right, var(--primary-color), var(--secondary-color))', color: 'white'}}>
                   <span className="text-white text-sm">✓</span>
                 </div>
                 <div>
@@ -164,7 +164,7 @@ export default function AboutPage() {
               </div>
               
               <div className="flex items-start space-x-3">
-                <div className="w-6 h-6 bg-gradient-to-r from-cyan-400 to-purple-400 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
+                <div className="w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 mt-1" style={{background: 'linear-gradient(to right, var(--primary-color), var(--secondary-color))', color: 'white'}}>
                   <span className="text-white text-sm">✓</span>
                 </div>
                 <div>
@@ -176,7 +176,7 @@ export default function AboutPage() {
               </div>
               
               <div className="flex items-start space-x-3">
-                <div className="w-6 h-6 bg-gradient-to-r from-cyan-400 to-purple-400 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
+                <div className="w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 mt-1" style={{background: 'linear-gradient(to right, var(--primary-color), var(--secondary-color))', color: 'white'}}>
                   <span className="text-white text-sm">✓</span>
                 </div>
                 <div>
@@ -191,7 +191,7 @@ export default function AboutPage() {
         </div>
 
         {/* Footer */}
-        <div className="text-center mt-12 pt-8 border-t border-purple-500/20">
+        <div className="text-center mt-12 pt-8 border-t" style={{borderColor: 'var(--default-border)'}}>
           <p className="text-gray-400 text-sm">
             © 2024 Haldar AI & IT. All rights reserved.
           </p>

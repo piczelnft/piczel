@@ -113,52 +113,75 @@ const WalletHistoryPage = () => {
   const getStatusColor = (status) => {
     switch (status) {
       case 'Completed':
-        return 'bg-green-500/20 text-green-400';
+        return {
+          backgroundColor: 'rgba(var(--success-rgb), 0.2)',
+          color: 'rgb(var(--success-rgb))'
+        };
       case 'Pending':
-        return 'bg-yellow-500/20 text-yellow-400';
+        return {
+          backgroundColor: 'rgba(var(--warning-rgb), 0.2)',
+          color: 'rgb(var(--warning-rgb))'
+        };
       case 'Failed':
-        return 'bg-red-500/20 text-red-400';
+        return {
+          backgroundColor: 'rgba(var(--danger-rgb), 0.2)',
+          color: 'rgb(var(--danger-rgb))'
+        };
       default:
-        return 'bg-gray-500/20 text-gray-400';
+        return {
+          backgroundColor: 'rgba(255, 255, 255, 0.2)',
+          color: 'rgba(255, 255, 255, 0.8)'
+        };
     }
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 p-8">
-      <div className="max-w-7xl mx-auto">
+    <div className="min-h-screen flex p-8" style={{background: 'linear-gradient(to bottom right, var(--default-body-bg-color) 0%, var(--theme-bg-gradient) 25%, var(--default-body-bg-color) 100%)', fontFamily: 'var(--default-font-family)'}}>
+
+      {/* Main Content */}
+      <div className="flex-1">
+        <div className="max-w-7xl mx-auto">
         <div className="text-center mb-12">
-          <h1 className="text-4xl font-bold text-white mb-2">Withdrawal History</h1>
-          <p className="text-lg text-gray-300">Use Withdrawal</p>
+          <h1 className="text-4xl font-bold text-white mb-2 gradient-text-enhanced animate-fadeInUp">Withdrawal History</h1>
+          <p className="text-lg animate-fadeInUp" style={{color: 'rgba(255, 255, 255, 0.7)', animationDelay: '0.2s'}}>Use Withdrawal</p>
         </div>
 
-        <div className="bg-gradient-to-br from-slate-800/50 to-purple-800/50 backdrop-blur-sm rounded-2xl p-8 border border-purple-500/20 shadow-lg">
+        <div className="card-enhanced rounded-2xl p-8 shadow-lg animate-fadeInUp" style={{animationDelay: '0.4s'}}>
           <h2 className="text-2xl font-semibold text-white mb-8 text-center">Withdrawal History</h2>
           
           {/* Controls */}
           <div className="flex flex-col sm:flex-row justify-between items-center mb-6 gap-4">
             <div className="flex items-center gap-4">
-              <label className="text-gray-300 text-sm font-medium">Show</label>
+              <label className="text-sm font-medium" style={{color: 'rgba(255, 255, 255, 0.8)'}}>Show</label>
               <select
                 value={entriesPerPage}
                 onChange={handleEntriesChange}
-                className="px-3 py-2 bg-slate-700/50 text-white border border-purple-500/30 rounded-lg text-sm focus:outline-none focus:border-purple-400 transition-colors"
+                className="px-3 py-2 text-white rounded-lg text-sm focus:outline-none transition-colors"
+                style={{
+                  backgroundColor: 'rgba(29, 68, 67, 0.8)',
+                  border: '1px solid var(--default-border)'
+                }}
               >
                 <option value={10}>10</option>
                 <option value={25}>25</option>
                 <option value={50}>50</option>
                 <option value={100}>100</option>
               </select>
-              <span className="text-gray-300 text-sm">entries</span>
+              <span className="text-sm" style={{color: 'rgba(255, 255, 255, 0.8)'}}>entries</span>
             </div>
             
             <div className="flex items-center gap-2">
-              <label className="text-gray-300 text-sm font-medium">Search:</label>
+              <label className="text-sm font-medium" style={{color: 'rgba(255, 255, 255, 0.8)'}}>Search:</label>
               <input
                 type="text"
                 value={searchTerm}
                 onChange={handleSearch}
                 placeholder="Search..."
-                className="px-3 py-2 bg-slate-700/50 text-white border border-purple-500/30 rounded-lg text-sm focus:outline-none focus:border-purple-400 transition-colors placeholder-gray-400 w-48"
+                className="px-3 py-2 text-white rounded-lg text-sm focus:outline-none transition-colors placeholder-gray-400 w-48"
+                style={{
+                  backgroundColor: 'rgba(29, 68, 67, 0.8)',
+                  border: '1px solid var(--default-border)'
+                }}
               />
             </div>
           </div>
@@ -167,7 +190,7 @@ const WalletHistoryPage = () => {
           <div className="overflow-x-auto">
             <table className="w-full text-sm text-left">
               <thead>
-                <tr className="bg-gradient-to-r from-slate-700/50 to-purple-700/50 border-b border-purple-500/30">
+                <tr style={{background: 'linear-gradient(to right, rgba(29, 68, 67, 0.8), rgba(29, 68, 67, 0.8))', borderBottom: '1px solid var(--default-border)'}}>
                   <th className="px-6 py-4 text-white font-semibold">S.No.</th>
                   <th className="px-6 py-4 text-white font-semibold">Request Date</th>
                   <th className="px-6 py-4 text-white font-semibold">Request ID</th>
@@ -182,20 +205,23 @@ const WalletHistoryPage = () => {
               </thead>
               <tbody>
                 {currentData.map((item, index) => (
-                  <tr key={item.id} className="border-b border-purple-500/20 hover:bg-slate-700/30 transition-colors">
-                    <td className="px-6 py-4 text-gray-300">{startIndex + index + 1}</td>
-                    <td className="px-6 py-4 text-gray-300">{item.requestDate}</td>
-                    <td className="px-6 py-4 text-cyan-400 font-medium">{item.requestId}</td>
-                    <td className="px-6 py-4 text-blue-400 font-medium max-w-xs truncate" title={item.walletAddress}>
+                  <tr key={item.id} className="transition-colors duration-200 hover:bg-opacity-20" style={{
+                    borderBottom: '1px solid var(--default-border)',
+                    backgroundColor: 'rgba(29, 68, 67, 0.1)'
+                  }}>
+                    <td className="px-6 py-4" style={{color: 'rgba(255, 255, 255, 0.8)'}}>{startIndex + index + 1}</td>
+                    <td className="px-6 py-4" style={{color: 'rgba(255, 255, 255, 0.8)'}}>{item.requestDate}</td>
+                    <td className="px-6 py-4 font-medium" style={{color: 'var(--primary-color)'}}>{item.requestId}</td>
+                    <td className="px-6 py-4 font-medium max-w-xs truncate" style={{color: 'rgb(var(--info-rgb))'}} title={item.walletAddress}>
                       {item.walletAddress}
                     </td>
-                    <td className="px-6 py-4 text-green-400 font-medium">{item.usdtAmount}</td>
-                    <td className="px-6 py-4 text-purple-400 font-medium">{item.grossAmount}</td>
-                    <td className="px-6 py-4 text-yellow-400 font-medium">{item.service}</td>
-                    <td className="px-6 py-4 text-orange-400 font-medium">{item.netAmount}</td>
-                    <td className="px-6 py-4 text-gray-300 text-xs">{item.paymentDate}</td>
+                    <td className="px-6 py-4 font-medium" style={{color: 'rgb(var(--success-rgb))'}}>{item.usdtAmount}</td>
+                    <td className="px-6 py-4 font-medium" style={{color: 'var(--secondary-color)'}}>{item.grossAmount}</td>
+                    <td className="px-6 py-4 font-medium" style={{color: 'rgb(var(--warning-rgb))'}}>{item.service}</td>
+                    <td className="px-6 py-4 font-medium" style={{color: 'rgb(var(--danger-rgb))'}}>{item.netAmount}</td>
+                    <td className="px-6 py-4 text-xs" style={{color: 'rgba(255, 255, 255, 0.8)'}}>{item.paymentDate}</td>
                     <td className="px-6 py-4">
-                      <span className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(item.status)}`}>
+                      <span className="px-3 py-1 rounded-full text-xs font-medium" style={getStatusColor(item.status)}>
                         {item.status}
                       </span>
                     </td>
@@ -207,7 +233,7 @@ const WalletHistoryPage = () => {
 
           {/* Pagination Info */}
           <div className="mt-6 flex flex-col sm:flex-row justify-between items-center gap-4">
-            <div className="text-gray-300 text-sm">
+            <div className="text-sm" style={{color: 'rgba(255, 255, 255, 0.8)'}}>
               Showing {startIndex + 1} to {Math.min(endIndex, totalEntries)} of {totalEntries} entries
             </div>
             
@@ -216,7 +242,11 @@ const WalletHistoryPage = () => {
               <button
                 onClick={() => handlePageChange(currentPage - 1)}
                 disabled={currentPage === 1}
-                className="px-3 py-2 bg-slate-700/50 text-white border border-purple-500/30 rounded-lg text-sm hover:bg-slate-600/50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                className="px-3 py-2 text-white rounded-lg text-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                style={{
+                  backgroundColor: 'rgba(29, 68, 67, 0.8)',
+                  border: '1px solid var(--default-border)'
+                }}
               >
                 Previous
               </button>
@@ -230,11 +260,15 @@ const WalletHistoryPage = () => {
                     <button
                       key={page}
                       onClick={() => handlePageChange(page)}
-                      className={`px-3 py-2 rounded-lg text-sm transition-colors ${
-                        currentPage === page
-                          ? 'bg-gradient-to-r from-cyan-500 to-purple-600 text-white'
-                          : 'bg-slate-700/50 text-gray-300 border border-purple-500/30 hover:bg-slate-600/50'
-                      }`}
+                    className={`px-3 py-2 rounded-lg text-sm transition-colors ${
+                      currentPage === page
+                        ? 'text-white btn-enhanced'
+                        : 'text-white'
+                    }`}
+                    style={{
+                      backgroundColor: currentPage === page ? 'var(--primary-color)' : 'rgba(29, 68, 67, 0.8)',
+                      border: currentPage === page ? 'none' : '1px solid var(--default-border)'
+                    }}
                     >
                       {page}
                     </button>
@@ -245,13 +279,18 @@ const WalletHistoryPage = () => {
               <button
                 onClick={() => handlePageChange(currentPage + 1)}
                 disabled={currentPage === totalPages}
-                className="px-3 py-2 bg-slate-700/50 text-white border border-purple-500/30 rounded-lg text-sm hover:bg-slate-600/50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                className="px-3 py-2 text-white rounded-lg text-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                style={{
+                  backgroundColor: 'rgba(29, 68, 67, 0.8)',
+                  border: '1px solid var(--default-border)'
+                }}
               >
                 Next
               </button>
             </div>
           </div>
         </div>
+      </div>
       </div>
     </div>
   );

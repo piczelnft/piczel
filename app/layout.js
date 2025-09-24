@@ -1,8 +1,10 @@
-import { Geist, Geist_Mono } from "next/font/google";
+import { Geist, Geist_Mono, Rajdhani } from "next/font/google";
 import "./globals.css";
 import Navbar from "./components/Navbar";
+import LayoutWithSidebar from "./components/LayoutWithSidebar";
 import CryptoPriceTicker from "./components/CryptoPriceTicker";
 import { AuthProvider } from "@/contexts/AuthContext";
+import { SidebarProvider } from "./contexts/SidebarContext";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -14,22 +16,33 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+const rajdhani = Rajdhani({
+  variable: "--font-rajdhani",
+  subsets: ["latin"],
+  weight: ["300", "400", "500", "600", "700"],
+});
+
 export const metadata = {
-  title: "PICZEL - Meme NFT platform",
+  title: "PICZEL - Crypto Trading Platform",
   description:
-    "Meme NFT platform and investment company",
+    "Professional cryptocurrency trading and investment platform",
 };
 
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 min-h-screen`}
+        className={`${geistSans.variable} ${geistMono.variable} ${rajdhani.variable} antialiased min-h-screen`}
+        style={{fontFamily: 'var(--font-rajdhani)', background: 'var(--default-body-bg-color)'}}
       >
         <AuthProvider>
-          <Navbar />
-          <CryptoPriceTicker />
-          <main className="pt-28">{children}</main>
+          <SidebarProvider>
+            <Navbar />
+            <CryptoPriceTicker />
+            <LayoutWithSidebar>
+              <main className="pt-28">{children}</main>
+            </LayoutWithSidebar>
+          </SidebarProvider>
         </AuthProvider>
       </body>
     </html>

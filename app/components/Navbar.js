@@ -3,12 +3,12 @@
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { useAuth } from "@/contexts/AuthContext";
-import Sidebar from "./Sidebar";
+import { useSidebar } from "../contexts/SidebarContext";
 
 export default function Navbar() {
-  const [sidebarOpen, setSidebarOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const { user, isAuthenticated, logout, isLoading, authVersion } = useAuth();
+  const { sidebarOpen, toggleSidebar } = useSidebar();
   const userMenuRef = useRef(null);
 
   // Debug logging
@@ -19,10 +19,6 @@ export default function Navbar() {
       authVersion,
     });
   }, [isAuthenticated, user, authVersion]);
-
-  const toggleSidebar = () => {
-    setSidebarOpen(!sidebarOpen);
-  };
 
   const toggleUserMenu = () => {
     setUserMenuOpen(!userMenuOpen);
@@ -44,7 +40,7 @@ export default function Navbar() {
 
   if (isLoading) {
     return (
-      <nav className="fixed top-0 left-0 right-0 z-50 bg-gradient-to-r from-slate-900 via-purple-900 to-slate-900 backdrop-blur-md border-b border-purple-500/20 shadow-2xl">
+      <nav className="fixed top-0 left-0 right-0 z-50 border-b border-slate-700/30 shadow-2xl" style={{backgroundColor: 'rgba(0, 0, 0, 0.1)', backdropFilter: 'blur(10px)'}}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             <div className="flex items-center space-x-2">
@@ -61,42 +57,41 @@ export default function Navbar() {
 
   return (
     <>
-      <nav className="fixed top-0 left-0 right-0 z-50 bg-gradient-to-r from-slate-900 via-purple-900 to-slate-900 backdrop-blur-md border-b border-purple-500/20 shadow-2xl">
+      <nav className="fixed top-0 left-0 right-0 z-50 border-b shadow-2xl animate-fadeInUp" style={{borderColor: 'var(--default-border)', backgroundColor: 'rgba(0, 0, 0, 0.1)', backdropFilter: 'blur(10px)'}}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
-            {/* Left side - Logo and Menu Button */}
+            {/* Left side - Hamburger Menu & Logo */}
             <div className="flex items-center space-x-4">
-              {/* Logo */}
-              <div className="flex items-center space-x-2">
-                <div className="text-2xl font-bold bg-gradient-to-r from-purple-400 to-cyan-400 bg-clip-text text-transparent">
-                  PICZEL
-                </div>
-              </div>
-
               {/* Hamburger Menu Button */}
               <button
                 onClick={toggleSidebar}
-                className="p-2 rounded-lg bg-gradient-to-r from-purple-600/20 to-cyan-600/20 hover:from-purple-600/30 hover:to-cyan-600/30 transition-all duration-300 border border-purple-500/30 hover:border-purple-400/50 group"
+                className="p-2 rounded-lg transition-all duration-200 hover:bg-opacity-20"
+                style={{
+                  backgroundColor: 'rgba(29, 68, 67, 0.8)',
+                  border: '1px solid var(--default-border)'
+                }}
                 aria-label="Toggle sidebar"
               >
-                <div className="w-6 h-6 flex flex-col justify-center items-center space-y-1">
-                  <div
-                    className={`w-5 h-0.5 bg-gradient-to-r from-cyan-400 to-purple-400 transition-all duration-300 ${
-                      sidebarOpen ? "rotate-45 translate-y-1.5" : ""
-                    }`}
-                  ></div>
-                  <div
-                    className={`w-5 h-0.5 bg-gradient-to-r from-cyan-400 to-purple-400 transition-all duration-300 ${
-                      sidebarOpen ? "opacity-0" : ""
-                    }`}
-                  ></div>
-                  <div
-                    className={`w-5 h-0.5 bg-gradient-to-r from-cyan-400 to-purple-400 transition-all duration-300 ${
-                      sidebarOpen ? "-rotate-45 -translate-y-1.5" : ""
-                    }`}
-                  ></div>
+                <div className="w-6 h-6 flex flex-col justify-center space-y-1">
+                  <div className="w-full h-0.5 bg-white transition-all duration-200" style={{backgroundColor: 'var(--primary-color)'}}></div>
+                  <div className="w-full h-0.5 bg-white transition-all duration-200" style={{backgroundColor: 'var(--primary-color)'}}></div>
+                  <div className="w-full h-0.5 bg-white transition-all duration-200" style={{backgroundColor: 'var(--primary-color)'}}></div>
                 </div>
               </button>
+              
+              {/* Logo */}
+              <div className="flex items-center space-x-2 group">
+                <div className="flex items-center space-x-2">
+                  <div className="w-8 h-8 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform duration-300 animate-cardFloat" style={{background: 'linear-gradient(135deg, var(--primary-color), var(--secondary-color))'}}>
+                    <div className="w-4 h-4 bg-white rounded-full flex items-center justify-center">
+                      <div className="w-2 h-2 rounded-full animate-pulse" style={{backgroundColor: 'var(--primary-color)'}}></div>
+                    </div>
+                  </div>
+                  <div className="text-2xl font-bold text-white gradient-text-enhanced animate-neonGlow">
+                    PICZEL
+                  </div>
+                </div>
+              </div>
             </div>
 
             {/* Right side - Authentication */}
@@ -105,28 +100,29 @@ export default function Navbar() {
                 <div className="relative" ref={userMenuRef}>
                   <button
                     onClick={toggleUserMenu}
-                    className="flex items-center space-x-3 bg-gradient-to-r from-slate-800/50 to-purple-800/50 rounded-lg px-4 py-2 border border-purple-500/30 backdrop-blur-sm hover:border-purple-400/50 transition-all duration-300 group"
+                    className="flex items-center space-x-3 glass-card rounded-lg px-4 py-2 hover-lift-enhanced hover-glow transition-all duration-300 group"
                   >
-                    <div className="w-8 h-8 bg-gradient-to-br from-green-400 to-blue-500 rounded-full flex items-center justify-center ring-2 ring-purple-400/30 group-hover:ring-purple-400/50 transition-all">
-                      <span className="text-white font-semibold text-sm">
+                    <div className="w-8 h-8 rounded-full flex items-center justify-center ring-2 transition-all animate-cardFloat" style={{background: 'linear-gradient(135deg, rgb(var(--success-rgb)), var(--primary-color))', ringColor: 'rgba(0, 255, 190, 0.3)'}}>
+                      <span className="text-white font-semibold text-sm animate-neonGlow">
                         {user?.name?.charAt(0).toUpperCase() || "U"}
                       </span>
                     </div>
                     <div className="text-white hidden sm:block">
-                      <div className="text-sm font-medium">
-                        {user?.name || "User"}
+                      <div className="text-sm font-medium gradient-text-neon">
+                        DGT123456
                       </div>
-                      <div className="text-xs text-gray-300">
+                      <div className="text-xs" style={{color: 'rgba(255, 255, 255, 0.7)'}}>
                         {user?.email || ""}
                       </div>
-                      <div className="text-xs text-purple-300">
+                      <div className="text-xs animate-neonGlow" style={{color: 'var(--primary-color)'}}>
                         Balance: ${user?.wallet?.balance?.toFixed(2) || "0.00"}
                       </div>
                     </div>
                     <svg
-                      className={`w-4 h-4 text-gray-400 transition-transform ${
+                      className={`w-4 h-4 transition-transform group-hover:text-white ${
                         userMenuOpen ? "rotate-180" : ""
                       }`}
+                      style={{color: 'rgba(255, 255, 255, 0.7)'}}
                       fill="none"
                       stroke="currentColor"
                       viewBox="0 0 24 24"
@@ -142,23 +138,23 @@ export default function Navbar() {
 
                   {/* User Dropdown Menu */}
                   {userMenuOpen && (
-                    <div className="absolute right-0 mt-2 w-64 bg-slate-800/95 backdrop-blur-md rounded-lg shadow-xl border border-purple-500/30 py-2 z-50">
+                    <div className="absolute right-0 mt-2 w-64 glass-enhanced rounded-lg shadow-xl py-2 z-50 animate-fadeInUp" style={{border: '1px solid var(--default-border)'}}>
                       {/* User Info Section */}
-                      <div className="px-4 py-3 border-b border-gray-600">
+                      <div className="px-4 py-3 border-b" style={{borderColor: 'var(--default-border)'}}>
                         <div className="flex items-center space-x-3">
-                          <div className="w-10 h-10 bg-gradient-to-br from-green-400 to-blue-500 rounded-full flex items-center justify-center">
-                            <span className="text-white font-semibold">
+                          <div className="w-10 h-10 rounded-full flex items-center justify-center animate-cardFloat" style={{background: 'linear-gradient(135deg, rgb(var(--success-rgb)), var(--primary-color))'}}>
+                            <span className="text-white font-semibold animate-neonGlow">
                               {user?.name?.charAt(0).toUpperCase() || "U"}
                             </span>
                           </div>
                           <div>
-                            <div className="text-white font-medium text-sm">
+                            <div className="text-white font-medium text-sm gradient-text-neon">
                               {user?.name || "User"}
                             </div>
-                            <div className="text-gray-300 text-xs">
+                            <div className="text-xs" style={{color: 'rgba(255, 255, 255, 0.7)'}}>
                               {user?.email || ""}
                             </div>
-                            <div className="text-purple-300 text-xs font-medium">
+                            <div className="text-xs font-medium animate-neonGlow" style={{color: 'var(--primary-color)'}}>
                               Wallet: $
                               {user?.wallet?.balance?.toFixed(2) || "0.00"}
                             </div>
@@ -170,11 +166,12 @@ export default function Navbar() {
                       <div className="py-1">
                         <Link
                           href="/profile"
-                          className="flex items-center px-4 py-2 text-sm text-gray-300 hover:text-white hover:bg-purple-600/20 transition-colors"
+                          className="flex items-center px-4 py-2 text-sm transition-all duration-300 group hover-lift-enhanced"
+                          style={{color: 'rgba(255, 255, 255, 0.8)'}}
                           onClick={() => setUserMenuOpen(false)}
                         >
                           <svg
-                            className="w-4 h-4 mr-3"
+                            className="w-4 h-4 mr-3 group-hover:scale-110 transition-transform duration-300"
                             fill="none"
                             stroke="currentColor"
                             viewBox="0 0 24 24"
@@ -190,11 +187,12 @@ export default function Navbar() {
                         </Link>
                         <Link
                           href="/wallet"
-                          className="flex items-center px-4 py-2 text-sm text-gray-300 hover:text-white hover:bg-purple-600/20 transition-colors"
+                          className="flex items-center px-4 py-2 text-sm transition-all duration-300 group hover-lift-enhanced"
+                          style={{color: 'rgba(255, 255, 255, 0.8)'}}
                           onClick={() => setUserMenuOpen(false)}
                         >
                           <svg
-                            className="w-4 h-4 mr-3"
+                            className="w-4 h-4 mr-3 group-hover:scale-110 transition-transform duration-300"
                             fill="none"
                             stroke="currentColor"
                             viewBox="0 0 24 24"
@@ -210,11 +208,12 @@ export default function Navbar() {
                         </Link>
                         <Link
                           href="/profile/summary"
-                          className="flex items-center px-4 py-2 text-sm text-gray-300 hover:text-white hover:bg-purple-600/20 transition-colors"
+                          className="flex items-center px-4 py-2 text-sm transition-all duration-300 group hover-lift-enhanced"
+                          style={{color: 'rgba(255, 255, 255, 0.8)'}}
                           onClick={() => setUserMenuOpen(false)}
                         >
                           <svg
-                            className="w-4 h-4 mr-3"
+                            className="w-4 h-4 mr-3 group-hover:scale-110 transition-transform duration-300"
                             fill="none"
                             stroke="currentColor"
                             viewBox="0 0 24 24"
@@ -236,17 +235,18 @@ export default function Navbar() {
                         </Link>
                       </div>
 
-                      <hr className="my-2 border-gray-600" />
+                      <hr className="my-2" style={{borderColor: 'var(--default-border)'}} />
 
                       <button
                         onClick={() => {
                           setUserMenuOpen(false);
                           logout();
                         }}
-                        className="flex items-center w-full text-left px-4 py-2 text-sm text-red-400 hover:text-red-300 hover:bg-red-600/20 transition-colors"
+                        className="flex items-center w-full text-left px-4 py-2 text-sm transition-all duration-300 group hover-lift-enhanced"
+                        style={{color: 'rgb(var(--danger-rgb))'}}
                       >
                         <svg
-                          className="w-4 h-4 mr-3"
+                          className="w-4 h-4 mr-3 group-hover:scale-110 transition-transform duration-300"
                           fill="none"
                           stroke="currentColor"
                           viewBox="0 0 24 24"
@@ -267,13 +267,14 @@ export default function Navbar() {
                 <div className="flex items-center space-x-3">
                   <Link
                     href="/login"
-                    className="px-4 py-2 text-sm font-medium text-white hover:text-purple-200 transition-colors"
+                    className="px-4 py-2 text-sm font-medium text-white transition-all duration-300 hover-lift-enhanced"
+                    style={{color: 'rgba(255, 255, 255, 0.8)'}}
                   >
                     Sign In
                   </Link>
                   <Link
                     href="/signup"
-                    className="px-4 py-2 text-sm font-medium text-white bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 rounded-lg border border-purple-500/30 hover:border-purple-400/50 transition-all duration-300"
+                    className="btn-enhanced px-4 py-2 text-sm font-medium text-white hover-bounce hover-glow transition-all duration-300"
                   >
                     Sign Up
                   </Link>
@@ -283,9 +284,6 @@ export default function Navbar() {
           </div>
         </div>
       </nav>
-
-      {/* Sidebar */}
-      <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
     </>
   );
 }

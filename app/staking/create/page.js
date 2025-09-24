@@ -26,30 +26,25 @@ const StakingCreatePage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 p-8">
-      <div className="max-w-2xl mx-auto">
-        <div className="text-center mb-12">
-          <h1 className="text-4xl font-bold text-white mb-2">Staking Creation</h1>
-          <p className="text-lg text-gray-300">Create your staking</p>
-        </div>
-
-        <div className="bg-gradient-to-br from-slate-800/50 to-purple-800/50 backdrop-blur-sm rounded-2xl p-8 border border-purple-500/20 shadow-lg">
-          <h2 className="text-2xl font-semibold text-white mb-8 text-center">Create Staking Form</h2>
-          
-          <form onSubmit={handleSubmit} className="space-y-6">
+    <div className="min-h-screen flex p-8" style={{background: 'linear-gradient(to bottom right, var(--default-body-bg-color) 0%, var(--theme-bg-gradient) 25%, var(--default-body-bg-color) 100%)', fontFamily: 'var(--default-font-family)'}}>
+      <div className="w-full max-w-2xl mx-auto">
+        <form onSubmit={handleSubmit} className="space-y-6">
             {/* Member ID */}
             <div>
-              <label className="block text-gray-300 text-sm font-medium mb-2">
+              <label className="block text-sm font-medium mb-2" style={{color: 'rgba(255, 255, 255, 0.8)'}}>
                 Member ID
               </label>
-              <div className="bg-gradient-to-br from-slate-700/50 to-purple-700/50 backdrop-blur-sm rounded-lg p-4 border border-purple-500/30">
+              <div className="rounded-lg p-4 transition-all duration-200" style={{
+                background: 'linear-gradient(to right, rgba(var(--success-rgb), 0.2), rgba(var(--primary-rgb), 0.1))',
+                border: '1px solid rgba(var(--success-rgb), 0.3)'
+              }}>
                 <div className="text-white font-semibold text-lg">{formData.memberId}</div>
               </div>
             </div>
 
             {/* Amount */}
             <div>
-              <label className="block text-gray-300 text-sm font-medium mb-2">
+              <label className="block text-sm font-medium mb-2" style={{color: 'rgba(255, 255, 255, 0.8)'}}>
                 Amount
               </label>
               <div className="relative">
@@ -62,7 +57,12 @@ const StakingCreatePage = () => {
                   value={formData.amount}
                   onChange={handleInputChange}
                   placeholder="Enter Amount"
-                  className="w-full pl-8 pr-4 py-4 bg-slate-700/50 text-white border border-purple-500/30 rounded-lg text-base focus:outline-none focus:border-purple-400 transition-colors placeholder-gray-400"
+                  className="w-full pl-8 pr-4 py-4 text-white rounded-lg text-base focus:outline-none transition-colors placeholder-gray-400"
+                  style={{
+                    backgroundColor: 'rgba(29, 68, 67, 0.8)',
+                    border: '1px solid var(--default-border)',
+                    focusRingColor: 'var(--primary-color)'
+                  }}
                   required
                 />
               </div>
@@ -70,10 +70,13 @@ const StakingCreatePage = () => {
 
             {/* Deposit Wallet */}
             <div>
-              <label className="block text-gray-300 text-sm font-medium mb-2">
+              <label className="block text-sm font-medium mb-2" style={{color: 'rgba(255, 255, 255, 0.8)'}}>
                 Deposit Wallet
               </label>
-              <div className="bg-gradient-to-br from-slate-700/50 to-purple-700/50 backdrop-blur-sm rounded-lg p-4 border border-purple-500/30">
+              <div className="rounded-lg p-4 transition-all duration-200" style={{
+                background: 'linear-gradient(to right, rgba(var(--primary-rgb), 0.2), rgba(var(--secondary-rgb), 0.1))',
+                border: '1px solid rgba(var(--primary-rgb), 0.3)'
+              }}>
                 <div className="flex items-center justify-between">
                   <span className="text-white font-semibold text-lg">$</span>
                   <span className="text-white font-semibold text-lg">{depositWallet}</span>
@@ -83,7 +86,7 @@ const StakingCreatePage = () => {
 
             {/* Transaction Password */}
             <div>
-              <label className="block text-gray-300 text-sm font-medium mb-2">
+              <label className="block text-sm font-medium mb-2" style={{color: 'rgba(255, 255, 255, 0.8)'}}>
                 Transaction Password
               </label>
               <input
@@ -92,7 +95,12 @@ const StakingCreatePage = () => {
                 value={formData.transactionPassword}
                 onChange={handleInputChange}
                 placeholder="Enter Transaction Password"
-                className="w-full px-4 py-4 bg-slate-700/50 text-white border border-purple-500/30 rounded-lg text-base focus:outline-none focus:border-purple-400 transition-colors placeholder-gray-400"
+                className="w-full px-4 py-4 text-white rounded-lg text-base focus:outline-none transition-colors placeholder-gray-400"
+                style={{
+                  backgroundColor: 'rgba(29, 68, 67, 0.8)',
+                  border: '1px solid var(--default-border)',
+                  focusRingColor: 'var(--primary-color)'
+                }}
                 required
               />
             </div>
@@ -101,28 +109,30 @@ const StakingCreatePage = () => {
             <div className="pt-4">
               <button
                 type="submit"
-                className="w-full px-6 py-4 bg-gradient-to-r from-cyan-500 to-purple-600 text-white rounded-lg text-lg font-medium hover:from-cyan-600 hover:to-purple-700 transition-all duration-300 cursor-pointer shadow-lg hover:shadow-xl"
+                className="btn-enhanced w-full px-6 py-4 text-white rounded-lg text-lg font-medium transition-all duration-300 cursor-pointer shadow-lg hover:shadow-xl"
               >
                 Create Staking
               </button>
             </div>
-          </form>
-        </div>
+        </form>
 
         {/* Additional Info */}
-        <div className="mt-8 bg-gradient-to-br from-slate-800/30 to-purple-800/30 backdrop-blur-sm rounded-xl p-6 border border-purple-500/20">
-          <h3 className="text-lg font-semibold text-white mb-4">Staking Information</h3>
-          <div className="space-y-3 text-gray-300">
-            <div className="flex justify-between">
-              <span>Minimum Staking Amount:</span>
-              <span className="text-cyan-400 font-medium">$100</span>
-            </div>
-            <div className="flex justify-between">
-              <span>Staking Period:</span>
-              <span className="text-purple-400 font-medium">30 Days</span>
+        <div className="mt-8 rounded-xl p-6 transition-all duration-200" style={{
+            background: 'linear-gradient(to right, rgba(var(--body-bg-rgb), 0.2), rgba(var(--primary-rgb), 0.1))',
+            border: '1px solid var(--default-border)'
+          }}>
+            <h3 className="text-lg font-semibold text-white mb-4">Staking Information</h3>
+            <div className="space-y-3" style={{color: 'rgba(255, 255, 255, 0.8)'}}>
+              <div className="flex justify-between">
+                <span>Minimum Staking Amount:</span>
+                <span className="font-medium" style={{color: 'var(--primary-color)'}}>$100</span>
+              </div>
+              <div className="flex justify-between">
+                <span>Staking Period:</span>
+                <span className="font-medium" style={{color: 'var(--secondary-color)'}}>30 Days</span>
+              </div>
             </div>
           </div>
-        </div>
       </div>
     </div>
   );

@@ -37,13 +37,13 @@ export default function ProfilePassword() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
+    <div className="min-h-screen" style={{background: 'linear-gradient(to bottom right, var(--default-body-bg-color) 0%, var(--theme-bg-gradient) 25%, var(--default-body-bg-color) 100%)', fontFamily: 'var(--default-font-family)'}}>
       {/* Header */}
-      <div className="bg-gradient-to-r from-slate-800/50 to-purple-800/50 backdrop-blur-sm border-b border-purple-500/20">
+      <div className="backdrop-blur-sm border-b" style={{background: 'linear-gradient(to right, rgba(29, 68, 67, 0.8), rgba(29, 68, 67, 0.8))', borderColor: 'var(--default-border)'}}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <div className="text-center">
             <h1 className="text-3xl font-bold text-white mb-2">Security</h1>
-            <p className="text-gray-400">Update your Password Change</p>
+            <p className="text-gray-400" style={{color: 'rgba(255, 255, 255, 0.7)'}}>Update your Password Change</p>
           </div>
         </div>
       </div>
@@ -51,7 +51,7 @@ export default function ProfilePassword() {
       {/* Main Content */}
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Password Change Card */}
-        <div className="bg-gradient-to-br from-slate-800/50 to-purple-800/50 backdrop-blur-sm rounded-2xl p-8 border border-purple-500/20">
+        <div className="card-enhanced rounded-2xl p-8 shadow-2xl animate-fadeInUp">
           <div className="flex items-center justify-between mb-8">
             <h2 className="text-2xl font-bold text-white">Password Settings</h2>
             <button
@@ -59,7 +59,7 @@ export default function ProfilePassword() {
               className={`px-6 py-2 rounded-xl font-medium transition-all duration-300 ${
                 isEditing
                   ? 'bg-gradient-to-r from-gray-500 to-gray-600 hover:from-gray-600 hover:to-gray-700 text-white'
-                  : 'bg-gradient-to-r from-cyan-500 to-purple-600 hover:from-cyan-600 hover:to-purple-700 text-white'
+                  : 'btn-enhanced text-white'
               }`}
             >
               {isEditing ? 'Cancel' : 'Edit Passwords'}
@@ -68,7 +68,7 @@ export default function ProfilePassword() {
 
           <div className="space-y-8">
             {/* Transaction Password Section */}
-            <div className="bg-gradient-to-r from-slate-700/30 to-purple-700/30 rounded-xl p-6 border border-purple-500/20">
+            <div className="rounded-xl p-6" style={{background: 'linear-gradient(to right, rgba(29, 68, 67, 0.8), rgba(0, 227, 210, 0.8))', border: '1px solid var(--default-border)'}}>
               <h3 className="text-xl font-semibold text-white mb-6 flex items-center">
                 🔐 Change Transaction Password
               </h3>
@@ -85,10 +85,15 @@ export default function ProfilePassword() {
                       value={passwordData.currentTransactionPassword}
                       onChange={(e) => handleInputChange('currentTransactionPassword', e.target.value)}
                       placeholder="Enter current transaction password"
-                      className="w-full bg-slate-700/50 text-white px-4 py-3 rounded-xl border border-purple-500/30 focus:border-purple-500 focus:outline-none focus:ring-2 focus:ring-purple-500/20 placeholder-gray-400"
+                      className="w-full text-white px-4 py-3 rounded-xl focus:outline-none focus:ring-2 focus:border-transparent placeholder-gray-400 transition-all duration-200"
+                      style={{
+                        backgroundColor: 'rgba(29, 68, 67, 0.8)',
+                        border: '1px solid var(--default-border)',
+                        focusRingColor: 'var(--primary-color)'
+                      }}
                     />
                   ) : (
-                    <div className="bg-slate-700/30 text-white px-4 py-3 rounded-xl border border-purple-500/20">
+                    <div className="text-white px-4 py-3 rounded-xl" style={{backgroundColor: 'rgba(29, 68, 67, 0.8)', border: '1px solid var(--default-border)'}}>
                       ••••••••
                     </div>
                   )}
@@ -105,10 +110,15 @@ export default function ProfilePassword() {
                       value={passwordData.newTransactionPassword}
                       onChange={(e) => handleInputChange('newTransactionPassword', e.target.value)}
                       placeholder="Enter new transaction password"
-                      className="w-full bg-slate-700/50 text-white px-4 py-3 rounded-xl border border-purple-500/30 focus:border-purple-500 focus:outline-none focus:ring-2 focus:ring-purple-500/20 placeholder-gray-400"
+                      className="w-full text-white px-4 py-3 rounded-xl focus:outline-none focus:ring-2 focus:border-transparent placeholder-gray-400 transition-all duration-200"
+                      style={{
+                        backgroundColor: 'rgba(29, 68, 67, 0.8)',
+                        border: '1px solid var(--default-border)',
+                        focusRingColor: 'var(--primary-color)'
+                      }}
                     />
                   ) : (
-                    <div className="bg-slate-700/30 text-white px-4 py-3 rounded-xl border border-purple-500/20">
+                    <div className="text-white px-4 py-3 rounded-xl" style={{backgroundColor: 'rgba(29, 68, 67, 0.8)', border: '1px solid var(--default-border)'}}>
                       ••••••••
                     </div>
                   )}
@@ -125,10 +135,15 @@ export default function ProfilePassword() {
                       value={passwordData.confirmTransactionPassword}
                       onChange={(e) => handleInputChange('confirmTransactionPassword', e.target.value)}
                       placeholder="Enter confirm transaction password"
-                      className="w-full bg-slate-700/50 text-white px-4 py-3 rounded-xl border border-purple-500/30 focus:border-purple-500 focus:outline-none focus:ring-2 focus:ring-purple-500/20 placeholder-gray-400"
+                      className="w-full text-white px-4 py-3 rounded-xl focus:outline-none focus:ring-2 focus:border-transparent placeholder-gray-400 transition-all duration-200"
+                      style={{
+                        backgroundColor: 'rgba(29, 68, 67, 0.8)',
+                        border: '1px solid var(--default-border)',
+                        focusRingColor: 'var(--primary-color)'
+                      }}
                     />
                   ) : (
-                    <div className="bg-slate-700/30 text-white px-4 py-3 rounded-xl border border-purple-500/20">
+                    <div className="text-white px-4 py-3 rounded-xl" style={{backgroundColor: 'rgba(29, 68, 67, 0.8)', border: '1px solid var(--default-border)'}}>
                       ••••••••
                     </div>
                   )}
@@ -137,7 +152,7 @@ export default function ProfilePassword() {
             </div>
 
             {/* Regular Password Section */}
-            <div className="bg-gradient-to-r from-slate-700/30 to-purple-700/30 rounded-xl p-6 border border-purple-500/20">
+            <div className="rounded-xl p-6" style={{background: 'linear-gradient(to right, rgba(29, 68, 67, 0.8), rgba(0, 227, 210, 0.8))', border: '1px solid var(--default-border)'}}>
               <h3 className="text-xl font-semibold text-white mb-6 flex items-center">
                 🔑 Change Password
               </h3>
@@ -154,10 +169,15 @@ export default function ProfilePassword() {
                       value={passwordData.currentPassword}
                       onChange={(e) => handleInputChange('currentPassword', e.target.value)}
                       placeholder="Enter current password"
-                      className="w-full bg-slate-700/50 text-white px-4 py-3 rounded-xl border border-purple-500/30 focus:border-purple-500 focus:outline-none focus:ring-2 focus:ring-purple-500/20 placeholder-gray-400"
+                      className="w-full text-white px-4 py-3 rounded-xl focus:outline-none focus:ring-2 focus:border-transparent placeholder-gray-400 transition-all duration-200"
+                      style={{
+                        backgroundColor: 'rgba(29, 68, 67, 0.8)',
+                        border: '1px solid var(--default-border)',
+                        focusRingColor: 'var(--primary-color)'
+                      }}
                     />
                   ) : (
-                    <div className="bg-slate-700/30 text-white px-4 py-3 rounded-xl border border-purple-500/20">
+                    <div className="text-white px-4 py-3 rounded-xl" style={{backgroundColor: 'rgba(29, 68, 67, 0.8)', border: '1px solid var(--default-border)'}}>
                       ••••••••
                     </div>
                   )}
@@ -174,10 +194,15 @@ export default function ProfilePassword() {
                       value={passwordData.newPassword}
                       onChange={(e) => handleInputChange('newPassword', e.target.value)}
                       placeholder="Enter new password"
-                      className="w-full bg-slate-700/50 text-white px-4 py-3 rounded-xl border border-purple-500/30 focus:border-purple-500 focus:outline-none focus:ring-2 focus:ring-purple-500/20 placeholder-gray-400"
+                      className="w-full text-white px-4 py-3 rounded-xl focus:outline-none focus:ring-2 focus:border-transparent placeholder-gray-400 transition-all duration-200"
+                      style={{
+                        backgroundColor: 'rgba(29, 68, 67, 0.8)',
+                        border: '1px solid var(--default-border)',
+                        focusRingColor: 'var(--primary-color)'
+                      }}
                     />
                   ) : (
-                    <div className="bg-slate-700/30 text-white px-4 py-3 rounded-xl border border-purple-500/20">
+                    <div className="text-white px-4 py-3 rounded-xl" style={{backgroundColor: 'rgba(29, 68, 67, 0.8)', border: '1px solid var(--default-border)'}}>
                       ••••••••
                     </div>
                   )}
@@ -194,10 +219,15 @@ export default function ProfilePassword() {
                       value={passwordData.confirmPassword}
                       onChange={(e) => handleInputChange('confirmPassword', e.target.value)}
                       placeholder="Enter confirm password"
-                      className="w-full bg-slate-700/50 text-white px-4 py-3 rounded-xl border border-purple-500/30 focus:border-purple-500 focus:outline-none focus:ring-2 focus:ring-purple-500/20 placeholder-gray-400"
+                      className="w-full text-white px-4 py-3 rounded-xl focus:outline-none focus:ring-2 focus:border-transparent placeholder-gray-400 transition-all duration-200"
+                      style={{
+                        backgroundColor: 'rgba(29, 68, 67, 0.8)',
+                        border: '1px solid var(--default-border)',
+                        focusRingColor: 'var(--primary-color)'
+                      }}
                     />
                   ) : (
-                    <div className="bg-slate-700/30 text-white px-4 py-3 rounded-xl border border-purple-500/20">
+                    <div className="text-white px-4 py-3 rounded-xl" style={{backgroundColor: 'rgba(29, 68, 67, 0.8)', border: '1px solid var(--default-border)'}}>
                       ••••••••
                     </div>
                   )}

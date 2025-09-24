@@ -40,13 +40,13 @@ export default function ProfilePage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 py-12 px-4">
+    <div className="min-h-screen py-12 px-4" style={{background: 'linear-gradient(to bottom right, var(--default-body-bg-color) 0%, var(--theme-bg-gradient) 25%, var(--default-body-bg-color) 100%)', fontFamily: 'var(--default-font-family)'}}>
       <div className="max-w-4xl mx-auto">
-        <div className="bg-white/10 backdrop-blur-lg rounded-xl shadow-2xl border border-white/20 overflow-hidden">
+        <div className="card-enhanced rounded-xl shadow-2xl overflow-hidden animate-fadeInUp">
           {/* Header */}
-          <div className="bg-gradient-to-r from-purple-600/20 to-blue-600/20 px-6 py-8 border-b border-white/10">
+          <div className="px-6 py-8 border-b" style={{background: 'linear-gradient(to right, rgba(0, 255, 190, 0.2), rgba(0, 227, 210, 0.2))', borderColor: 'var(--default-border)'}}>
             <div className="flex items-center space-x-4">
-              <div className="w-16 h-16 bg-gradient-to-br from-green-400 to-blue-500 rounded-full flex items-center justify-center ring-4 ring-purple-400/30">
+              <div className="w-16 h-16 rounded-full flex items-center justify-center ring-4" style={{background: 'linear-gradient(to bottom right, rgb(var(--success-rgb)), var(--primary-color))', ringColor: 'rgba(0, 255, 190, 0.3)'}}>
                 <span className="text-white font-bold text-2xl">
                   {user?.name?.charAt(0).toUpperCase() || "U"}
                 </span>
@@ -55,7 +55,7 @@ export default function ProfilePage() {
                 <h1 className="text-2xl font-bold text-white">
                   {user?.name || "User Profile"}
                 </h1>
-                <p className="text-gray-300">
+                <p className="text-gray-300" style={{color: 'rgba(255, 255, 255, 0.7)'}}>
                   Member since{" "}
                   {new Date(user?.createdAt).toLocaleDateString() || "Unknown"}
                 </p>
@@ -118,7 +118,7 @@ export default function ProfilePage() {
                   </h2>
                   <button
                     onClick={() => setIsEditing(!isEditing)}
-                    className="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition-colors"
+                    className="btn-enhanced px-4 py-2 text-white rounded-lg transition-colors"
                   >
                     {isEditing ? "Cancel" : "Edit"}
                   </button>
@@ -135,7 +135,12 @@ export default function ProfilePage() {
                         name="name"
                         value={formData.name}
                         onChange={handleChange}
-                        className="w-full px-4 py-3 bg-white/5 border border-white/20 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500"
+                        className="w-full px-4 py-3 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:border-transparent transition-all duration-200"
+                        style={{
+                          backgroundColor: 'rgba(29, 68, 67, 0.8)',
+                          border: '1px solid var(--default-border)',
+                          focusRingColor: 'var(--primary-color)'
+                        }}
                       />
                     </div>
 
@@ -148,7 +153,12 @@ export default function ProfilePage() {
                         name="email"
                         value={formData.email}
                         onChange={handleChange}
-                        className="w-full px-4 py-3 bg-white/5 border border-white/20 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500"
+                        className="w-full px-4 py-3 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:border-transparent transition-all duration-200"
+                        style={{
+                          backgroundColor: 'rgba(29, 68, 67, 0.8)',
+                          border: '1px solid var(--default-border)',
+                          focusRingColor: 'var(--primary-color)'
+                        }}
                         disabled
                       />
                       <p className="text-xs text-gray-400 mt-1">
@@ -166,7 +176,12 @@ export default function ProfilePage() {
                         value={formData.phone}
                         onChange={handleChange}
                         placeholder="Enter your phone number"
-                        className="w-full px-4 py-3 bg-white/5 border border-white/20 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500"
+                        className="w-full px-4 py-3 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:border-transparent transition-all duration-200"
+                        style={{
+                          backgroundColor: 'rgba(29, 68, 67, 0.8)',
+                          border: '1px solid var(--default-border)',
+                          focusRingColor: 'var(--primary-color)'
+                        }}
                       />
                     </div>
 
@@ -180,13 +195,18 @@ export default function ProfilePage() {
                         value={formData.country}
                         onChange={handleChange}
                         placeholder="Enter your country"
-                        className="w-full px-4 py-3 bg-white/5 border border-white/20 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500"
+                        className="w-full px-4 py-3 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:border-transparent transition-all duration-200"
+                        style={{
+                          backgroundColor: 'rgba(29, 68, 67, 0.8)',
+                          border: '1px solid var(--default-border)',
+                          focusRingColor: 'var(--primary-color)'
+                        }}
                       />
                     </div>
 
                     <button
                       type="submit"
-                      className="w-full py-3 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white rounded-lg transition-all duration-200"
+                      className="btn-enhanced w-full py-3 text-white rounded-lg transition-all duration-200"
                     >
                       Save Changes
                     </button>
@@ -239,7 +259,7 @@ export default function ProfilePage() {
                   Account Summary
                 </h2>
 
-                <div className="bg-gradient-to-br from-purple-600/20 to-blue-600/20 rounded-lg p-6 border border-purple-500/30">
+                <div className="rounded-lg p-6" style={{background: 'linear-gradient(to bottom right, rgba(0, 255, 190, 0.2), rgba(0, 227, 210, 0.2))', border: '1px solid rgba(0, 255, 190, 0.3)'}}>
                   <h3 className="text-lg font-medium text-white mb-4">
                     Wallet Balance
                   </h3>
@@ -251,7 +271,7 @@ export default function ProfilePage() {
                   </p>
                 </div>
 
-                <div className="bg-gradient-to-br from-slate-700/20 to-purple-700/20 rounded-lg p-6 border border-slate-500/30">
+                <div className="rounded-lg p-6" style={{background: 'linear-gradient(to bottom right, rgba(29, 68, 67, 0.2), rgba(0, 227, 210, 0.2))', border: '1px solid rgba(255, 255, 255, 0.1)'}}>
                   <h3 className="text-lg font-medium text-white mb-4">
                     Account Details
                   </h3>

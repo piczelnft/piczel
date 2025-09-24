@@ -2,6 +2,12 @@ import dbConnect from "@/lib/mongodb";
 import User from "@/models/User";
 import jwt from "jsonwebtoken";
 import { NextResponse } from "next/server";
+import { corsHeaders, handleCors } from "@/lib/cors";
+
+// Handle CORS preflight requests
+export async function OPTIONS(request) {
+  return handleCors(request);
+}
 
 export async function POST(request) {
   try {
@@ -65,7 +71,10 @@ export async function POST(request) {
         user,
         token,
       },
-      { status: 201 }
+      { 
+        status: 201,
+        headers: corsHeaders()
+      }
     );
   } catch (error) {
     console.error("Signup error:", error);
@@ -84,7 +93,10 @@ export async function POST(request) {
 
     return NextResponse.json(
       { error: "Internal server error" },
-      { status: 500 }
+      { 
+        status: 500,
+        headers: corsHeaders()
+      }
     );
   }
 }

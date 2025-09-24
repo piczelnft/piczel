@@ -31,13 +31,13 @@ export default function ProfileWallet() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
+    <div className="min-h-screen" style={{background: 'linear-gradient(to bottom right, var(--default-body-bg-color) 0%, var(--theme-bg-gradient) 25%, var(--default-body-bg-color) 100%)', fontFamily: 'var(--default-font-family)'}}>
       {/* Header */}
-      <div className="bg-gradient-to-r from-slate-800/50 to-purple-800/50 backdrop-blur-sm border-b border-purple-500/20">
+      <div className="backdrop-blur-sm border-b" style={{background: 'linear-gradient(to right, rgba(29, 68, 67, 0.8), rgba(29, 68, 67, 0.8))', borderColor: 'var(--default-border)'}}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <div className="text-center">
             <h1 className="text-3xl font-bold text-white mb-2">Wallet Address</h1>
-            <p className="text-gray-400">Update your Wallet Address</p>
+            <p className="text-gray-400" style={{color: 'rgba(255, 255, 255, 0.7)'}}>Update your Wallet Address</p>
           </div>
         </div>
       </div>
@@ -45,7 +45,7 @@ export default function ProfileWallet() {
       {/* Main Content */}
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Wallet Address Card */}
-        <div className="bg-gradient-to-br from-slate-800/50 to-purple-800/50 backdrop-blur-sm rounded-2xl p-8 border border-purple-500/20">
+        <div className="card-enhanced rounded-2xl p-8 shadow-2xl animate-fadeInUp">
           <div className="flex items-center justify-between mb-8">
             <h2 className="text-2xl font-bold text-white">Wallet Settings</h2>
             <button
@@ -53,7 +53,7 @@ export default function ProfileWallet() {
               className={`px-6 py-2 rounded-xl font-medium transition-all duration-300 ${
                 isEditing
                   ? 'bg-gradient-to-r from-gray-500 to-gray-600 hover:from-gray-600 hover:to-gray-700 text-white'
-                  : 'bg-gradient-to-r from-cyan-500 to-purple-600 hover:from-cyan-600 hover:to-purple-700 text-white'
+                  : 'btn-enhanced text-white'
               }`}
             >
               {isEditing ? 'Cancel' : 'Edit Wallet'}
@@ -62,7 +62,7 @@ export default function ProfileWallet() {
 
           <div className="space-y-6">
             {/* Wallet Address Section */}
-            <div className="bg-gradient-to-r from-slate-700/30 to-purple-700/30 rounded-xl p-6 border border-purple-500/20">
+            <div className="bg-gradient-to-r rounded-xl p-6" style={{background: 'linear-gradient(to right, rgba(29, 68, 67, 0.8), rgba(29, 68, 67, 0.8))', border: '1px solid var(--default-border)'}}>
               <h3 className="text-xl font-semibold text-white mb-6 flex items-center">
                 💳 Wallet Address
               </h3>
@@ -80,7 +80,12 @@ export default function ProfileWallet() {
                         value={walletData.walletAddress}
                         onChange={(e) => handleInputChange('walletAddress', e.target.value)}
                         placeholder="Enter wallet address"
-                        className="w-full bg-slate-700/50 text-white px-4 py-3 rounded-xl border border-purple-500/30 focus:border-purple-500 focus:outline-none focus:ring-2 focus:ring-purple-500/20 placeholder-gray-400"
+                        className="w-full text-white px-4 py-3 rounded-xl focus:outline-none focus:ring-2 focus:border-transparent placeholder-gray-400 transition-all duration-200"
+                        style={{
+                          backgroundColor: 'rgba(29, 68, 67, 0.8)',
+                          border: '1px solid var(--default-border)',
+                          focusRingColor: 'var(--primary-color)'
+                        }}
                       />
                       <p className="text-xs text-gray-400">
                         Enter your cryptocurrency wallet address (e.g., Bitcoin, Ethereum, BNB)
@@ -88,7 +93,7 @@ export default function ProfileWallet() {
                     </div>
                   ) : (
                     <div className="flex items-center space-x-3">
-                      <div className="flex-1 bg-slate-700/30 text-white px-4 py-3 rounded-xl border border-purple-500/20">
+                      <div className="flex-1 text-white px-4 py-3 rounded-xl" style={{backgroundColor: 'rgba(29, 68, 67, 0.8)', border: '1px solid var(--default-border)'}}>
                         {walletData.walletAddress || 'No wallet address set'}
                       </div>
                       {walletData.walletAddress && (
@@ -133,7 +138,7 @@ export default function ProfileWallet() {
         </div>
 
         {/* Additional Info Card */}
-        <div className="mt-8 bg-gradient-to-br from-slate-800/30 to-purple-800/30 backdrop-blur-sm rounded-2xl p-6 border border-purple-500/20">
+        <div className="mt-8 card-enhanced rounded-2xl p-6 shadow-2xl animate-fadeInUp">
           <h3 className="text-lg font-semibold text-white mb-4 flex items-center">
             ℹ️ Important Information
           </h3>

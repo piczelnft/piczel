@@ -80,25 +80,27 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center px-4 py-12 bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
+    <div className="min-h-screen flex items-center justify-center px-4 py-12" style={{background: 'linear-gradient(to bottom right, var(--default-body-bg-color) 0%, var(--theme-bg-gradient) 25%, var(--default-body-bg-color) 100%)', fontFamily: 'var(--default-font-family)'}}>
       <div className="max-w-md w-full space-y-8">
         <div className="text-center">
-          <h2 className="mt-6 text-3xl font-bold text-white">Welcome Back</h2>
-          <p className="mt-2 text-sm text-gray-300">
+          <h2 className="mt-6 text-3xl font-bold text-white gradient-text-enhanced animate-fadeInUp">
+            Welcome Back
+          </h2>
+          <p className="mt-2 text-sm animate-fadeInUp" style={{color: 'rgba(255, 255, 255, 0.7)', animationDelay: '0.2s'}}>
             Sign in to your PICZEL account
           </p>
         </div>
 
-        <div className="bg-white/10 backdrop-blur-lg rounded-xl shadow-2xl p-8 border border-white/20">
+        <div className="card-enhanced rounded-xl shadow-2xl p-8 animate-fadeInUp" style={{animationDelay: '0.4s'}}>
           <form className="space-y-6" onSubmit={handleSubmit}>
             {errors.general && (
-              <div className="bg-red-500/20 border border-red-500/50 text-red-200 px-4 py-3 rounded-lg">
+              <div className="px-4 py-3 rounded-lg animate-fadeInUp" style={{backgroundColor: 'rgba(255, 74, 74, 0.2)', border: '1px solid rgba(255, 74, 74, 0.3)', color: 'rgb(var(--danger-rgb))'}}>
                 {errors.general}
               </div>
             )}
 
             {message && (
-              <div className="bg-green-500/20 border border-green-500/50 text-green-200 px-4 py-3 rounded-lg">
+              <div className="px-4 py-3 rounded-lg animate-fadeInUp" style={{backgroundColor: 'rgba(72, 247, 104, 0.2)', border: '1px solid rgba(72, 247, 104, 0.3)', color: 'rgb(var(--success-rgb))'}}>
                 {message}
               </div>
             )}
@@ -106,7 +108,8 @@ export default function LoginPage() {
             <div>
               <label
                 htmlFor="email"
-                className="block text-sm font-medium text-gray-200 mb-2"
+                className="block text-sm font-medium mb-2"
+                style={{color: 'rgba(255, 255, 255, 0.8)'}}
               >
                 Email Address
               </label>
@@ -117,18 +120,25 @@ export default function LoginPage() {
                 required
                 value={formData.email}
                 onChange={handleChange}
-                className="w-full px-4 py-3 bg-white/5 border border-white/20 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200"
+                className="w-full px-4 py-3 rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:border-transparent"
+                style={{
+                  backgroundColor: 'rgba(29, 68, 67, 0.8)',
+                  border: '1px solid var(--default-border)',
+                  color: 'rgb(var(--default-text-color-rgb))',
+                  focusRingColor: 'var(--primary-color)'
+                }}
                 placeholder="Enter your email"
               />
               {errors.email && (
-                <p className="mt-1 text-sm text-red-400">{errors.email}</p>
+                <p className="mt-1 text-sm" style={{color: 'rgb(var(--danger-rgb))'}}>{errors.email}</p>
               )}
             </div>
 
             <div>
               <label
                 htmlFor="password"
-                className="block text-sm font-medium text-gray-200 mb-2"
+                className="block text-sm font-medium mb-2"
+                style={{color: 'rgba(255, 255, 255, 0.8)'}}
               >
                 Password
               </label>
@@ -139,11 +149,17 @@ export default function LoginPage() {
                 required
                 value={formData.password}
                 onChange={handleChange}
-                className="w-full px-4 py-3 bg-white/5 border border-white/20 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200"
+                className="w-full px-4 py-3 rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:border-transparent"
+                style={{
+                  backgroundColor: 'rgba(29, 68, 67, 0.8)',
+                  border: '1px solid var(--default-border)',
+                  color: 'rgb(var(--default-text-color-rgb))',
+                  focusRingColor: 'var(--primary-color)'
+                }}
                 placeholder="Enter your password"
               />
               {errors.password && (
-                <p className="mt-1 text-sm text-red-400">{errors.password}</p>
+                <p className="mt-1 text-sm" style={{color: 'rgb(var(--danger-rgb))'}}>{errors.password}</p>
               )}
             </div>
 
@@ -157,7 +173,8 @@ export default function LoginPage() {
                 />
                 <label
                   htmlFor="remember-me"
-                  className="ml-2 block text-sm text-gray-300"
+                  className="ml-2 block text-sm"
+                  style={{color: 'rgba(255, 255, 255, 0.7)'}}
                 >
                   Remember me
                 </label>
@@ -166,7 +183,8 @@ export default function LoginPage() {
               <div className="text-sm">
                 <Link
                   href="/forgot-password"
-                  className="text-purple-400 hover:text-purple-300 transition-colors duration-200"
+                  className="transition-colors duration-200"
+                  style={{color: 'var(--primary-color)'}}
                 >
                   Forgot your password?
                 </Link>
@@ -177,7 +195,7 @@ export default function LoginPage() {
               <button
                 type="submit"
                 disabled={isLoading}
-                className="w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
+                className="btn-enhanced w-full flex justify-center py-3 px-4 rounded-lg text-sm font-medium text-white transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {isLoading ? (
                   <div className="flex items-center">
@@ -191,10 +209,11 @@ export default function LoginPage() {
             </div>
 
             <div className="text-center">
-              <span className="text-gray-400">Don&apos;t have an account? </span>
+              <span className="transition-colors duration-200" style={{color: 'rgba(255, 255, 255, 0.7)'}}>Don't have an account? </span>
               <Link
                 href="/signup"
-                className="text-purple-400 hover:text-purple-300 font-medium transition-colors duration-200"
+                className="font-medium transition-colors duration-200"
+                style={{color: 'var(--primary-color)'}}
               >
                 Create one here
               </Link>

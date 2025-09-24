@@ -27,36 +27,40 @@ export default function ImportFundHistory() {
   );
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 text-white">
+    <div className="min-h-screen text-white" style={{background: 'linear-gradient(to bottom right, var(--default-body-bg-color) 0%, var(--theme-bg-gradient) 25%, var(--default-body-bg-color) 100%)', fontFamily: 'var(--default-font-family)'}}>
       {/* Page Header */}
       <div className="relative overflow-hidden">
         <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-12 text-center">
-          <h1 className="text-3xl sm:text-4xl font-extrabold text-white mb-4">
+          <h1 className="text-3xl sm:text-4xl font-extrabold text-white mb-4 gradient-text-enhanced animate-fadeInUp">
             Import Fund History
           </h1>
-          <p className="text-gray-300 max-w-2xl mx-auto">
+          <p className="max-w-2xl mx-auto animate-fadeInUp" style={{color: 'rgba(255, 255, 255, 0.7)', animationDelay: '0.2s'}}>
             Track all your imported fund transactions here.
           </p>
         </div>
 
         {/* Animated Background Blobs */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          <div className="absolute -top-40 -right-40 w-80 h-80 bg-purple-500/20 rounded-full blur-3xl animate-pulse"></div>
-          <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-cyan-500/20 rounded-full blur-3xl animate-pulse delay-1000"></div>
+          <div className="absolute -top-40 -right-40 w-80 h-80 rounded-full blur-3xl animate-pulse" style={{backgroundColor: 'rgba(0, 227, 210, 0.2)'}}></div>
+          <div className="absolute -bottom-40 -left-40 w-80 h-80 rounded-full blur-3xl animate-pulse delay-1000" style={{backgroundColor: 'rgba(0, 255, 190, 0.2)'}}></div>
         </div>
       </div>
 
       {/* History Table */}
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pb-20">
-        <div className="bg-gradient-to-br from-slate-800/50 to-purple-800/50 backdrop-blur-sm p-8 rounded-2xl border border-purple-500/20 shadow-lg">
+        <div className="card-enhanced rounded-2xl p-8 shadow-lg animate-fadeInUp" style={{animationDelay: '0.4s'}}>
           {/* Controls */}
-          <div className="flex justify-between items-center mb-6 text-sm">
+          <div className="flex justify-between items-center mb-6 text-sm" style={{color: 'rgba(255, 255, 255, 0.8)'}}>
             <div>
               Show{" "}
               <select
                 value={entries}
                 onChange={(e) => setEntries(Number(e.target.value))}
-                className="bg-slate-700/50 border border-purple-500/30 rounded px-2 py-1 text-white"
+                className="rounded px-2 py-1 text-white transition-all duration-200"
+                style={{
+                  backgroundColor: 'rgba(29, 68, 67, 0.8)',
+                  border: '1px solid var(--default-border)'
+                }}
               >
                 <option value={10}>10</option>
                 <option value={25}>25</option>
@@ -70,7 +74,11 @@ export default function ImportFundHistory() {
                 type="text"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                className="bg-slate-700/50 border border-cyan-500/30 rounded px-2 py-1 text-white placeholder-gray-400"
+                className="rounded px-2 py-1 text-white placeholder-gray-400 transition-all duration-200"
+                style={{
+                  backgroundColor: 'rgba(29, 68, 67, 0.8)',
+                  border: '1px solid var(--default-border)'
+                }}
                 placeholder="Search..."
               />
             </div>
@@ -78,9 +86,9 @@ export default function ImportFundHistory() {
 
           {/* Table */}
           <div className="overflow-x-auto">
-            <table className="w-full text-sm border border-purple-500/20">
+            <table className="w-full text-sm" style={{border: '1px solid var(--default-border)'}}>
               <thead>
-                <tr className="bg-slate-700/50 text-gray-300">
+                <tr style={{backgroundColor: 'rgba(29, 68, 67, 0.8)', color: 'rgba(255, 255, 255, 0.8)'}}>
                   <th className="px-3 py-2 text-left">S.No.</th>
                   <th className="px-3 py-2 text-left">Date</th>
                   <th className="px-3 py-2 text-left">Memberid</th>
@@ -96,17 +104,20 @@ export default function ImportFundHistory() {
                   filteredData.map((row) => (
                     <tr
                       key={row.sno}
-                      className="hover:bg-slate-700/40 transition-colors"
+                      className="transition-colors duration-200 hover:bg-opacity-20"
+                      style={{
+                        backgroundColor: 'rgba(29, 68, 67, 0.1)'
+                      }}
                     >
                       <td className="px-3 py-2">{row.sno}</td>
                       <td className="px-3 py-2">{row.date}</td>
                       <td className="px-3 py-2">{row.memberId}</td>
-                      <td className="px-3 py-2 break-all text-cyan-400">
+                      <td className="px-3 py-2 break-all" style={{color: 'var(--primary-color)'}}>
                         {row.txnId}
                       </td>
                       <td className="px-3 py-2">{row.addedBy}</td>
-                      <td className="px-3 py-2 text-purple-300">{row.usdg}</td>
-                      <td className="px-3 py-2 text-cyan-300">{row.usdt}</td>
+                      <td className="px-3 py-2" style={{color: 'var(--secondary-color)'}}>{row.usdg}</td>
+                      <td className="px-3 py-2" style={{color: 'rgb(var(--success-rgb))'}}>{row.usdt}</td>
                       <td className="px-3 py-2">{row.status || "-"}</td>
                     </tr>
                   ))
@@ -122,18 +133,24 @@ export default function ImportFundHistory() {
           </div>
 
           {/* Pagination */}
-          <div className="flex justify-between items-center mt-6 text-sm text-gray-300">
+          <div className="flex justify-between items-center mt-6 text-sm" style={{color: 'rgba(255, 255, 255, 0.8)'}}>
             <p>
               Showing 1 to {filteredData.length} of {filteredData.length} entries
             </p>
             <div className="flex gap-2">
-              <button className="px-3 py-1 rounded bg-slate-700/50 border border-purple-500/30 hover:bg-slate-700">
+              <button className="px-3 py-1 rounded transition-all duration-200 hover:bg-opacity-20" style={{
+                backgroundColor: 'rgba(29, 68, 67, 0.8)',
+                border: '1px solid var(--default-border)'
+              }}>
                 Previous
               </button>
-              <button className="px-3 py-1 rounded bg-gradient-to-r from-cyan-500 to-purple-600 text-white shadow-lg">
+              <button className="px-3 py-1 rounded text-white shadow-lg btn-enhanced">
                 1
               </button>
-              <button className="px-3 py-1 rounded bg-slate-700/50 border border-purple-500/30 hover:bg-slate-700">
+              <button className="px-3 py-1 rounded transition-all duration-200 hover:bg-opacity-20" style={{
+                backgroundColor: 'rgba(29, 68, 67, 0.8)',
+                border: '1px solid var(--default-border)'
+              }}>
                 Next
               </button>
             </div>

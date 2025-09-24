@@ -26,21 +26,24 @@ const TeamLevelsPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 p-8">
-      <div className="max-w-4xl mx-auto">
+    <div className="min-h-screen flex p-8" style={{background: 'linear-gradient(to bottom right, var(--default-body-bg-color) 0%, var(--theme-bg-gradient) 25%, var(--default-body-bg-color) 100%)', fontFamily: 'var(--default-font-family)'}}>
+
+      {/* Main Content */}
+      <div className="flex-1">
+        <div className="max-w-4xl mx-auto">
         <div className="text-center mb-12">
-          <h1 className="text-4xl font-bold text-white mb-2">Level Table</h1>
-          <p className="text-lg text-gray-300">Check your Genealogy</p>
+          <h1 className="text-4xl font-bold text-white mb-2 gradient-text-enhanced animate-fadeInUp">Level Table</h1>
+          <p className="text-lg animate-fadeInUp" style={{color: 'rgba(255, 255, 255, 0.7)', animationDelay: '0.2s'}}>Check your Genealogy</p>
         </div>
 
-        <div className="bg-gradient-to-br from-slate-800/50 to-purple-800/50 backdrop-blur-sm rounded-2xl p-8 border border-purple-500/20 shadow-lg">
+        <div className="card-enhanced rounded-2xl p-8 shadow-lg animate-fadeInUp" style={{animationDelay: '0.4s'}}>
           <h2 className="text-2xl font-semibold text-white mb-8 text-center">Level Details</h2>
           
           {/* Level Table */}
           <div className="overflow-x-auto">
             <table className="w-full text-sm text-left">
               <thead>
-                <tr className="bg-gradient-to-r from-slate-700/50 to-purple-700/50 border-b border-purple-500/30">
+                <tr style={{background: 'linear-gradient(to right, rgba(29, 68, 67, 0.8), rgba(29, 68, 67, 0.8))', borderBottom: '1px solid var(--default-border)'}}>
                   <th className="px-6 py-4 text-white font-semibold">S.No</th>
                   <th className="px-6 py-4 text-white font-semibold">Level No</th>
                   <th className="px-6 py-4 text-white font-semibold">Total Members</th>
@@ -49,14 +52,17 @@ const TeamLevelsPage = () => {
               </thead>
               <tbody>
                 {levelsData.map((level, index) => (
-                  <tr key={level.id} className="border-b border-purple-500/20 hover:bg-slate-700/30 transition-colors">
-                    <td className="px-6 py-4 text-gray-300">{index + 1}</td>
+                  <tr key={level.id} className="transition-colors duration-200 hover:bg-opacity-20" style={{
+                    borderBottom: '1px solid var(--default-border)',
+                    backgroundColor: 'rgba(29, 68, 67, 0.1)'
+                  }}>
+                    <td className="px-6 py-4" style={{color: 'rgba(255, 255, 255, 0.8)'}}>{index + 1}</td>
                     <td className="px-6 py-4 text-white font-medium">{level.levelNo}</td>
-                    <td className="px-6 py-4 text-purple-400 font-medium">{level.totalMembers}</td>
+                    <td className="px-6 py-4 font-medium" style={{color: 'var(--secondary-color)'}}>{level.totalMembers}</td>
                     <td className="px-6 py-4">
                       <button
                         onClick={() => handleLevelAction(level)}
-                        className="px-4 py-2 bg-gradient-to-r from-cyan-500 to-purple-600 text-white rounded-lg text-sm font-medium hover:from-cyan-600 hover:to-purple-700 transition-all duration-300 cursor-pointer shadow-lg hover:shadow-xl"
+                        className="btn-enhanced px-4 py-2 text-white rounded-lg text-sm font-medium transition-all duration-300 cursor-pointer shadow-lg hover:shadow-xl"
                       >
                         View Details
                       </button>
@@ -69,36 +75,48 @@ const TeamLevelsPage = () => {
 
           {/* Level Statistics */}
           <div className="mt-8 grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="bg-gradient-to-br from-slate-700/50 to-purple-700/50 backdrop-blur-sm rounded-xl p-6 border border-purple-500/30">
+            <div className="rounded-xl p-6 transition-all duration-200" style={{
+              background: 'linear-gradient(to right, rgba(var(--primary-rgb), 0.2), rgba(var(--secondary-rgb), 0.1))',
+              border: '1px solid rgba(var(--primary-rgb), 0.3)'
+            }}>
               <div className="text-center">
-                <div className="text-2xl font-bold text-cyan-400 mb-2">10</div>
-                <div className="text-gray-300 text-sm">Total Levels</div>
+                <div className="text-2xl font-bold mb-2" style={{color: 'var(--primary-color)'}}>10</div>
+                <div className="text-sm" style={{color: 'rgba(255, 255, 255, 0.8)'}}>Total Levels</div>
               </div>
             </div>
             
-            <div className="bg-gradient-to-br from-slate-700/50 to-green-700/50 backdrop-blur-sm rounded-xl p-6 border border-green-500/30">
+            <div className="rounded-xl p-6 transition-all duration-200" style={{
+              background: 'linear-gradient(to right, rgba(var(--success-rgb), 0.2), rgba(var(--success-rgb), 0.1))',
+              border: '1px solid rgba(var(--success-rgb), 0.3)'
+            }}>
               <div className="text-center">
-                <div className="text-2xl font-bold text-green-400 mb-2">0</div>
-                <div className="text-gray-300 text-sm">Total Members</div>
+                <div className="text-2xl font-bold mb-2" style={{color: 'rgb(var(--success-rgb))'}}>0</div>
+                <div className="text-sm" style={{color: 'rgba(255, 255, 255, 0.8)'}}>Total Members</div>
               </div>
             </div>
             
-            <div className="bg-gradient-to-br from-slate-700/50 to-blue-700/50 backdrop-blur-sm rounded-xl p-6 border border-blue-500/30">
+            <div className="rounded-xl p-6 transition-all duration-200" style={{
+              background: 'linear-gradient(to right, rgba(var(--info-rgb), 0.2), rgba(var(--info-rgb), 0.1))',
+              border: '1px solid rgba(var(--info-rgb), 0.3)'
+            }}>
               <div className="text-center">
-                <div className="text-2xl font-bold text-blue-400 mb-2">0</div>
-                <div className="text-gray-300 text-sm">Active Levels</div>
+                <div className="text-2xl font-bold mb-2" style={{color: 'rgb(var(--info-rgb))'}}>0</div>
+                <div className="text-sm" style={{color: 'rgba(255, 255, 255, 0.8)'}}>Active Levels</div>
               </div>
             </div>
           </div>
 
           {/* Selected Level Info */}
           {selectedLevel && (
-            <div className="mt-8 bg-gradient-to-br from-slate-700/80 to-purple-700/80 backdrop-blur-sm rounded-xl p-6 border border-purple-500/30">
+            <div className="mt-8 rounded-xl p-6 transition-all duration-200" style={{
+              background: 'linear-gradient(to right, rgba(var(--body-bg-rgb), 0.2), rgba(var(--primary-rgb), 0.1))',
+              border: '1px solid var(--default-border)'
+            }}>
               <div className="flex items-center justify-between mb-4">
                 <h3 className="text-xl font-semibold text-white">{selectedLevel.levelNo} Details</h3>
                 <button 
                   onClick={() => setSelectedLevel(null)}
-                  className="text-gray-400 hover:text-white transition-colors"
+                  className="transition-colors" style={{color: 'rgba(255, 255, 255, 0.6)'}} onMouseEnter={(e) => e.target.style.color = 'white'} onMouseLeave={(e) => e.target.style.color = 'rgba(255, 255, 255, 0.6)'}
                 >
                   ✕
                 </button>
@@ -106,19 +124,28 @@ const TeamLevelsPage = () => {
               
               <div className="space-y-4">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="bg-gradient-to-br from-slate-600/50 to-purple-600/50 rounded-lg p-4">
-                    <div className="text-sm text-gray-300 mb-1">Level Number</div>
+                  <div className="rounded-lg p-4 transition-all duration-200" style={{
+                    background: 'linear-gradient(to right, rgba(var(--body-bg-rgb), 0.2), rgba(var(--primary-rgb), 0.1))',
+                    border: '1px solid var(--default-border)'
+                  }}>
+                    <div className="text-sm mb-1" style={{color: 'rgba(255, 255, 255, 0.8)'}}>Level Number</div>
                     <div className="text-lg font-semibold text-white">{selectedLevel.levelNo}</div>
                   </div>
-                  <div className="bg-gradient-to-br from-slate-600/50 to-purple-600/50 rounded-lg p-4">
-                    <div className="text-sm text-gray-300 mb-1">Total Members</div>
-                    <div className="text-lg font-semibold text-purple-400">{selectedLevel.totalMembers}</div>
+                  <div className="rounded-lg p-4 transition-all duration-200" style={{
+                    background: 'linear-gradient(to right, rgba(var(--body-bg-rgb), 0.2), rgba(var(--primary-rgb), 0.1))',
+                    border: '1px solid var(--default-border)'
+                  }}>
+                    <div className="text-sm mb-1" style={{color: 'rgba(255, 255, 255, 0.8)'}}>Total Members</div>
+                    <div className="text-lg font-semibold" style={{color: 'var(--secondary-color)'}}>{selectedLevel.totalMembers}</div>
                   </div>
                 </div>
                 
-                <div className="bg-gradient-to-br from-slate-600/50 to-purple-600/50 rounded-lg p-4">
-                  <div className="text-sm text-gray-300 mb-2">Level Information</div>
-                  <div className="text-gray-300 text-sm">
+                <div className="rounded-lg p-4 transition-all duration-200" style={{
+                  background: 'linear-gradient(to right, rgba(var(--body-bg-rgb), 0.2), rgba(var(--primary-rgb), 0.1))',
+                  border: '1px solid var(--default-border)'
+                }}>
+                  <div className="text-sm mb-2" style={{color: 'rgba(255, 255, 255, 0.8)'}}>Level Information</div>
+                  <div className="text-sm" style={{color: 'rgba(255, 255, 255, 0.8)'}}>
                     This level shows all members who joined through your network at the {selectedLevel.levelNo.toLowerCase()}. 
                     Currently, there are no members in this level.
                   </div>
@@ -127,6 +154,7 @@ const TeamLevelsPage = () => {
             </div>
           )}
         </div>
+      </div>
       </div>
     </div>
   );

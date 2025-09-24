@@ -40,17 +40,17 @@ export default function ProfileSummary() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
+    <div className="min-h-screen" style={{background: 'linear-gradient(to bottom right, var(--default-body-bg-color) 0%, var(--theme-bg-gradient) 25%, var(--default-body-bg-color) 100%)', fontFamily: 'var(--default-font-family)'}}>
       {/* Header */}
-      <div className="bg-gradient-to-r from-slate-800/50 to-purple-800/50 backdrop-blur-sm border-b border-purple-500/20">
+      <div className="backdrop-blur-sm border-b" style={{background: 'linear-gradient(to right, rgba(29, 68, 67, 0.8), rgba(29, 68, 67, 0.8))', borderColor: 'var(--default-border)'}}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex items-center justify-between">
-            <Link href="/" className="text-white hover:text-cyan-400 transition-colors">
+            <Link href="/" className="transition-colors" style={{color: 'var(--primary-color)'}}>
               ← Back to Dashboard
             </Link>
             <div className="text-center">
               <h1 className="text-2xl font-bold text-white">👤 Profile Settings</h1>
-              <p className="text-gray-300 text-sm">Update your profile settings</p>
+              <p className="text-gray-300 text-sm" style={{color: 'rgba(255, 255, 255, 0.7)'}}>Update your profile settings</p>
             </div>
             <div className="w-24"></div> {/* Spacer for centering */}
           </div>
@@ -60,7 +60,7 @@ export default function ProfileSummary() {
       {/* Main Content */}
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Profile Card */}
-        <div className="bg-gradient-to-br from-slate-800/50 to-purple-800/50 backdrop-blur-sm rounded-2xl p-8 border border-purple-500/20">
+        <div className="card-enhanced rounded-2xl p-8 shadow-2xl animate-fadeInUp">
           <div className="flex items-center justify-between mb-8">
             <h2 className="text-2xl font-bold text-white">Profile Information</h2>
             <button
@@ -68,7 +68,7 @@ export default function ProfileSummary() {
               className={`px-6 py-2 rounded-xl font-medium transition-all duration-300 ${
                 isEditing
                   ? 'bg-gradient-to-r from-gray-500 to-gray-600 hover:from-gray-600 hover:to-gray-700 text-white'
-                  : 'bg-gradient-to-r from-cyan-500 to-purple-600 hover:from-cyan-600 hover:to-purple-700 text-white'
+                  : 'btn-enhanced text-white'
               }`}
             >
               {isEditing ? 'Cancel' : 'Edit Profile'}
@@ -80,7 +80,7 @@ export default function ProfileSummary() {
             <div className="lg:col-span-1">
               <div className="text-center">
                 <div className="relative w-32 h-32 mx-auto mb-4">
-                  <div className="w-full h-full bg-gradient-to-br from-cyan-500 to-purple-600 rounded-full flex items-center justify-center text-white text-4xl font-bold">
+                  <div className="w-full h-full rounded-full flex items-center justify-center text-white text-4xl font-bold" style={{background: 'linear-gradient(to bottom right, var(--primary-color), var(--secondary-color))', color: 'white'}}>
                     {profileData.profileImage ? (
                       <Image
                         src={URL.createObjectURL(profileData.profileImage)}
@@ -108,7 +108,11 @@ export default function ProfileSummary() {
                       type="file"
                       accept="image/*"
                       onChange={handleImageUpload}
-                      className="block w-full text-sm text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-purple-600 file:text-white hover:file:bg-purple-700 file:cursor-pointer cursor-pointer"
+                      className="block w-full text-sm text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-medium file:text-white file:cursor-pointer cursor-pointer"
+                      style={{
+                        fileBackgroundColor: 'var(--primary-color)',
+                        fileHoverBackgroundColor: 'var(--secondary-color)'
+                      }}
                     />
                     <p className="text-xs text-gray-500 mt-1">No file chosen</p>
                   </div>
@@ -129,10 +133,15 @@ export default function ProfileSummary() {
                       type="text"
                       value={profileData.fullName}
                       onChange={(e) => handleInputChange('fullName', e.target.value)}
-                      className="w-full bg-slate-700/50 text-white px-4 py-3 rounded-xl border border-purple-500/30 focus:border-purple-500 focus:outline-none focus:ring-2 focus:ring-purple-500/20"
+                      className="w-full text-white px-4 py-3 rounded-xl focus:outline-none focus:ring-2 focus:border-transparent transition-all duration-200"
+                      style={{
+                        backgroundColor: 'rgba(29, 68, 67, 0.8)',
+                        border: '1px solid var(--default-border)',
+                        focusRingColor: 'var(--primary-color)'
+                      }}
                     />
                   ) : (
-                    <div className="bg-slate-700/30 text-white px-4 py-3 rounded-xl border border-purple-500/20">
+                    <div className="text-white px-4 py-3 rounded-xl" style={{backgroundColor: 'rgba(29, 68, 67, 0.8)', border: '1px solid var(--default-border)'}}>
                       {profileData.fullName}
                     </div>
                   )}
@@ -148,10 +157,15 @@ export default function ProfileSummary() {
                       type="email"
                       value={profileData.email}
                       onChange={(e) => handleInputChange('email', e.target.value)}
-                      className="w-full bg-slate-700/50 text-white px-4 py-3 rounded-xl border border-purple-500/30 focus:border-purple-500 focus:outline-none focus:ring-2 focus:ring-purple-500/20"
+                      className="w-full text-white px-4 py-3 rounded-xl focus:outline-none focus:ring-2 focus:border-transparent transition-all duration-200"
+                      style={{
+                        backgroundColor: 'rgba(29, 68, 67, 0.8)',
+                        border: '1px solid var(--default-border)',
+                        focusRingColor: 'var(--primary-color)'
+                      }}
                     />
                   ) : (
-                    <div className="bg-slate-700/30 text-white px-4 py-3 rounded-xl border border-purple-500/20">
+                    <div className="text-white px-4 py-3 rounded-xl" style={{backgroundColor: 'rgba(29, 68, 67, 0.8)', border: '1px solid var(--default-border)'}}>
                       {profileData.email}
                     </div>
                   )}
@@ -167,10 +181,15 @@ export default function ProfileSummary() {
                       type="tel"
                       value={profileData.mobile}
                       onChange={(e) => handleInputChange('mobile', e.target.value)}
-                      className="w-full bg-slate-700/50 text-white px-4 py-3 rounded-xl border border-purple-500/30 focus:border-purple-500 focus:outline-none focus:ring-2 focus:ring-purple-500/20"
+                      className="w-full text-white px-4 py-3 rounded-xl focus:outline-none focus:ring-2 focus:border-transparent transition-all duration-200"
+                      style={{
+                        backgroundColor: 'rgba(29, 68, 67, 0.8)',
+                        border: '1px solid var(--default-border)',
+                        focusRingColor: 'var(--primary-color)'
+                      }}
                     />
                   ) : (
-                    <div className="bg-slate-700/30 text-white px-4 py-3 rounded-xl border border-purple-500/20">
+                    <div className="text-white px-4 py-3 rounded-xl" style={{backgroundColor: 'rgba(29, 68, 67, 0.8)', border: '1px solid var(--default-border)'}}>
                       {profileData.mobile}
                     </div>
                   )}
@@ -185,7 +204,12 @@ export default function ProfileSummary() {
                     <select
                       value={profileData.country}
                       onChange={(e) => handleInputChange('country', e.target.value)}
-                      className="w-full bg-slate-700/50 text-white px-4 py-3 rounded-xl border border-purple-500/30 focus:border-purple-500 focus:outline-none focus:ring-2 focus:ring-purple-500/20"
+                      className="w-full text-white px-4 py-3 rounded-xl focus:outline-none focus:ring-2 focus:border-transparent transition-all duration-200"
+                      style={{
+                        backgroundColor: 'rgba(29, 68, 67, 0.8)',
+                        border: '1px solid var(--default-border)',
+                        focusRingColor: 'var(--primary-color)'
+                      }}
                     >
                       <option value="India">India</option>
                       <option value="United States">United States</option>
@@ -199,7 +223,7 @@ export default function ProfileSummary() {
                       <option value="Brazil">Brazil</option>
                     </select>
                   ) : (
-                    <div className="bg-slate-700/30 text-white px-4 py-3 rounded-xl border border-purple-500/20">
+                    <div className="text-white px-4 py-3 rounded-xl" style={{backgroundColor: 'rgba(29, 68, 67, 0.8)', border: '1px solid var(--default-border)'}}>
                       {profileData.country}
                     </div>
                   )}

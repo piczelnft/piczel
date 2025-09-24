@@ -68,41 +68,39 @@ const GenealogyPage = () => {
           onClick={() => setClickedNode(isClicked ? null : node)}
         >
           <div
-            className={`w-16 h-16 md:w-20 md:h-20 rounded-full bg-gradient-to-br from-cyan-500 to-purple-600 flex items-center justify-center mb-2 shadow-lg border-3 border-white transition-all duration-300 ${
+            className={`w-16 h-16 md:w-20 md:h-20 rounded-full flex items-center justify-center mb-2 shadow-lg border-3 border-white transition-all duration-300 ${
               isHovered ? "scale-110 shadow-xl" : ""
-            } ${isClicked ? "ring-4 ring-purple-400 ring-opacity-50" : ""}`}
+            } ${isClicked ? "ring-4 ring-opacity-50" : ""}`}
+            style={{
+              background: 'linear-gradient(135deg, var(--primary-color), var(--secondary-color))',
+              ringColor: isClicked ? 'var(--primary-color)' : 'transparent'
+            }}
           >
-            {node.profile ? (
-              <img
-                src={node.profile}
-                alt={node.name}
-                className="w-full h-full rounded-full object-cover"
-              />
-            ) : (
-              <div className="w-full h-full rounded-full bg-gradient-to-br from-cyan-400 to-purple-500 flex items-center justify-center text-white font-bold text-lg">
-                {node.name?.charAt(0)?.toUpperCase() || '?'}
-              </div>
-            )}
+            {node.name?.charAt(0)?.toUpperCase() || '?'}
           </div>
           <div
-            className={`text-center bg-gradient-to-br from-slate-700/80 to-purple-700/80 backdrop-blur-sm px-3 py-2 md:px-4 md:py-2 rounded-lg shadow-md min-w-32 md:min-w-40 border border-purple-500/30 transition-all duration-300 ${
+            className={`text-center px-3 py-2 md:px-4 md:py-2 rounded-lg shadow-md min-w-32 md:min-w-40 transition-all duration-300 ${
               isHovered ? "scale-105 shadow-lg" : ""
             }`}
+            style={{
+              background: 'linear-gradient(to right, rgba(var(--body-bg-rgb), 0.2), rgba(var(--primary-rgb), 0.1))',
+              border: '1px solid var(--default-border)'
+            }}
           >
             <div className="font-semibold text-white text-xs md:text-sm mb-1">
               {node.name}
             </div>
-            <div className="text-xs text-gray-300 font-medium mb-1">
+            <div className="text-xs mb-1" style={{color: 'rgba(255, 255, 255, 0.8)'}}>
               {node.id}
             </div>
-            <div className="text-xs text-cyan-400 font-medium">
+            <div className="text-xs font-medium" style={{color: 'var(--primary-color)'}}>
               {node.package}
             </div>
-            <div className="flex justify-between text-xs text-gray-400 mt-1">
+            <div className="flex justify-between text-xs mt-1" style={{color: 'rgba(255, 255, 255, 0.6)'}}>
               <span>L: {node.leftCount}</span>
               <span>R: {node.rightCount}</span>
             </div>
-            <div className="text-xs text-green-400 font-medium mt-1">
+            <div className="text-xs font-medium mt-1" style={{color: 'rgb(var(--success-rgb))'}}>
               {node.business}
             </div>
           </div>
@@ -111,22 +109,30 @@ const GenealogyPage = () => {
         {(node.left || node.right) && (
           <div className="flex gap-8 md:gap-16 mt-8 relative">
             {/* Vertical line from parent to children level */}
-            <div className="absolute -top-8 left-1/2 transform -translate-x-1/2 w-0.5 h-8 bg-gradient-to-b from-cyan-400 to-purple-500"></div>
+            <div className="absolute -top-8 left-1/2 transform -translate-x-1/2 w-0.5 h-8" style={{
+              background: 'linear-gradient(to bottom, var(--primary-color), var(--secondary-color))'
+            }}></div>
 
             {/* Horizontal connector line */}
-            <div className="absolute -top-8 left-1/2 transform -translate-x-1/2 w-full h-0.5 bg-gradient-to-r from-cyan-400 to-purple-500"></div>
+            <div className="absolute -top-8 left-1/2 transform -translate-x-1/2 w-full h-0.5" style={{
+              background: 'linear-gradient(to right, var(--primary-color), var(--secondary-color))'
+            }}></div>
 
             {node.left && (
               <div className="relative flex flex-col items-center">
                 {/* Vertical line to left child */}
-                <div className="absolute -top-8 left-1/2 transform -translate-x-1/2 w-0.5 h-8 bg-gradient-to-b from-cyan-400 to-purple-500"></div>
+                <div className="absolute -top-8 left-1/2 transform -translate-x-1/2 w-0.5 h-8" style={{
+              background: 'linear-gradient(to bottom, var(--primary-color), var(--secondary-color))'
+            }}></div>
                 <TreeNode node={node.left} level={level + 1} />
               </div>
             )}
             {node.right && (
               <div className="relative flex flex-col items-center">
                 {/* Vertical line to right child */}
-                <div className="absolute -top-8 left-1/2 transform -translate-x-1/2 w-0.5 h-8 bg-gradient-to-b from-cyan-400 to-purple-500"></div>
+                <div className="absolute -top-8 left-1/2 transform -translate-x-1/2 w-0.5 h-8" style={{
+              background: 'linear-gradient(to bottom, var(--primary-color), var(--secondary-color))'
+            }}></div>
                 <TreeNode node={node.right} level={level + 1} />
               </div>
             )}
@@ -137,14 +143,14 @@ const GenealogyPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 p-8">
+    <div className="min-h-screen p-8" style={{background: 'linear-gradient(to bottom right, var(--default-body-bg-color) 0%, var(--theme-bg-gradient) 25%, var(--default-body-bg-color) 100%)', fontFamily: 'var(--default-font-family)'}}>
       <div className="max-w-6xl mx-auto">
         <div className="text-center mb-12">
-          <h1 className="text-4xl font-bold text-white mb-2">Genealogy</h1>
-          <p className="text-lg text-gray-300">Check your Genealogy</p>
+          <h1 className="text-4xl font-bold text-white mb-2 gradient-text-enhanced animate-fadeInUp">Genealogy</h1>
+          <p className="text-lg animate-fadeInUp" style={{color: 'rgba(255, 255, 255, 0.7)', animationDelay: '0.2s'}}>Check your Genealogy</p>
         </div>
 
-        <div className="bg-gradient-to-br from-slate-800/50 to-purple-800/50 backdrop-blur-sm rounded-2xl p-8 border border-purple-500/20 mb-12">
+        <div className="card-enhanced rounded-2xl p-8 shadow-lg animate-fadeInUp mb-12" style={{animationDelay: '0.4s'}}>
           <h2 className="text-2xl font-semibold text-white mb-4">
             Search Members
           </h2>
@@ -154,23 +160,33 @@ const GenealogyPage = () => {
               placeholder="Enter Member ID"
               value={searchId}
               onChange={(e) => setSearchId(e.target.value)}
-              className="flex-1 px-4 py-3 bg-slate-700/50 text-white border border-purple-500/30 rounded-lg text-base focus:outline-none focus:border-purple-400 transition-colors placeholder-gray-400"
+              className="flex-1 px-4 py-3 text-white rounded-lg text-base focus:outline-none transition-colors placeholder-gray-400"
+              style={{
+                backgroundColor: 'rgba(29, 68, 67, 0.8)',
+                border: '1px solid var(--default-border)',
+                focusRingColor: 'var(--primary-color)'
+              }}
             />
             <button
               onClick={handleSearch}
-              className="px-6 py-3 bg-gradient-to-r from-cyan-500 to-purple-600 text-white rounded-lg text-base font-medium hover:from-cyan-600 hover:to-purple-700 transition-all duration-300 cursor-pointer"
+              className="btn-enhanced px-6 py-3 text-white rounded-lg text-base font-medium transition-all duration-300 cursor-pointer"
             >
               Search
             </button>
           </div>
 
           {selectedMember && (
-            <div className="bg-gradient-to-br from-slate-700/50 to-purple-700/50 backdrop-blur-sm p-6 rounded-xl border border-purple-500/30">
+            <div className="rounded-xl p-6 transition-all duration-200" style={{
+              background: 'linear-gradient(to right, rgba(var(--body-bg-rgb), 0.2), rgba(var(--primary-rgb), 0.1))',
+              border: '1px solid var(--default-border)'
+            }}>
               <h3 className="text-xl font-semibold text-white mb-4">
                 Found Member:
               </h3>
               <div className="flex items-center gap-4">
-                <div className="w-15 h-15 rounded-full bg-gradient-to-br from-cyan-500 to-purple-600 flex items-center justify-center shadow-lg border-3 border-white">
+                <div className="w-15 h-15 rounded-full flex items-center justify-center shadow-lg border-3 border-white" style={{
+                  background: 'linear-gradient(135deg, var(--primary-color), var(--secondary-color))'
+                }}>
                   {selectedMember.profile ? (
                     <img
                       src={selectedMember.profile}
@@ -178,7 +194,9 @@ const GenealogyPage = () => {
                       className="w-full h-full rounded-full object-cover"
                     />
                   ) : (
-                    <div className="w-full h-full rounded-full bg-gradient-to-br from-cyan-400 to-purple-500 flex items-center justify-center text-white font-bold text-sm">
+                    <div className="w-full h-full rounded-full flex items-center justify-center text-white font-bold text-sm" style={{
+                      background: 'linear-gradient(135deg, var(--primary-color), var(--secondary-color))'
+                    }}>
                       {selectedMember.name?.charAt(0)?.toUpperCase() || '?'}
                     </div>
                   )}
@@ -196,7 +214,7 @@ const GenealogyPage = () => {
           )}
         </div>
 
-        <div className="bg-gradient-to-br from-slate-800/50 to-purple-800/50 backdrop-blur-sm rounded-2xl p-8 border border-purple-500/20 shadow-lg">
+        <div className="card-enhanced rounded-2xl p-8 shadow-lg animate-fadeInUp" style={{animationDelay: '0.6s'}}>
           <h2 className="text-2xl font-semibold text-white mb-8 text-center">
             Team Genealogy Tree
           </h2>
@@ -211,14 +229,17 @@ const GenealogyPage = () => {
 
           {/* Detailed Node Information Panel */}
           {clickedNode && (
-            <div className="mb-8 bg-gradient-to-br from-slate-700/80 to-purple-700/80 backdrop-blur-sm rounded-xl p-6 border border-purple-500/30">
+            <div className="mb-8 rounded-xl p-6 transition-all duration-200" style={{
+              background: 'linear-gradient(to right, rgba(var(--body-bg-rgb), 0.2), rgba(var(--primary-rgb), 0.1))',
+              border: '1px solid var(--default-border)'
+            }}>
               <div className="flex items-center justify-between mb-4">
                 <h3 className="text-xl font-semibold text-white">
                   Member Details
                 </h3>
                 <button
                   onClick={() => setClickedNode(null)}
-                  className="text-gray-400 hover:text-white transition-colors"
+                  className="transition-colors" style={{color: 'rgba(255, 255, 255, 0.6)'}} onMouseEnter={(e) => e.target.style.color = 'white'} onMouseLeave={(e) => e.target.style.color = 'rgba(255, 255, 255, 0.6)'}
                 >
                   ✕
                 </button>
@@ -227,7 +248,9 @@ const GenealogyPage = () => {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-4">
                   <div className="flex items-center gap-4">
-                    <div className="w-16 h-16 rounded-full bg-gradient-to-br from-cyan-500 to-purple-600 flex items-center justify-center shadow-lg border-3 border-white">
+                    <div className="w-16 h-16 rounded-full flex items-center justify-center shadow-lg border-3 border-white" style={{
+                      background: 'linear-gradient(135deg, var(--primary-color), var(--secondary-color))'
+                    }}>
                       {clickedNode.profile ? (
                         <img
                           src={clickedNode.profile}
@@ -235,7 +258,9 @@ const GenealogyPage = () => {
                           className="w-full h-full rounded-full object-cover"
                         />
                       ) : (
-                        <div className="w-full h-full rounded-full bg-gradient-to-br from-cyan-400 to-purple-500 flex items-center justify-center text-white font-bold text-sm">
+                        <div className="w-full h-full rounded-full flex items-center justify-center text-white font-bold text-sm" style={{
+                      background: 'linear-gradient(135deg, var(--primary-color), var(--secondary-color))'
+                    }}>
                           {clickedNode.name?.charAt(0)?.toUpperCase() || '?'}
                         </div>
                       )}
@@ -245,7 +270,7 @@ const GenealogyPage = () => {
                         {clickedNode.name}
                       </div>
                       <div className="text-gray-300">{clickedNode.id}</div>
-                      <div className="text-cyan-400 font-medium">
+                      <div className="font-medium" style={{color: 'var(--primary-color)'}}>
                         {clickedNode.package}
                       </div>
                     </div>
@@ -254,7 +279,7 @@ const GenealogyPage = () => {
                   <div className="space-y-2">
                     <div className="flex justify-between">
                       <span className="text-gray-300">Status:</span>
-                      <span className="text-green-400 font-medium">
+                      <span className="font-medium" style={{color: 'rgb(var(--success-rgb))'}}>
                         {clickedNode.status}
                       </span>
                     </div>
@@ -275,40 +300,55 @@ const GenealogyPage = () => {
 
                 <div className="space-y-4">
                   <div className="grid grid-cols-2 gap-4">
-                    <div className="bg-gradient-to-br from-slate-600/50 to-purple-600/50 rounded-lg p-3 text-center">
-                      <div className="text-2xl font-bold text-cyan-400">
+                    <div className="rounded-lg p-3 text-center transition-all duration-200" style={{
+                      background: 'linear-gradient(to right, rgba(var(--body-bg-rgb), 0.2), rgba(var(--primary-rgb), 0.1))',
+                      border: '1px solid var(--default-border)'
+                    }}>
+                      <div className="text-2xl font-bold mb-1" style={{color: 'var(--primary-color)'}}>
                         {clickedNode.directs}
                       </div>
-                      <div className="text-xs text-gray-300">Directs</div>
+                      <div className="text-xs" style={{color: 'rgba(255, 255, 255, 0.8)'}}>Directs</div>
                     </div>
-                    <div className="bg-gradient-to-br from-slate-600/50 to-purple-600/50 rounded-lg p-3 text-center">
-                      <div className="text-2xl font-bold text-purple-400">
+                    <div className="rounded-lg p-3 text-center transition-all duration-200" style={{
+                      background: 'linear-gradient(to right, rgba(var(--body-bg-rgb), 0.2), rgba(var(--primary-rgb), 0.1))',
+                      border: '1px solid var(--default-border)'
+                    }}>
+                      <div className="text-2xl font-bold mb-1" style={{color: 'var(--secondary-color)'}}>
                         {clickedNode.leftCount + clickedNode.rightCount}
                       </div>
-                      <div className="text-xs text-gray-300">Total Team</div>
+                      <div className="text-xs" style={{color: 'rgba(255, 255, 255, 0.8)'}}>Total Team</div>
                     </div>
                   </div>
 
                   <div className="grid grid-cols-2 gap-4">
-                    <div className="bg-gradient-to-br from-slate-600/50 to-purple-600/50 rounded-lg p-3 text-center">
-                      <div className="text-lg font-bold text-blue-400">
+                    <div className="rounded-lg p-3 text-center transition-all duration-200" style={{
+                      background: 'linear-gradient(to right, rgba(var(--body-bg-rgb), 0.2), rgba(var(--primary-rgb), 0.1))',
+                      border: '1px solid var(--default-border)'
+                    }}>
+                      <div className="text-lg font-bold mb-1" style={{color: 'rgb(var(--info-rgb))'}}>
                         {clickedNode.leftCount}
                       </div>
-                      <div className="text-xs text-gray-300">Left Count</div>
+                      <div className="text-xs" style={{color: 'rgba(255, 255, 255, 0.8)'}}>Left Count</div>
                     </div>
-                    <div className="bg-gradient-to-br from-slate-600/50 to-purple-600/50 rounded-lg p-3 text-center">
-                      <div className="text-lg font-bold text-orange-400">
+                    <div className="rounded-lg p-3 text-center transition-all duration-200" style={{
+                      background: 'linear-gradient(to right, rgba(var(--body-bg-rgb), 0.2), rgba(var(--primary-rgb), 0.1))',
+                      border: '1px solid var(--default-border)'
+                    }}>
+                      <div className="text-lg font-bold mb-1" style={{color: 'rgb(var(--warning-rgb))'}}>
                         {clickedNode.rightCount}
                       </div>
-                      <div className="text-xs text-gray-300">Right Count</div>
+                      <div className="text-xs" style={{color: 'rgba(255, 255, 255, 0.8)'}}>Right Count</div>
                     </div>
                   </div>
 
-                  <div className="bg-gradient-to-br from-slate-600/50 to-purple-600/50 rounded-lg p-3 text-center">
-                    <div className="text-xl font-bold text-green-400">
+                  <div className="rounded-lg p-3 text-center transition-all duration-200" style={{
+                    background: 'linear-gradient(to right, rgba(var(--body-bg-rgb), 0.2), rgba(var(--primary-rgb), 0.1))',
+                    border: '1px solid var(--default-border)'
+                  }}>
+                    <div className="text-xl font-bold mb-1" style={{color: 'rgb(var(--success-rgb))'}}>
                       {clickedNode.business}
                     </div>
-                    <div className="text-xs text-gray-300">Total Business</div>
+                    <div className="text-xs" style={{color: 'rgba(255, 255, 255, 0.8)'}}>Total Business</div>
                   </div>
                 </div>
               </div>

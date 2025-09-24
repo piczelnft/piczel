@@ -1,21 +1,41 @@
 @import "tailwindcss";
 
-/* Custom scrollbar */
-::-webkit-scrollbar {
-  width: 8px;
+/* CSS Variables for the new design */
+:root {
+  --body-bg-rgb: 20, 20, 20;
+  --primary-rgb: 0, 255, 190;
+  --secondary-rgb: 0, 227, 210;
+  --warning-rgb: 235, 247, 72;
+  --info-rgb: 72, 247, 238;
+  --success-rgb: 72, 247, 104;
+  --danger-rgb: 255, 74, 74;
+  --default-body-bg-color: rgb(var(--body-bg-rgb));
+  --primary-color: rgb(var(--primary-rgb));
+  --secondary-color: rgb(var(--secondary-rgb));
+  --default-text-color-rgb: 255, 255, 255;
+  --default-font-family: var(--font-rajdhani);
+  --default-font-weight: 400;
+  --theme-bg-gradient: #021e18;
+  --card-bg: rgba(29, 68, 67, 0.8);
+  --default-border: rgba(255, 255, 255, 0.1);
+  --menu-bg: rgb(var(--body-bg-rgb));
+  --header-bg: rgb(var(--body-bg-rgb));
 }
 
-::-webkit-scrollbar-track {
-  background: rgba(30, 41, 59, 0.3);
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 0.3rem;
+  height: 0.25rem;
+  background: rgba(0, 0, 0, 0.2);
 }
 
 ::-webkit-scrollbar-thumb {
-  background: linear-gradient(180deg, #8b5cf6, #06b6d4);
+  background: rgba(255, 255, 255, 0.2);
   border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: linear-gradient(180deg, #7c3aed, #0891b2);
+  background: rgba(255, 255, 255, 0.3);
 }
 
 /* Custom animations */
@@ -30,10 +50,10 @@
 
 @keyframes glow {
   0%, 100% {
-    box-shadow: 0 0 20px rgba(139, 92, 246, 0.3);
+    box-shadow: 0 0 20px rgba(0, 255, 190, 0.3);
   }
   50% {
-    box-shadow: 0 0 30px rgba(139, 92, 246, 0.6);
+    box-shadow: 0 0 30px rgba(0, 255, 190, 0.6);
   }
 }
 
@@ -55,7 +75,7 @@
 }
 
 .animate-shimmer {
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+  background: linear-gradient(90deg, transparent, rgba(0, 255, 190, 0.1), transparent);
   background-size: 200% 100%;
   animation: shimmer 2s infinite;
 }
@@ -67,12 +87,44 @@
   border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
+/* Enhanced glass morphism */
+.glass-enhanced {
+  background: var(--card-bg);
+  backdrop-filter: blur(20px);
+  border: 1px solid var(--default-border);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+}
+
+.glass-card {
+  background: var(--card-bg);
+  backdrop-filter: blur(15px);
+  border: 1px solid var(--default-border);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+}
+
 /* Gradient text */
 .gradient-text {
-  background: linear-gradient(135deg, #06b6d4, #8b5cf6);
+  background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
+}
+
+.gradient-text-enhanced {
+  background: linear-gradient(135deg, var(--primary-color), var(--secondary-color), var(--primary-color));
+  background-size: 200% 200%;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: gradientShift 3s ease infinite;
+}
+
+.gradient-text-neon {
+  background: linear-gradient(135deg, var(--primary-color), var(--secondary-color), var(--primary-color));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-shadow: 0 0 10px rgba(0, 255, 190, 0.5);
 }
 
 /* Hover effects */
@@ -82,66 +134,119 @@
 
 .hover-lift:hover {
   transform: translateY(-5px);
-  box-shadow: 0 20px 40px rgba(139, 92, 246, 0.2);
+  box-shadow: 0 20px 40px rgba(0, 255, 190, 0.2);
 }
 
-/* Crypto ticker animations */
-@keyframes slideIn {
-  from {
-    opacity: 0;
-    transform: translateX(-20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateX(0);
-  }
+.hover-lift-enhanced:hover {
+  transform: translateY(-8px) scale(1.02);
+  box-shadow: 0 25px 50px rgba(0, 255, 190, 0.3);
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
-@keyframes slideOut {
-  from {
-    opacity: 1;
-    transform: translateX(0);
-  }
-  to {
-    opacity: 0;
-    transform: translateX(20px);
-  }
+/* Glowing border effects */
+.glow-border {
+  transition: all 0.3s ease;
 }
 
-.ticker-slide-in {
-  animation: slideIn 0.5s ease-out;
+.glow-border:hover {
+  box-shadow: 0 0 20px rgba(0, 255, 190, 0.4), 0 0 40px rgba(0, 255, 190, 0.2);
 }
 
-.ticker-slide-out {
-  animation: slideOut 0.5s ease-in;
+.glow-border-blue:hover {
+  box-shadow: 0 0 20px rgba(72, 247, 238, 0.4), 0 0 40px rgba(72, 247, 238, 0.2);
 }
 
-/* Price change indicators */
-.price-up {
-  color: #10b981;
-  text-shadow: 0 0 10px rgba(16, 185, 129, 0.3);
+.glow-border-green:hover {
+  box-shadow: 0 0 20px rgba(72, 247, 104, 0.4), 0 0 40px rgba(72, 247, 104, 0.2);
 }
 
-.price-down {
-  color: #ef4444;
-  text-shadow: 0 0 10px rgba(239, 68, 68, 0.3);
+.glow-border-purple:hover {
+  box-shadow: 0 0 20px rgba(143, 0, 255, 0.4), 0 0 40px rgba(143, 0, 255, 0.2);
 }
 
-/* Ticker background animation */
-@keyframes tickerGlow {
-  0%, 100% {
-    background: linear-gradient(90deg, transparent, rgba(139, 92, 246, 0.1), transparent);
+.glow-border-yellow:hover {
+  box-shadow: 0 0 20px rgba(235, 247, 72, 0.4), 0 0 40px rgba(235, 247, 72, 0.2);
+}
+
+/* Enhanced card styles */
+.card-enhanced {
+  background: var(--card-bg);
+  backdrop-filter: blur(20px);
+  border: 1px solid var(--default-border);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  transition: all 0.3s ease;
+  border-radius: 0;
+}
+
+.card-enhanced:hover {
+  transform: translateY(-5px) scale(1.02);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+  border-color: rgba(0, 255, 190, 0.3);
+}
+
+/* Enhanced button styles */
+.btn-enhanced {
+  background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+  border: 1px solid var(--default-border);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+  transition: all 0.3s ease;
+  color: #fff;
+}
+
+.btn-enhanced:hover {
+  background: linear-gradient(135deg, var(--secondary-color), var(--primary-color));
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+}
+
+/* Additional animations */
+@keyframes gradientShift {
+  0% {
+    background-position: 0% 50%;
   }
   50% {
-    background: linear-gradient(90deg, transparent, rgba(139, 92, 246, 0.2), transparent);
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
   }
 }
 
-.ticker-glow {
-  animation: tickerGlow 3s ease-in-out infinite;
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
-/* Scrolling ticker animation */
+@keyframes bounce {
+  0%, 20%, 53%, 80%, 100% {
+    transform: translate3d(0,0,0);
+  }
+  40%, 43% {
+    transform: translate3d(0, -8px, 0);
+  }
+  70% {
+    transform: translate3d(0, -4px, 0);
+  }
+  90% {
+    transform: translate3d(0, -2px, 0);
+  }
+}
+
+@keyframes rotate {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
 @keyframes scroll {
   0% {
     transform: translateX(0);
@@ -149,6 +254,53 @@
   100% {
     transform: translateX(-50%);
   }
+}
+
+@keyframes neonGlow {
+  0%, 100% {
+    text-shadow: 0 0 5px rgba(0, 255, 190, 0.5), 0 0 10px rgba(0, 255, 190, 0.3), 0 0 15px rgba(0, 255, 190, 0.2);
+  }
+  50% {
+    text-shadow: 0 0 10px rgba(0, 255, 190, 0.8), 0 0 20px rgba(0, 255, 190, 0.5), 0 0 30px rgba(0, 255, 190, 0.3);
+  }
+}
+
+@keyframes cardFloat {
+  0%, 100% {
+    transform: translateY(0px) rotate(0deg);
+  }
+  33% {
+    transform: translateY(-5px) rotate(0.5deg);
+  }
+  66% {
+    transform: translateY(-3px) rotate(-0.5deg);
+  }
+}
+
+/* Animation classes */
+.animate-fadeInUp {
+  animation: fadeInUp 0.8s ease-out;
+}
+
+.animate-bounce {
+  animation: bounce 2s infinite;
+}
+
+.animate-rotate {
+  animation: rotate 3s linear infinite;
+}
+
+.animate-neonGlow {
+  animation: neonGlow 2s ease-in-out infinite;
+}
+
+.animate-cardFloat {
+  animation: cardFloat 4s ease-in-out infinite;
+}
+
+.animate-gradientShift {
+  background-size: 200% 200%;
+  animation: gradientShift 3s ease infinite;
 }
 
 .animate-scroll {
@@ -159,79 +311,17 @@
   animation-play-state: paused;
 }
 
-/* Zigzag animation for income graphs */
-@keyframes zigzag {
-  0% {
-    stroke-dasharray: 0 1000;
-    stroke-dashoffset: 0;
-  }
-  100% {
-    stroke-dasharray: 1000 0;
-    stroke-dashoffset: -1000;
-  }
+/* Enhanced hover effects */
+.hover-bounce:hover {
+  animation: bounce 0.6s ease-in-out;
 }
 
-.animate-zigzag {
-  stroke-dasharray: 1000;
-  stroke-dashoffset: 1000;
-  animation: zigzag 3s ease-in-out infinite;
+.hover-scale:hover {
+  transform: scale(1.05);
+  transition: transform 0.3s ease;
 }
 
-/* Real-time price change animations */
-@keyframes pulseGreen {
-  0%, 100% {
-    background-color: rgba(16, 185, 129, 0.1);
-    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.4);
-  }
-  50% {
-    background-color: rgba(16, 185, 129, 0.2);
-    box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.1);
-  }
+.hover-glow:hover {
+  box-shadow: 0 0 30px rgba(0, 255, 190, 0.6), 0 0 60px rgba(0, 255, 190, 0.4);
+  transition: box-shadow 0.3s ease;
 }
-
-@keyframes pulseRed {
-  0%, 100% {
-    background-color: rgba(239, 68, 68, 0.1);
-    box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4);
-  }
-  50% {
-    background-color: rgba(239, 68, 68, 0.2);
-    box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.1);
-  }
-}
-
-.animate-pulse-green {
-  animation: pulseGreen 1s ease-in-out;
-}
-
-.animate-pulse-red {
-  animation: pulseRed 1s ease-in-out;
-}
-
-/* Custom scrollbar for sidebar */
-.scrollbar-thin {
-  scrollbar-width: thin;
-}
-
-.scrollbar-thin::-webkit-scrollbar {
-  width: 6px;
-}
-
-.scrollbar-thin::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-.scrollbar-thin::-webkit-scrollbar-thumb {
-  background: rgba(139, 92, 246, 0.3);
-  border-radius: 3px;
-  transition: background 0.3s ease;
-}
-
-.scrollbar-thin::-webkit-scrollbar-thumb:hover {
-  background: rgba(139, 92, 246, 0.5);
-}
-
-.scrollbar-thin::-webkit-scrollbar-thumb:active {
-  background: rgba(139, 92, 246, 0.7);
-}
-
