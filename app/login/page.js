@@ -209,7 +209,7 @@ export default function LoginPage() {
             </div>
 
             <div className="text-center">
-              <span className="transition-colors duration-200" style={{color: 'rgba(255, 255, 255, 0.7)'}}>Don't have an account? </span>
+              <span className="transition-colors duration-200" style={{color: 'rgba(255, 255, 255, 0.7)'}}>Don&apos;t have an account? </span>
               <Link
                 href="/signup"
                 className="font-medium transition-colors duration-200"
