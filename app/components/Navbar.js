@@ -5,8 +5,19 @@ import Link from "next/link";
 import { useAuth } from "@/contexts/AuthContext";
 import { useSidebar } from "../contexts/SidebarContext";
 
+// Wallet connection states
+const WALLET_STATES = {
+  DISCONNECTED: 'disconnected',
+  CONNECTING: 'connecting',
+  CONNECTED: 'connected',
+  ERROR: 'error'
+};
+
 export default function Navbar() {
   const [userMenuOpen, setUserMenuOpen] = useState(false);
+  const [walletState, setWalletState] = useState(WALLET_STATES.DISCONNECTED);
+  const [walletAddress, setWalletAddress] = useState(null);
+  const [tokenBalance, setTokenBalance] = useState('0.0000');
   const { user, isAuthenticated, logout, isLoading, authVersion } = useAuth();
   const { sidebarOpen, toggleSidebar } = useSidebar();
   const userMenuRef = useRef(null);
@@ -20,8 +31,133 @@ export default function Navbar() {
     });
   }, [isAuthenticated, user, authVersion]);
 
+  // Fetch BNB balance when wallet connects
+  useEffect(() => {
+    if (walletState === WALLET_STATES.CONNECTED && walletAddress) {
+      getTokenBalance(walletAddress).then(balance => {
+        setTokenBalance(balance);
+      });
+    } else {
+      setTokenBalance('0.0000');
+    }
+  }, [walletState, walletAddress]);
+
   const toggleUserMenu = () => {
     setUserMenuOpen(!userMenuOpen);
+  };
+
+  // Wallet connection functions
+  const connectWallet = async () => {
+    try {
+      setWalletState(WALLET_STATES.CONNECTING);
+      
+      // Check if MetaMask is installed
+      if (typeof window.ethereum !== 'undefined') {
+        // Request account access
+        const accounts = await window.ethereum.request({
+          method: 'eth_requestAccounts'
+        });
+        
+        if (accounts.length > 0) {
+          // Switch to BSC Testnet network if needed
+          try {
+            await window.ethereum.request({
+              method: 'wallet_switchEthereumChain',
+              params: [{ chainId: '0x61' }], // 97 in hex (BSC Testnet)
+            });
+          } catch (switchError) {
+            // If the network doesn't exist, add it
+            if (switchError.code === 4902) {
+              try {
+                await window.ethereum.request({
+                  method: 'wallet_addEthereumChain',
+                  params: [
+                    {
+                      chainId: '0x61',
+                      chainName: 'BNB Smart Chain Testnet',
+                      nativeCurrency: {
+                        name: 'BNB',
+                        symbol: 'tBNB',
+                        decimals: 18,
+                      },
+                      rpcUrls: ['https://data-seed-prebsc-1-s1.binance.org:8545'],
+                      blockExplorerUrls: ['https://testnet.bscscan.com'],
+                    },
+                  ],
+                });
+              } catch (addError) {
+                console.error('Error adding BSC Testnet:', addError);
+                // Fallback to localhost if BSC fails
+                try {
+                  await window.ethereum.request({
+                    method: 'wallet_addEthereumChain',
+                    params: [
+                      {
+                        chainId: '0x7A69',
+                        chainName: 'Hardhat Local',
+                        nativeCurrency: {
+                          name: 'BNB',
+                          symbol: 'BNB',
+                          decimals: 18,
+                        },
+                        rpcUrls: ['http://127.0.0.1:8545'],
+                        blockExplorerUrls: null,
+                      },
+                    ],
+                  });
+                } catch (localhostError) {
+                  console.error('Error adding localhost network:', localhostError);
+                }
+              }
+            }
+          }
+          
+          setWalletAddress(accounts[0]);
+          setWalletState(WALLET_STATES.CONNECTED);
+          console.log('Wallet connected:', accounts[0]);
+          console.log('Connected to DGTek BNB network');
+        } else {
+          setWalletState(WALLET_STATES.DISCONNECTED);
+        }
+      } else {
+        // MetaMask not installed
+        alert('Please install MetaMask to connect your wallet');
+        setWalletState(WALLET_STATES.ERROR);
+        setTimeout(() => setWalletState(WALLET_STATES.DISCONNECTED), 3000);
+      }
+    } catch (error) {
+      console.error('Error connecting wallet:', error);
+      setWalletState(WALLET_STATES.ERROR);
+      setTimeout(() => setWalletState(WALLET_STATES.DISCONNECTED), 3000);
+    }
+  };
+
+  const disconnectWallet = () => {
+    setWalletAddress(null);
+    setWalletState(WALLET_STATES.DISCONNECTED);
+    setTokenBalance('0.0000');
+  };
+
+  const formatAddress = (address) => {
+    if (!address) return '';
+    return `${address.slice(0, 6)}...${address.slice(-4)}`;
+  };
+
+  // Get BNB balance from wallet
+  const getTokenBalance = async (address) => {
+    try {
+      // Get BNB balance directly
+      const result = await window.ethereum.request({
+        method: 'eth_getBalance',
+        params: [address, 'latest']
+      });
+      
+      const balance = parseInt(result, 16) / Math.pow(10, 18);
+      return balance.toFixed(4);
+    } catch (error) {
+      console.error('Error getting BNB balance:', error);
+      return '0.0000';
+    }
   };
 
   // Close user menu when clicking outside
@@ -96,6 +232,61 @@ export default function Navbar() {
 
             {/* Right side - Authentication */}
             <div className="flex items-center space-x-4">
+              {/* Connect Wallet Button - Always visible */}
+                  {walletState === WALLET_STATES.CONNECTED ? (
+                    <div className="flex items-center space-x-2">
+                      <div className="flex items-center space-x-2 glass-card rounded-lg px-3 py-2 hover-lift-enhanced transition-all duration-300">
+                        <div className="w-6 h-6 rounded-full flex items-center justify-center animate-cardFloat" style={{background: 'linear-gradient(135deg, var(--primary-color), var(--secondary-color))'}}>
+                          <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+                          </svg>
+                        </div>
+                        <div className="text-sm">
+                          <div className="text-white font-medium gradient-text-neon">
+                            {formatAddress(walletAddress)}
+                          </div>
+                          <div className="text-xs" style={{color: 'rgba(255, 255, 255, 0.7)'}}>
+                            BNB: {tokenBalance}
+                          </div>
+                        </div>
+                      </div>
+                      <button
+                        onClick={disconnectWallet}
+                        className="px-3 py-2 text-xs font-medium text-white transition-all duration-300 hover-lift-enhanced rounded-lg"
+                        style={{color: 'rgba(255, 255, 255, 0.6)', backgroundColor: 'rgba(255, 255, 255, 0.1)'}}
+                      >
+                        Disconnect
+                      </button>
+                    </div>
+              ) : (
+                <button
+                  onClick={connectWallet}
+                  disabled={walletState === WALLET_STATES.CONNECTING}
+                  className="flex items-center space-x-2 px-4 py-2 text-sm font-medium text-white transition-all duration-300 hover-lift-enhanced hover-glow rounded-lg"
+                  style={{
+                    backgroundColor: walletState === WALLET_STATES.CONNECTING 
+                      ? 'rgba(255, 255, 255, 0.2)' 
+                      : 'rgba(29, 68, 67, 0.8)',
+                    border: '1px solid var(--default-border)',
+                    opacity: walletState === WALLET_STATES.CONNECTING ? 0.7 : 1
+                  }}
+                >
+                  {walletState === WALLET_STATES.CONNECTING ? (
+                    <>
+                      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                      <span>Connecting...</span>
+                    </>
+                  ) : (
+                    <>
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+                      </svg>
+                      <span>Connect Wallet</span>
+                    </>
+                  )}
+                </button>
+              )}
+
               {isAuthenticated ? (
                 <div className="relative" ref={userMenuRef}>
                   <button
@@ -240,6 +431,8 @@ export default function Navbar() {
                       <button
                         onClick={() => {
                           setUserMenuOpen(false);
+                          // Disconnect wallet when signing out
+                          disconnectWallet();
                           logout();
                         }}
                         className="flex items-center w-full text-left px-4 py-2 text-sm transition-all duration-300 group hover-lift-enhanced"

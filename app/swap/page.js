@@ -30,6 +30,9 @@ export default function SwapPage() {
   const [sponsorId, setSponsorId] = useState("");
   const [sponsorValid, setSponsorValid] = useState(null); // null = unchecked, true/false = validity
   const [sponsorChecking, setSponsorChecking] = useState(false);
+  const [walletConnected, setWalletConnected] = useState(false);
+  const [walletAddress, setWalletAddress] = useState('');
+  const [bnbBalance, setBnbBalance] = useState('0.0000');
 
   const wsRef = useRef(null);
   const reconnectTimeoutRef = useRef(null);
@@ -136,6 +139,68 @@ export default function SwapPage() {
     return true;
   };
 
+  // Check wallet connection on mount
+  useEffect(() => {
+    checkWalletConnection();
+  }, []);
+
+  // Check if wallet is connected
+  const checkWalletConnection = async () => {
+    if (typeof window.ethereum !== 'undefined') {
+      try {
+        const accounts = await window.ethereum.request({
+          method: 'eth_accounts'
+        });
+        
+        if (accounts.length > 0) {
+          setWalletConnected(true);
+          setWalletAddress(accounts[0]);
+          await getBnbBalance(accounts[0]);
+        }
+      } catch (error) {
+        console.error('Error checking wallet connection:', error);
+      }
+    }
+  };
+
+  // Get BNB balance
+  const getBnbBalance = async (address) => {
+    try {
+      const result = await window.ethereum.request({
+        method: 'eth_getBalance',
+        params: [address, 'latest']
+      });
+      
+      const balance = parseInt(result, 16) / Math.pow(10, 18);
+      setBnbBalance(balance.toFixed(4));
+    } catch (error) {
+      console.error('Error getting BNB balance:', error);
+    }
+  };
+
+  // Connect wallet function
+  const connectWallet = async () => {
+    try {
+      if (typeof window.ethereum === 'undefined') {
+        alert('Please install MetaMask to connect your wallet');
+        return;
+      }
+
+      const accounts = await window.ethereum.request({
+        method: 'eth_requestAccounts'
+      });
+
+      if (accounts.length > 0) {
+        setWalletConnected(true);
+        setWalletAddress(accounts[0]);
+        await getBnbBalance(accounts[0]);
+      }
+    } catch (error) {
+      console.error('Error connecting wallet:', error);
+      alert('Failed to connect wallet');
+    }
+  };
+
   // Initialize WebSocket on mount
   useEffect(() => {
     initializeWebSocket();
@@ -182,36 +247,125 @@ export default function SwapPage() {
 
     if (swapType === "buy") {
       try {
-        if (!isAuthenticated || !token) {
-          alert("Please log in to buy.");
+        // Check if MetaMask is installed
+        if (typeof window.ethereum === 'undefined') {
+          alert('Please install MetaMask to purchase BNB');
           return;
         }
-        // Activate user in genealogy using sponsor memberId
-        const res = await fetch("/api/purchase/activate", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({
-            sponsorMemberId: sponsorId.trim(),
-            package: `${packages}x100USD`,
-          }),
+
+        // Request account access
+        const accounts = await window.ethereum.request({
+          method: 'eth_requestAccounts'
         });
-        const data = await res.json();
-        if (!res.ok) {
-          alert(data.error || "Activation failed");
+
+        if (accounts.length === 0) {
+          alert('Please connect your wallet to MetaMask');
           return;
         }
-        // Optionally refresh user from /api/auth/verify if needed
-        setDailyBuyCount((prev) => prev + 1);
-        alert(
-          "Activation successful! Your account is now active in the genealogy tree."
-        );
-        router.push("/team/geneology");
-      } catch (e) {
-        console.error("Buy error:", e);
-        alert("Network error while buying");
+
+        // Switch to BSC Testnet if needed
+        try {
+          await window.ethereum.request({
+            method: 'wallet_switchEthereumChain',
+            params: [{ chainId: '0x61' }], // 97 in hex (BSC Testnet)
+          });
+        } catch (switchError) {
+          // If the network doesn't exist, add it
+          if (switchError.code === 4902) {
+            try {
+              await window.ethereum.request({
+                method: 'wallet_addEthereumChain',
+                params: [
+                  {
+                    chainId: '0x61',
+                    chainName: 'BNB Smart Chain Testnet',
+                    nativeCurrency: {
+                      name: 'BNB',
+                      symbol: 'tBNB',
+                      decimals: 18,
+                    },
+                    rpcUrls: ['https://data-seed-prebsc-1-s1.binance.org:8545'],
+                    blockExplorerUrls: ['https://testnet.bscscan.com'],
+                  },
+                ],
+              });
+            } catch (addError) {
+              console.error('Error adding BSC Testnet:', addError);
+              alert('Failed to add BSC Testnet to MetaMask');
+              return;
+            }
+          }
+        }
+
+        // Convert USD amount to BNB
+        const bnbAmount = (parseFloat(usdAmount) / bnbPrice).toFixed(6);
+        
+        // Convert BNB amount to wei
+        const bnbAmountWei = (parseFloat(bnbAmount) * Math.pow(10, 18)).toString();
+        
+        // Create transaction to send BNB to a specific address (you can change this)
+        const transactionParameters = {
+          to: '0x5fbdb2315678afecb367f032d93f642f64180aa3', // Your DGTek contract address
+          from: accounts[0],
+          value: '0x' + parseInt(bnbAmountWei).toString(16), // Convert to hex
+          gas: '0x5208', // 21000 gas limit for simple transfer
+        };
+
+        // Send transaction
+        const txHash = await window.ethereum.request({
+          method: 'eth_sendTransaction',
+          params: [transactionParameters],
+        });
+
+        alert(`Transaction submitted!\n\nTransaction Hash: ${txHash}\n\nBNB Amount: ${bnbAmount} BNB\nUSD Value: $${usdAmount}\n\nPlease wait for confirmation...`);
+
+        // Wait for transaction confirmation
+        const receipt = await waitForTransactionConfirmation(txHash);
+        
+        if (receipt.status === '0x1') {
+          // Transaction successful - proceed with backend activation
+          if (!isAuthenticated || !token) {
+            alert("Transaction successful! Please log in to complete activation.");
+            return;
+          }
+
+          // Activate user in genealogy using sponsor memberId
+          const res = await fetch("/api/purchase/activate", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify({
+              sponsorMemberId: sponsorId.trim(),
+              package: `${packages}x100USD`,
+              transactionHash: txHash,
+            }),
+          });
+          const data = await res.json();
+          if (!res.ok) {
+            alert(data.error || "Activation failed");
+            return;
+          }
+          
+          setDailyBuyCount((prev) => prev + 1);
+          alert(
+            "Purchase and activation successful!\n\nTransaction confirmed on BSC Testnet.\nYour account is now active in the genealogy tree."
+          );
+          router.push("/team/geneology");
+        } else {
+          alert("Transaction failed. Please try again.");
+        }
+
+      } catch (error) {
+        console.error('Transaction error:', error);
+        if (error.code === 4001) {
+          alert('Transaction rejected by user');
+        } else if (error.code === -32602) {
+          alert('Invalid transaction parameters');
+        } else {
+          alert(`Transaction failed: ${error.message}`);
+        }
       }
     } else {
       alert(
@@ -220,21 +374,55 @@ export default function SwapPage() {
     }
   };
 
+  // Helper function to wait for transaction confirmation
+  const waitForTransactionConfirmation = async (txHash) => {
+    return new Promise((resolve, reject) => {
+      const checkTransaction = async () => {
+        try {
+          const receipt = await window.ethereum.request({
+            method: 'eth_getTransactionReceipt',
+            params: [txHash],
+          });
+          
+          if (receipt) {
+            resolve(receipt);
+          } else {
+            // Transaction not yet mined, check again in 2 seconds
+            setTimeout(checkTransaction, 2000);
+          }
+        } catch (error) {
+          reject(error);
+        }
+      };
+      
+      checkTransaction();
+    });
+  };
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
+    <div className="relative overflow-hidden" style={{backgroundColor: 'var(--default-body-bg-color)'}}>
+      {/* Animated Background */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        {/* Gradient orbs */}
+        <div className="absolute -top-40 -right-40 w-80 h-80 bg-gradient-to-br from-cyan-500/10 to-teal-500/10 rounded-full blur-3xl animate-pulse"></div>
+        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-gradient-to-br from-teal-500/10 to-cyan-400/10 rounded-full blur-3xl animate-pulse delay-1000"></div>
+        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-gradient-to-br from-emerald-700/5 to-teal-600/5 rounded-full blur-3xl animate-float"></div>
+      </div>
+
       {/* Header */}
-      <div className="bg-gradient-to-r from-slate-800/50 to-purple-800/50 backdrop-blur-sm border-b border-purple-500/20">
+      <div className="relative z-10 backdrop-blur-sm border-b" style={{backgroundColor: 'rgba(0, 0, 0, 0.1)', borderColor: 'var(--default-border)'}}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex items-center justify-between">
             <Link
               href="/"
-              className="text-white hover:text-cyan-400 transition-colors"
+              className="text-white hover-lift-enhanced transition-colors"
+              style={{color: 'var(--primary-color)'}}
             >
               ← Back to Dashboard
             </Link>
             <div className="text-center">
-              <h1 className="text-2xl font-bold text-white">🚀 PICZEL SWAP</h1>
-              <p className="text-gray-300 text-sm">Trade Binance Coin (BNB)</p>
+              <h1 className="text-2xl font-bold text-white gradient-text-neon animate-fadeInUp">🚀 PICZEL SWAP</h1>
+              <p className="text-sm animate-fadeInUp" style={{color: 'rgba(255, 255, 255, 0.7)', animationDelay: '0.2s'}}>Trade Binance Coin (BNB)</p>
             </div>
             <div className="w-24"></div> {/* Spacer for centering */}
           </div>
@@ -242,16 +430,16 @@ export default function SwapPage() {
       </div>
 
       {/* Main Content */}
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* BNB Price Card */}
-        <div className="bg-gradient-to-br from-slate-800/50 to-purple-800/50 backdrop-blur-sm rounded-2xl p-6 border border-purple-500/20 mb-8">
+        <div className="glass-enhanced hover-lift-enhanced animate-fadeInUp rounded-2xl p-6 mb-8 glow-border-blue" style={{animationDelay: '0.1s'}}>
           <div className="flex items-center justify-between">
             <div>
-              <h2 className="text-xl font-semibold text-white mb-2">
+              <h2 className="text-xl font-semibold text-white mb-2 gradient-text-neon">
                 Binance Coin (BNB)
               </h2>
               <div className="flex items-center space-x-4">
-                <div className="text-3xl font-bold text-white">
+                <div className="text-3xl font-bold text-white animate-neonGlow">
                   ${loading ? "..." : bnbPrice.toFixed(2)}
                 </div>
                 <div
@@ -283,21 +471,52 @@ export default function SwapPage() {
               >
                 {connectionStatus}
               </div>
-              <div className="text-xs text-gray-400">Live Price</div>
+              <div className="text-xs" style={{color: 'rgba(255, 255, 255, 0.7)'}}>Live Price</div>
             </div>
           </div>
         </div>
 
+        {/* Wallet Connection Status */}
+        <div className="glass-enhanced hover-lift-enhanced animate-fadeInUp rounded-2xl p-6 mb-8 glow-border-green" style={{animationDelay: '0.2s'}}>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-4">
+              <div className={`w-4 h-4 rounded-full animate-pulse ${walletConnected ? 'bg-green-500' : 'bg-red-500'}`} style={{backgroundColor: walletConnected ? 'rgb(var(--success-rgb))' : 'rgb(var(--danger-rgb))'}}></div>
+              <div>
+                <h3 className="text-lg font-semibold text-white gradient-text-neon">
+                  {walletConnected ? 'Wallet Connected' : 'Wallet Not Connected'}
+                </h3>
+                {walletConnected && (
+                  <div className="text-sm" style={{color: 'rgba(255, 255, 255, 0.7)'}}>
+                    <div>Address: {walletAddress.slice(0, 6)}...{walletAddress.slice(-4)}</div>
+                    <div>BNB Balance: {bnbBalance} BNB</div>
+                  </div>
+                )}
+              </div>
+            </div>
+            <button
+              onClick={connectWallet}
+              disabled={walletConnected}
+              className={`px-4 py-2 rounded-lg font-medium transition-all duration-300 ${
+                walletConnected
+                  ? 'bg-green-500/20 text-green-400 border border-green-500/30 cursor-not-allowed'
+                  : 'btn-enhanced hover-bounce hover-glow'
+              }`}
+            >
+              {walletConnected ? 'Connected' : 'Connect Wallet'}
+            </button>
+          </div>
+        </div>
+
         {/* Swap Interface */}
-        <div className="bg-gradient-to-br from-slate-800/50 to-purple-800/50 backdrop-blur-sm rounded-2xl p-8 border border-purple-500/20">
+        <div className="glass-enhanced hover-lift-enhanced animate-fadeInUp rounded-2xl p-8 glow-border" style={{animationDelay: '0.3s'}}>
           <div className="max-w-md mx-auto">
             {/* Swap Type Toggle */}
-            <div className="flex bg-slate-700/50 rounded-xl p-1 mb-6">
+            <div className="flex rounded-xl p-1 mb-6" style={{backgroundColor: 'rgba(255, 255, 255, 0.05)'}}>
               <button
                 onClick={() => setSwapType("buy")}
                 className={`flex-1 py-3 px-4 rounded-lg font-medium transition-all duration-300 ${
                   swapType === "buy"
-                    ? "bg-gradient-to-r from-green-500 to-emerald-600 text-white shadow-lg"
+                    ? "btn-enhanced shadow-lg hover-bounce"
                     : "text-gray-300 hover:text-white"
                 }`}
               >
@@ -307,7 +526,7 @@ export default function SwapPage() {
                 onClick={() => setSwapType("sell")}
                 className={`flex-1 py-3 px-4 rounded-lg font-medium transition-all duration-300 ${
                   swapType === "sell"
-                    ? "bg-gradient-to-r from-red-500 to-rose-600 text-white shadow-lg"
+                    ? "bg-gradient-to-r from-red-500 to-rose-600 text-white shadow-lg hover-bounce"
                     : "text-gray-300 hover:text-white"
                 }`}
               >
@@ -321,7 +540,7 @@ export default function SwapPage() {
                 <>
                   {/* Sponsorship ID */}
                   <div>
-                    <label className="block text-sm font-medium text-gray-300 mb-2">
+                    <label className="block text-sm font-medium mb-2" style={{color: 'rgba(255, 255, 255, 0.7)'}}>
                       Sponsorship ID (required for Buy)
                     </label>
                     <div className="flex gap-2">
@@ -333,7 +552,8 @@ export default function SwapPage() {
                           setSponsorValid(null);
                         }}
                         placeholder="Enter sponsor's ID (e.g., UABC123)"
-                        className="flex-1 bg-slate-700/50 text-white px-4 py-3 rounded-xl border border-purple-500/30 focus:border-purple-500 focus:outline-none focus:ring-2 focus:ring-purple-500/20"
+                        className="flex-1 text-white px-4 py-3 rounded-xl border focus:outline-none focus:ring-2 glass-card"
+                        style={{backgroundColor: 'var(--card-bg)', borderColor: 'var(--default-border)', focusRingColor: 'var(--primary-color)'}}
                       />
                       <button
                         type="button"
@@ -358,25 +578,25 @@ export default function SwapPage() {
                             setSponsorChecking(false);
                           }
                         }}
-                        className="px-4 py-3 bg-gradient-to-r from-cyan-500 to-purple-600 text-white rounded-xl text-sm font-medium hover:from-cyan-600 hover:to-purple-700 transition-all"
+                        className="btn-enhanced hover-bounce hover-glow px-4 py-3 rounded-xl text-sm font-medium"
                       >
                         {sponsorChecking ? "Checking..." : "Validate"}
                       </button>
                     </div>
                     {sponsorValid === true && (
-                      <p className="mt-1 text-xs text-green-400">
+                      <p className="mt-1 text-xs" style={{color: 'rgb(var(--success-rgb))'}}>
                         Sponsor ID is valid.
                       </p>
                     )}
                     {sponsorValid === false && (
-                      <p className="mt-1 text-xs text-red-400">
+                      <p className="mt-1 text-xs" style={{color: 'rgb(var(--danger-rgb))'}}>
                         Invalid Sponsorship ID.
                       </p>
                     )}
                   </div>
                   {/* Packages Input for Buy */}
                   <div>
-                    <label className="block text-sm font-medium text-gray-300 mb-2">
+                    <label className="block text-sm font-medium mb-2" style={{color: 'rgba(255, 255, 255, 0.7)'}}>
                       Packages ($100 each)
                     </label>
                     <div className="relative">
@@ -391,9 +611,10 @@ export default function SwapPage() {
                           validateBuyRules(value);
                         }}
                         placeholder="1"
-                        className="w-full bg-slate-700/50 text-white px-4 py-3 rounded-xl border border-purple-500/30 focus:border-purple-500 focus:outline-none focus:ring-2 focus:ring-purple-500/20"
+                        className="w-full text-white px-4 py-3 rounded-xl border focus:outline-none focus:ring-2 glass-card"
+                        style={{backgroundColor: 'var(--card-bg)', borderColor: 'var(--default-border)'}}
                       />
-                      <div className="absolute right-3 top-3 text-gray-400 text-sm">
+                      <div className="absolute right-3 top-3 text-sm" style={{color: 'rgba(255, 255, 255, 0.7)'}}>
                         packages
                       </div>
                     </div>
@@ -401,7 +622,7 @@ export default function SwapPage() {
 
                   {/* USD Amount (calculated) */}
                   <div>
-                    <label className="block text-sm font-medium text-gray-300 mb-2">
+                    <label className="block text-sm font-medium mb-2" style={{color: 'rgba(255, 255, 255, 0.7)'}}>
                       Total USD Amount
                     </label>
                     <div className="relative">
@@ -409,9 +630,10 @@ export default function SwapPage() {
                         type="text"
                         value={usdAmount}
                         readOnly
-                        className="w-full bg-slate-600/50 text-white px-4 py-3 rounded-xl border border-purple-500/30 cursor-not-allowed"
+                        className="w-full text-white px-4 py-3 rounded-xl border cursor-not-allowed"
+                        style={{backgroundColor: 'rgba(255, 255, 255, 0.05)', borderColor: 'var(--default-border)'}}
                       />
-                      <div className="absolute right-3 top-3 text-gray-400 text-sm">
+                      <div className="absolute right-3 top-3 text-sm" style={{color: 'rgba(255, 255, 255, 0.7)'}}>
                         USD
                       </div>
                     </div>
@@ -419,7 +641,7 @@ export default function SwapPage() {
 
                   {/* BNB Amount (calculated) */}
                   <div>
-                    <label className="block text-sm font-medium text-gray-300 mb-2">
+                    <label className="block text-sm font-medium mb-2" style={{color: 'rgba(255, 255, 255, 0.7)'}}>
                       BNB Amount
                     </label>
                     <div className="relative">
@@ -427,9 +649,10 @@ export default function SwapPage() {
                         type="text"
                         value={amount}
                         readOnly
-                        className="w-full bg-slate-600/50 text-white px-4 py-3 rounded-xl border border-purple-500/30 cursor-not-allowed"
+                        className="w-full text-white px-4 py-3 rounded-xl border cursor-not-allowed"
+                        style={{backgroundColor: 'rgba(255, 255, 255, 0.05)', borderColor: 'var(--default-border)'}}
                       />
-                      <div className="absolute right-3 top-3 text-gray-400 text-sm">
+                      <div className="absolute right-3 top-3 text-sm" style={{color: 'rgba(255, 255, 255, 0.7)'}}>
                         BNB
                       </div>
                     </div>
@@ -439,7 +662,7 @@ export default function SwapPage() {
                 <>
                   {/* BNB Amount for Sell */}
                   <div>
-                    <label className="block text-sm font-medium text-gray-300 mb-2">
+                    <label className="block text-sm font-medium mb-2" style={{color: 'rgba(255, 255, 255, 0.7)'}}>
                       BNB Amount
                     </label>
                     <div className="relative">
@@ -448,9 +671,10 @@ export default function SwapPage() {
                         value={amount}
                         onChange={(e) => setAmount(e.target.value)}
                         placeholder="0.000000"
-                        className="w-full bg-slate-700/50 text-white px-4 py-3 rounded-xl border border-purple-500/30 focus:border-purple-500 focus:outline-none focus:ring-2 focus:ring-purple-500/20"
+                        className="w-full text-white px-4 py-3 rounded-xl border focus:outline-none focus:ring-2 glass-card"
+                        style={{backgroundColor: 'var(--card-bg)', borderColor: 'var(--default-border)'}}
                       />
-                      <div className="absolute right-3 top-3 text-gray-400 text-sm">
+                      <div className="absolute right-3 top-3 text-sm" style={{color: 'rgba(255, 255, 255, 0.7)'}}>
                         BNB
                       </div>
                     </div>
@@ -458,7 +682,7 @@ export default function SwapPage() {
 
                   {/* USD Amount (calculated) */}
                   <div>
-                    <label className="block text-sm font-medium text-gray-300 mb-2">
+                    <label className="block text-sm font-medium mb-2" style={{color: 'rgba(255, 255, 255, 0.7)'}}>
                       USD Amount
                     </label>
                     <div className="relative">
@@ -466,9 +690,10 @@ export default function SwapPage() {
                         type="text"
                         value={usdAmount}
                         readOnly
-                        className="w-full bg-slate-600/50 text-white px-4 py-3 rounded-xl border border-purple-500/30 cursor-not-allowed"
+                        className="w-full text-white px-4 py-3 rounded-xl border cursor-not-allowed"
+                        style={{backgroundColor: 'rgba(255, 255, 255, 0.05)', borderColor: 'var(--default-border)'}}
                       />
-                      <div className="absolute right-3 top-3 text-gray-400 text-sm">
+                      <div className="absolute right-3 top-3 text-sm" style={{color: 'rgba(255, 255, 255, 0.7)'}}>
                         USD
                       </div>
                     </div>
@@ -479,12 +704,12 @@ export default function SwapPage() {
 
             {/* Validation Error */}
             {validationError && (
-              <div className="mt-4 p-3 bg-red-500/20 border border-red-500/30 rounded-lg">
+              <div className="mt-4 p-3 rounded-lg glass-card" style={{backgroundColor: 'rgba(255, 74, 74, 0.1)', borderColor: 'rgba(255, 74, 74, 0.3)'}}>
                 <div className="flex items-center space-x-2">
-                  <div className="w-5 h-5 bg-red-500 rounded-full flex items-center justify-center">
+                  <div className="w-5 h-5 rounded-full flex items-center justify-center animate-pulse" style={{backgroundColor: 'rgb(var(--danger-rgb))'}}>
                     <span className="text-white text-xs">!</span>
                   </div>
-                  <span className="text-red-400 text-sm font-medium">
+                  <span className="text-sm font-medium" style={{color: 'rgb(var(--danger-rgb))'}}>
                     {validationError}
                   </span>
                 </div>
@@ -499,22 +724,25 @@ export default function SwapPage() {
                 !bnbPrice ||
                 loading ||
                 validationError ||
-                (swapType === "buy" && sponsorValid !== true)
+                (swapType === "buy" && sponsorValid !== true) ||
+                (swapType === "buy" && !walletConnected)
               }
               className={`w-full mt-6 py-4 px-6 rounded-xl font-bold text-lg transition-all duration-300 ${
                 swapType === "buy"
-                  ? "bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white shadow-lg hover:shadow-green-500/25"
-                  : "bg-gradient-to-r from-red-500 to-rose-600 hover:from-red-600 hover:to-rose-700 text-white shadow-lg hover:shadow-red-500/25"
+                  ? "btn-enhanced hover-bounce hover-glow shadow-lg"
+                  : "bg-gradient-to-r from-red-500 to-rose-600 hover:from-red-600 hover:to-rose-700 text-white shadow-lg hover:shadow-red-500/25 hover-bounce"
               } disabled:opacity-50 disabled:cursor-not-allowed hover:scale-105`}
             >
               {loading
                 ? "Loading..."
+                : swapType === "buy" && !walletConnected
+                ? "Connect Wallet to Buy"
                 : `${swapType === "buy" ? "Buy" : "Sell"} BNB`}
             </button>
 
             {/* Price Info */}
             {bnbPrice && (
-              <div className="mt-4 text-center text-sm text-gray-400">
+              <div className="mt-4 text-center text-sm" style={{color: 'rgba(255, 255, 255, 0.7)'}}>
                 1 BNB = ${bnbPrice.toFixed(2)} USD
               </div>
             )}
@@ -523,11 +751,11 @@ export default function SwapPage() {
 
         {/* Info Cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8">
-          <div className="bg-gradient-to-br from-slate-800/50 to-blue-800/50 backdrop-blur-sm rounded-2xl p-6 border border-blue-500/20">
-            <h3 className="text-lg font-semibold text-white mb-3">
+          <div className="glass-enhanced hover-lift-enhanced animate-fadeInUp rounded-2xl p-6 glow-border-blue" style={{animationDelay: '0.4s'}}>
+            <h3 className="text-lg font-semibold text-white mb-3 gradient-text-neon">
               📈 Trading Info
             </h3>
-            <div className="space-y-2 text-sm text-gray-300">
+            <div className="space-y-2 text-sm" style={{color: 'rgba(255, 255, 255, 0.7)'}}>
               <div>• Real-time BNB prices from Binance</div>
               <div>• Instant price calculations</div>
               <div>• Live market data updates</div>
@@ -535,11 +763,11 @@ export default function SwapPage() {
             </div>
           </div>
 
-          <div className="bg-gradient-to-br from-slate-800/50 to-purple-800/50 backdrop-blur-sm rounded-2xl p-6 border border-purple-500/20">
-            <h3 className="text-lg font-semibold text-white mb-3">
+          <div className="glass-enhanced hover-lift-enhanced animate-fadeInUp rounded-2xl p-6 glow-border-yellow" style={{animationDelay: '0.5s'}}>
+            <h3 className="text-lg font-semibold text-white mb-3 gradient-text-neon">
               💰 Buying Rules
             </h3>
-            <div className="space-y-2 text-sm text-gray-300">
+            <div className="space-y-2 text-sm" style={{color: 'rgba(255, 255, 255, 0.7)'}}>
               <div>• Each package: $100</div>
               <div>• Minimum: 1 package</div>
               <div>• Maximum: 10 packages</div>
@@ -548,15 +776,16 @@ export default function SwapPage() {
             </div>
           </div>
 
-          <div className="bg-gradient-to-br from-slate-800/50 to-green-800/50 backdrop-blur-sm rounded-2xl p-6 border border-green-500/20">
-            <h3 className="text-lg font-semibold text-white mb-3">
-              ⚠️ Important Notice
+          <div className="glass-enhanced hover-lift-enhanced animate-fadeInUp rounded-2xl p-6 glow-border-green" style={{animationDelay: '0.6s'}}>
+            <h3 className="text-lg font-semibold text-white mb-3 gradient-text-neon">
+              🔗 MetaMask Integration
             </h3>
-            <div className="space-y-2 text-sm text-gray-300">
-              <div>• This is a demo interface</div>
-              <div>• No real transactions are executed</div>
-              <div>• Connect your wallet for real trading</div>
-              <div>• Always verify amounts before trading</div>
+            <div className="space-y-2 text-sm" style={{color: 'rgba(255, 255, 255, 0.7)'}}>
+              <div>• Real BNB transactions via MetaMask</div>
+              <div>• BSC Testnet integration</div>
+              <div>• Automatic network switching</div>
+              <div>• Transaction confirmation tracking</div>
+              <div>• Real-time BNB balance display</div>
             </div>
           </div>
         </div>
