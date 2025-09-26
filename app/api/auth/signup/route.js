@@ -9,47 +9,6 @@ export async function OPTIONS(request) {
   return handleCors(request);
 }
 
-async function findPlacementSlot(sponsorId) {
-  // Simple binary tree insertion: find the first available slot level by level
-  // This ensures each user appears only once and follows standard binary tree structure
-
-  const queue = [sponsorId];
-  let iterations = 0;
-
-  while (queue.length && iterations < 1000) {
-    const currentParentId = queue.shift();
-    iterations++;
-
-    // Check if left slot is available
-    const leftChild = await User.findOne({
-      placementParent: currentParentId,
-      placementSide: "L",
-      isActivated: true,
-    }).select("_id");
-
-    if (!leftChild) {
-      return { parentId: currentParentId, side: "L" };
-    }
-
-    // Check if right slot is available
-    const rightChild = await User.findOne({
-      placementParent: currentParentId,
-      placementSide: "R",
-      isActivated: true,
-    }).select("_id");
-
-    if (!rightChild) {
-      return { parentId: currentParentId, side: "R" };
-    }
-
-    // Both slots filled, add children to queue for next level
-    queue.push(leftChild._id);
-    queue.push(rightChild._id);
-  }
-
-  throw new Error("No placement slot found - tree may be too deep");
-}
-
 export async function POST(request) {
   try {
     // Check if MongoDB URI is configured
@@ -100,27 +59,13 @@ export async function POST(request) {
       );
     }
 
-    // Find placement slot under sponsor's tree
-    let placementInfo;
-    try {
-      placementInfo = await findPlacementSlot(sponsor._id);
-    } catch (error) {
-      console.error("Placement error:", error);
-      return NextResponse.json(
-        { error: "Unable to find placement in genealogy tree" },
-        { status: 400 }
-      );
-    }
-
-    // Create new user with genealogy information
+    // Create new user with direct sponsorship
     const activationTime = new Date();
     const user = await User.create({
       name,
       email,
       password,
       sponsor: sponsor._id,
-      placementParent: placementInfo.parentId,
-      placementSide: placementInfo.side,
       isActivated: true,
       activatedAt: activationTime,
     });
@@ -140,8 +85,6 @@ export async function POST(request) {
         token,
         genealogy: {
           sponsorMemberId: sponsor.memberId,
-          placementParent: String(placementInfo.parentId),
-          placementSide: placementInfo.side,
           isActivated: true,
           activatedAt: activationTime,
         },

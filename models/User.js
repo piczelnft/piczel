@@ -35,25 +35,14 @@ const UserSchema = new mongoose.Schema({
     enum: ["user", "admin"],
     default: "user",
   },
-  // Binary plan placement fields
+  // Direct MLM sponsorship - sponsor is the direct parent
   sponsor: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "User",
     default: null,
     index: true,
   },
-  placementParent: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "User",
-    default: null,
-    index: true,
-  },
-  placementSide: {
-    type: String,
-    enum: ["L", "R"],
-    default: undefined,
-  },
-  // Activation happens only after user clicks Buy on the buy page
+  // Activation happens at signup now
   isActivated: {
     type: Boolean,
     default: false,
@@ -159,17 +148,5 @@ UserSchema.methods.toJSON = function () {
   delete userObject.password;
   return userObject;
 };
-
-// Ensure only one child per side under a parent (when placement is set)
-UserSchema.index(
-  { placementParent: 1, placementSide: 1 },
-  {
-    unique: true,
-    partialFilterExpression: {
-      placementParent: { $type: "objectId" },
-      placementSide: { $exists: true },
-    },
-  }
-);
 
 export default mongoose.models.User || mongoose.model("User", UserSchema);

@@ -26,66 +26,63 @@ async function buildSubtree(root, depth, visitedNodes = new Set()) {
       : "",
     status: root.isActivated ? "Active" : "Inactive",
     directs: 0, // computed below
-    leftCount: 0,
-    rightCount: 0,
+    totalCount: 0,
     business: "$0",
   };
 
   if (depth === 0) {
-    return { ...base, left: null, right: null };
+    return { ...base, children: [] };
   }
 
-  // Find direct children by placement (only activated users)
+  // Find direct children (sponsored by this user, only activated users)
   const children = await User.find({
-    placementParent: root._id,
+    sponsor: root._id,
     isActivated: true,
   })
-    .select(
-      "_id memberId name profile package sponsor activatedAt isActivated placementSide"
-    )
+    .select("_id memberId name profile package sponsor activatedAt isActivated")
     .lean();
 
   console.log(
-    `Children of ${root.memberId}:`,
+    `Direct children of ${root.memberId}:`,
     children.map((c) => ({
       memberId: c.memberId,
-      placementSide: c.placementSide,
       activatedAt: c.activatedAt,
     }))
   );
 
-  // Ensure we only get one child per side
-  const leftChild = children.find((c) => c.placementSide === "L") || null;
-  const rightChild = children.find((c) => c.placementSide === "R") || null;
+  // Build subtrees recursively for each child
+  const childTrees = await Promise.all(
+    children.map((child) =>
+      buildSubtree(child, depth - 1, new Set(visitedNodes))
+    )
+  );
 
-  // Build subtrees recursively with visited tracking
-  const [leftTree, rightTree] = await Promise.all([
-    leftChild
-      ? buildSubtree(leftChild, depth - 1, new Set(visitedNodes))
-      : Promise.resolve(null),
-    rightChild
-      ? buildSubtree(rightChild, depth - 1, new Set(visitedNodes))
-      : Promise.resolve(null),
-  ]);
+  // Filter out any null results
+  const validChildTrees = childTrees.filter((child) => child !== null);
 
   // Compute metrics
   const directs = children.length;
 
   function countNodes(node) {
     if (!node) return 0;
-    return 1 + countNodes(node.left) + countNodes(node.right);
+    return (
+      1 +
+      (node.children
+        ? node.children.reduce((sum, child) => sum + countNodes(child), 0)
+        : 0)
+    );
   }
 
-  const leftCount = countNodes(leftTree);
-  const rightCount = countNodes(rightTree);
+  const totalCount = validChildTrees.reduce(
+    (sum, child) => sum + countNodes(child),
+    0
+  );
 
   return {
     ...base,
     directs,
-    leftCount,
-    rightCount,
-    left: leftTree,
-    right: rightTree,
+    totalCount,
+    children: validChildTrees,
   };
 }
 

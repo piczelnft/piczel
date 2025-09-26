@@ -7,9 +7,7 @@ async function checkUsers() {
     await dbConnect();
 
     const users = await User.find({ isActivated: true })
-      .select(
-        "memberId name isActivated activatedAt placementParent placementSide"
-      )
+      .select("memberId name isActivated activatedAt sponsor")
       .lean();
 
     console.log("Activated users:");
@@ -19,8 +17,7 @@ async function checkUsers() {
         name: user.name,
         isActivated: user.isActivated,
         activatedAt: user.activatedAt,
-        placementParent: user.placementParent,
-        placementSide: user.placementSide,
+        sponsor: user.sponsor,
       });
     });
 

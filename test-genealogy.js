@@ -8,15 +8,15 @@ async function testGenealogy() {
 
     // Get all activated users
     const users = await User.find({ isActivated: true })
-      .select("_id memberId name placementParent placementSide")
+      .select("_id memberId name sponsor")
       .lean();
 
     console.log("All activated users:");
     users.forEach((user) => {
       console.log(
-        `${user.memberId}: ${user.name} (parent: ${
-          user.placementParent || "ROOT"
-        }, side: ${user.placementSide || "N/A"})`
+        `${user.memberId}: ${user.name} (sponsor: ${
+          user.sponsor || "ROOT"
+        })`
       );
     });
 
@@ -24,19 +24,19 @@ async function testGenealogy() {
 
     for (const user of users) {
       const children = await User.find({
-        placementParent: user._id,
+        sponsor: user._id,
         isActivated: true,
       })
-        .select("memberId name placementSide")
+        .select("memberId name")
         .lean();
 
-      console.log(`\n${user.memberId} (${user.name}) has children:`);
+      console.log(`\n${user.memberId} (${user.name}) has direct children:`);
       if (children.length === 0) {
-        console.log("  No children");
+        console.log("  No direct children");
       } else {
         children.forEach((child) => {
           console.log(
-            `  ${child.placementSide}: ${child.memberId} (${child.name})`
+            `  Direct: ${child.memberId} (${child.name})`
           );
         });
       }
