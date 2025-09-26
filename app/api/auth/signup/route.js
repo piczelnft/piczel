@@ -9,6 +9,47 @@ export async function OPTIONS(request) {
   return handleCors(request);
 }
 
+async function findPlacementSlot(sponsorId) {
+  // Simple binary tree insertion: find the first available slot level by level
+  // This ensures each user appears only once and follows standard binary tree structure
+
+  const queue = [sponsorId];
+  let iterations = 0;
+
+  while (queue.length && iterations < 1000) {
+    const currentParentId = queue.shift();
+    iterations++;
+
+    // Check if left slot is available
+    const leftChild = await User.findOne({
+      placementParent: currentParentId,
+      placementSide: "L",
+      isActivated: true,
+    }).select("_id");
+
+    if (!leftChild) {
+      return { parentId: currentParentId, side: "L" };
+    }
+
+    // Check if right slot is available
+    const rightChild = await User.findOne({
+      placementParent: currentParentId,
+      placementSide: "R",
+      isActivated: true,
+    }).select("_id");
+
+    if (!rightChild) {
+      return { parentId: currentParentId, side: "R" };
+    }
+
+    // Both slots filled, add children to queue for next level
+    queue.push(leftChild._id);
+    queue.push(rightChild._id);
+  }
+
+  throw new Error("No placement slot found - tree may be too deep");
+}
+
 export async function POST(request) {
   try {
     // Check if MongoDB URI is configured
@@ -24,12 +65,12 @@ export async function POST(request) {
 
     await dbConnect();
 
-    const { name, email, password } = await request.json();
+    const { name, email, password, sponsorId } = await request.json();
 
     // Validation
-    if (!name || !email || !password) {
+    if (!name || !email || !password || !sponsorId) {
       return NextResponse.json(
-        { error: "All fields are required" },
+        { error: "All fields are required including sponsorship ID" },
         { status: 400 }
       );
     }
@@ -50,11 +91,38 @@ export async function POST(request) {
       );
     }
 
-    // Create new user
+    // Validate sponsor exists
+    const sponsor = await User.findOne({ memberId: sponsorId.trim() });
+    if (!sponsor) {
+      return NextResponse.json(
+        { error: "Invalid sponsorship ID" },
+        { status: 400 }
+      );
+    }
+
+    // Find placement slot under sponsor's tree
+    let placementInfo;
+    try {
+      placementInfo = await findPlacementSlot(sponsor._id);
+    } catch (error) {
+      console.error("Placement error:", error);
+      return NextResponse.json(
+        { error: "Unable to find placement in genealogy tree" },
+        { status: 400 }
+      );
+    }
+
+    // Create new user with genealogy information
+    const activationTime = new Date();
     const user = await User.create({
       name,
       email,
       password,
+      sponsor: sponsor._id,
+      placementParent: placementInfo.parentId,
+      placementSide: placementInfo.side,
+      isActivated: true,
+      activatedAt: activationTime,
     });
 
     // Generate JWT token
@@ -67,13 +135,20 @@ export async function POST(request) {
     // Return user data (password is excluded by the toJSON method)
     return NextResponse.json(
       {
-        message: "User created successfully",
+        message: "User created successfully and added to genealogy tree",
         user,
         token,
+        genealogy: {
+          sponsorMemberId: sponsor.memberId,
+          placementParent: String(placementInfo.parentId),
+          placementSide: placementInfo.side,
+          isActivated: true,
+          activatedAt: activationTime,
+        },
       },
-      { 
+      {
         status: 201,
-        headers: corsHeaders()
+        headers: corsHeaders(),
       }
     );
   } catch (error) {
@@ -93,9 +168,9 @@ export async function POST(request) {
 
     return NextResponse.json(
       { error: "Internal server error" },
-      { 
+      {
         status: 500,
-        headers: corsHeaders()
+        headers: corsHeaders(),
       }
     );
   }
