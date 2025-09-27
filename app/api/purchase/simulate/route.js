@@ -15,6 +15,67 @@ function getAuthUserId(request) {
   }
 }
 
+// Commission structure for MLM levels
+const COMMISSION_RATES = {
+  1: 0.03, // Level 1: 3%
+  2: 0.01, // Level 2: 1%
+  3: 0.01, // Level 3: 1%
+  4: 0.0025, // Level 4-10: 0.25%
+  5: 0.0025,
+  6: 0.0025,
+  7: 0.0025,
+  8: 0.0025,
+  9: 0.0025,
+  10: 0.0025,
+  // Levels 11+ get no commission
+};
+
+async function distributeCommissions(buyerId, purchaseAmount) {
+  const commissions = [];
+  let currentUser = await User.findById(buyerId);
+  let level = 1;
+
+  while (currentUser && currentUser.sponsor && level <= 10) {
+    // Get the sponsor (parent) at this level
+    const sponsor = await User.findById(currentUser.sponsor);
+    if (!sponsor) break;
+
+    // Calculate commission for this level
+    const commissionRate = COMMISSION_RATES[level];
+    if (commissionRate) {
+      const commissionAmount = purchaseAmount * commissionRate;
+
+      // Update sponsor's balance
+      const updatedSponsor = await User.findOneAndUpdate(
+        { _id: sponsor._id },
+        {
+          $inc: {
+            "wallet.balance": commissionAmount,
+          },
+        },
+        { new: true }
+      );
+
+      if (updatedSponsor) {
+        commissions.push({
+          level,
+          sponsorId: sponsor.memberId,
+          sponsorName: sponsor.name,
+          commissionRate: `${(commissionRate * 100).toFixed(2)}%`,
+          commissionAmount: commissionAmount.toFixed(2),
+          newBalance: (updatedSponsor.wallet?.balance || 0).toFixed(2),
+        });
+      }
+    }
+
+    // Move to next level
+    currentUser = sponsor;
+    level++;
+  }
+
+  return commissions;
+}
+
 export async function POST(request) {
   try {
     await dbConnect();
@@ -60,9 +121,15 @@ export async function POST(request) {
       );
     }
 
+    // Distribute commissions to upline sponsors
+    const commissions = await distributeCommissions(
+      userId,
+      parseFloat(usdAmount)
+    );
+
     return NextResponse.json(
       {
-        message: "Purchase simulated successfully",
+        message: "Purchase simulated successfully and commissions distributed",
         user: {
           memberId: updated.memberId,
           name: updated.name,
@@ -79,6 +146,11 @@ export async function POST(request) {
           packages: packages,
           timestamp: new Date().toISOString(),
         },
+        commissions: commissions,
+        commissionsDistributed: commissions.length,
+        totalCommissionsPaid: commissions
+          .reduce((sum, c) => sum + parseFloat(c.commissionAmount), 0)
+          .toFixed(2),
       },
       { status: 200 }
     );

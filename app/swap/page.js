@@ -287,10 +287,23 @@ export default function SwapPage() {
           updateUser(data.user);
         }
 
+        // Create commission details for success message
+        let commissionText = "";
+        if (data.commissions && data.commissions.length > 0) {
+          commissionText = `\n\n🎉 COMMISSIONS DISTRIBUTED:\n`;
+          commissionText += `Total Paid: $${data.totalCommissionsPaid}\n`;
+          commissionText += `Recipients: ${data.commissionsDistributed} sponsors\n\n`;
+
+          data.commissions.forEach((commission) => {
+            commissionText += `Level ${commission.level}: ${commission.sponsorName} (${commission.sponsorId})\n`;
+            commissionText += `  💰 ${commission.commissionRate} = $${commission.commissionAmount}\n`;
+          });
+        }
+
         alert(
-          `Purchase Successful!\n\nAmount: ${bnbAmount} BNB (${usdAmount} USD)\nYour wallet balance has been updated!\n\nNew Balance: $${data.user.wallet.balance.toFixed(
+          `🎉 Purchase Successful!\n\nAmount: ${bnbAmount} BNB ($${usdAmount})\nYour Balance: $${data.user.wallet.balance.toFixed(
             2
-          )}`
+          )}${commissionText}`
         );
       } catch (error) {
         console.error("Purchase error:", error);
