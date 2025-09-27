@@ -1,29 +1,121 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
+import { useAuth } from '@/contexts/AuthContext';
 
 const TeamLevelsPage = () => {
+  const { user, token, isAuthenticated } = useAuth();
   const [selectedLevel, setSelectedLevel] = useState(null);
+  const [levelsData, setLevelsData] = useState([]);
+  const [statistics, setStatistics] = useState({
+    totalLevels: 10,
+    totalMembers: 0,
+    activeLevels: 0
+  });
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [levelDetails, setLevelDetails] = useState(null);
+  const [loadingDetails, setLoadingDetails] = useState(false);
 
-  // Sample level data
-  const levelsData = [
-    { id: 1, levelNo: '1st Level', totalMembers: 0 },
-    { id: 2, levelNo: '2nd Level', totalMembers: 0 },
-    { id: 3, levelNo: '3rd Level', totalMembers: 0 },
-    { id: 4, levelNo: '4th Level', totalMembers: 0 },
-    { id: 5, levelNo: '5th Level', totalMembers: 0 },
-    { id: 6, levelNo: '6th Level', totalMembers: 0 },
-    { id: 7, levelNo: '7th Level', totalMembers: 0 },
-    { id: 8, levelNo: '8th Level', totalMembers: 0 },
-    { id: 9, levelNo: '9th Level', totalMembers: 0 },
-    { id: 10, levelNo: '10th Level', totalMembers: 0 }
-  ];
+  // Fetch team levels data
+  const fetchLevelsData = useCallback(async () => {
+    if (!isAuthenticated || !token) return;
+    
+    try {
+      setLoading(true);
+      setError(null);
+      
+      const response = await fetch('/api/team/levels', {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch team levels');
+      }
+
+      const data = await response.json();
+      setLevelsData(data.levels || []);
+      setStatistics(data.statistics || statistics);
+    } catch (err) {
+      console.error('Error fetching team levels:', err);
+      setError(err.message);
+      // Fallback to empty array if API fails
+      setLevelsData([]);
+    } finally {
+      setLoading(false);
+    }
+  }, [isAuthenticated, token]);
+
+  // Fetch specific level details
+  const fetchLevelDetails = useCallback(async (levelNumber) => {
+    if (!isAuthenticated || !token) return;
+    
+    try {
+      setLoadingDetails(true);
+      
+      const response = await fetch(`/api/team/levels?level=${levelNumber}`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch level details');
+      }
+
+      const data = await response.json();
+      setLevelDetails(data.levelDetails || null);
+    } catch (err) {
+      console.error('Error fetching level details:', err);
+      setLevelDetails(null);
+    } finally {
+      setLoadingDetails(false);
+    }
+  }, [isAuthenticated, token]);
+
+  // Fetch data when component mounts
+  useEffect(() => {
+    fetchLevelsData();
+  }, [fetchLevelsData]);
 
   const handleLevelAction = (level) => {
     setSelectedLevel(level);
-    console.log(`Viewing details for ${level.levelNo}`);
-    // Add your level details logic here
+    setLevelDetails(null); // Clear previous details
+    if (level.totalMembers > 0) {
+      fetchLevelDetails(level.levelNumber);
+    }
   };
+
+  // Loading state
+  if (loading && levelsData.length === 0) {
+    return (
+      <div className="min-h-screen flex items-center justify-center" style={{background: 'linear-gradient(to bottom right, var(--default-body-bg-color) 0%, var(--theme-bg-gradient) 25%, var(--default-body-bg-color) 100%)', fontFamily: 'var(--default-font-family)'}}>
+        <div className="text-white text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white mx-auto mb-4"></div>
+          <p>Loading team levels...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Error state
+  if (error && levelsData.length === 0) {
+    return (
+      <div className="min-h-screen flex items-center justify-center" style={{background: 'linear-gradient(to bottom right, var(--default-body-bg-color) 0%, var(--theme-bg-gradient) 25%, var(--default-body-bg-color) 100%)', fontFamily: 'var(--default-font-family)'}}>
+        <div className="text-white text-center max-w-md">
+          <p className="text-red-400 mb-4">Error: {error}</p>
+          <button 
+            onClick={fetchLevelsData}
+            className="btn-enhanced px-4 py-2 text-white hover-bounce"
+          >
+            Retry
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen flex p-8" style={{background: 'linear-gradient(to bottom right, var(--default-body-bg-color) 0%, var(--theme-bg-gradient) 25%, var(--default-body-bg-color) 100%)', fontFamily: 'var(--default-font-family)'}}>
@@ -34,6 +126,18 @@ const TeamLevelsPage = () => {
         <div className="text-center mb-12">
           <h1 className="text-4xl font-bold text-white mb-2 gradient-text-enhanced animate-fadeInUp">Level Table</h1>
           <p className="text-lg animate-fadeInUp" style={{color: 'rgba(255, 255, 255, 0.7)', animationDelay: '0.2s'}}>Check your Genealogy</p>
+          <div className="mt-4">
+            <button 
+              onClick={fetchLevelsData}
+              className="btn-enhanced px-4 py-2 text-white hover-bounce text-sm flex items-center space-x-2 mx-auto"
+              disabled={loading}
+            >
+              <span className={`text-sm ${loading ? 'animate-spin' : ''}`}>
+                {loading ? '⟳' : '↻'}
+              </span>
+              <span>Refresh Data</span>
+            </button>
+          </div>
         </div>
 
         <div className="card-enhanced rounded-2xl p-8 shadow-lg animate-fadeInUp" style={{animationDelay: '0.4s'}}>
@@ -80,7 +184,7 @@ const TeamLevelsPage = () => {
               border: '1px solid rgba(var(--primary-rgb), 0.3)'
             }}>
               <div className="text-center">
-                <div className="text-2xl font-bold mb-2" style={{color: 'var(--primary-color)'}}>10</div>
+                <div className="text-2xl font-bold mb-2" style={{color: 'var(--primary-color)'}}>{statistics.totalLevels}</div>
                 <div className="text-sm" style={{color: 'rgba(255, 255, 255, 0.8)'}}>Total Levels</div>
               </div>
             </div>
@@ -90,7 +194,7 @@ const TeamLevelsPage = () => {
               border: '1px solid rgba(var(--success-rgb), 0.3)'
             }}>
               <div className="text-center">
-                <div className="text-2xl font-bold mb-2" style={{color: 'rgb(var(--success-rgb))'}}>0</div>
+                <div className="text-2xl font-bold mb-2" style={{color: 'rgb(var(--success-rgb))'}}>{statistics.totalMembers}</div>
                 <div className="text-sm" style={{color: 'rgba(255, 255, 255, 0.8)'}}>Total Members</div>
               </div>
             </div>
@@ -100,7 +204,7 @@ const TeamLevelsPage = () => {
               border: '1px solid rgba(var(--info-rgb), 0.3)'
             }}>
               <div className="text-center">
-                <div className="text-2xl font-bold mb-2" style={{color: 'rgb(var(--info-rgb))'}}>0</div>
+                <div className="text-2xl font-bold mb-2" style={{color: 'rgb(var(--info-rgb))'}}>{statistics.activeLevels}</div>
                 <div className="text-sm" style={{color: 'rgba(255, 255, 255, 0.8)'}}>Active Levels</div>
               </div>
             </div>
@@ -147,9 +251,65 @@ const TeamLevelsPage = () => {
                   <div className="text-sm mb-2" style={{color: 'rgba(255, 255, 255, 0.8)'}}>Level Information</div>
                   <div className="text-sm" style={{color: 'rgba(255, 255, 255, 0.8)'}}>
                     This level shows all members who joined through your network at the {selectedLevel.levelNo.toLowerCase()}. 
-                    Currently, there are no members in this level.
+                    {selectedLevel.totalMembers > 0 
+                      ? ` Currently, there are ${selectedLevel.totalMembers} members in this level.`
+                      : ' Currently, there are no members in this level.'
+                    }
                   </div>
                 </div>
+
+                {/* Level Members List */}
+                {levelDetails && levelDetails.members && levelDetails.members.length > 0 && (
+                  <div className="rounded-lg p-4 transition-all duration-200 mt-4" style={{
+                    background: 'linear-gradient(to right, rgba(var(--body-bg-rgb), 0.2), rgba(var(--primary-rgb), 0.1))',
+                    border: '1px solid var(--default-border)'
+                  }}>
+                    <div className="text-sm mb-3" style={{color: 'rgba(255, 255, 255, 0.8)'}}>
+                      Members in {selectedLevel.levelNo} ({levelDetails.totalCount} total)
+                    </div>
+                    <div className="space-y-2 max-h-60 overflow-y-auto">
+                      {levelDetails.members.map((member, index) => (
+                        <div key={member.id} className="flex justify-between items-center p-2 rounded" style={{
+                          backgroundColor: 'rgba(255, 255, 255, 0.05)'
+                        }}>
+                          <div className="flex items-center space-x-3">
+                            <div className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-medium" style={{
+                              background: 'linear-gradient(135deg, var(--primary-color), var(--secondary-color))',
+                              color: 'white'
+                            }}>
+                              {member.name.charAt(0)}
+                            </div>
+                            <div>
+                              <div className="text-sm font-medium text-white">{member.name}</div>
+                              <div className="text-xs" style={{color: 'rgba(255, 255, 255, 0.6)'}}>{member.memberId}</div>
+                            </div>
+                          </div>
+                          <div className="text-right">
+                            <div className="text-xs font-medium" style={{color: 'var(--secondary-color)'}}>{member.package}</div>
+                            <div className="text-xs" style={{
+                              color: member.status === 'Active' ? 'rgb(var(--success-rgb))' : 'rgb(var(--danger-rgb))'
+                            }}>
+                              {member.status}
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Loading state for level details */}
+                {selectedLevel.totalMembers > 0 && loadingDetails && (
+                  <div className="rounded-lg p-4 transition-all duration-200 mt-4" style={{
+                    background: 'linear-gradient(to right, rgba(var(--body-bg-rgb), 0.2), rgba(var(--primary-rgb), 0.1))',
+                    border: '1px solid var(--default-border)'
+                  }}>
+                    <div className="flex items-center justify-center">
+                      <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-white mr-3"></div>
+                      <span className="text-sm" style={{color: 'rgba(255, 255, 255, 0.8)'}}>Loading level details...</span>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           )}

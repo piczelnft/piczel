@@ -175,10 +175,9 @@ export default function Sidebar({ isOpen, onClose }) {
       hasDropdown: true,
       dropdownItems: [
         { name: 'Create New Ticket', icon: 'ticket', href: '/support/create' },
-        { name: 'Support Tickets', icon: 'file-text', href: '/support/tickets' }
       ]
     },
-    { name: 'Logout', icon: 'log-out', isLogout: true }
+    // { name: 'Logout', icon: 'log-out', isLogout: true }
   ];
 
   const handleItemClick = (itemName, hasDropdown = false, isLogout = false) => {
