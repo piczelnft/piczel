@@ -1,8 +1,133 @@
 'use client';
 
 import Link from 'next/link';
+import { useAuth } from '@/contexts/AuthContext';
+import { useEffect, useState, useCallback } from 'react';
 
 export default function Home() {
+  const { user, token, isAuthenticated } = useAuth();
+  const [dashboardData, setDashboardData] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  const fetchDashboardData = useCallback(async () => {
+    try {
+      setLoading(true);
+      const response = await fetch('/api/dashboard', {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch dashboard data');
+      }
+
+      const data = await response.json();
+      setDashboardData(data);
+    } catch (err) {
+      console.error('Error fetching dashboard data:', err);
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  }, [token]);
+
+  useEffect(() => {
+    if (isAuthenticated && token) {
+      fetchDashboardData();
+    }
+  }, [isAuthenticated, token, fetchDashboardData]);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
+        <div className="text-white text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white mx-auto mb-4"></div>
+          <p>Loading Dashboard...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
+        <div className="text-white text-center max-w-md">
+          <p className="text-red-400 mb-4">Error: {error}</p>
+          <div className="space-y-2 mb-4">
+            <button 
+              onClick={fetchDashboardData}
+              className="btn-enhanced px-4 py-2 text-white hover-bounce mr-2"
+            >
+              Retry Dashboard
+            </button>
+            <button 
+              onClick={async () => {
+                try {
+                  const response = await fetch('/api/test-user', {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                  });
+                  const data = await response.json();
+                  console.log('Test User Response:', data);
+                  alert(JSON.stringify(data, null, 2));
+                } catch (err) {
+                  console.error('Test User Error:', err);
+                  alert('Test User Error: ' + err.message);
+                }
+              }}
+              className="btn-enhanced px-4 py-2 text-white hover-bounce"
+            >
+              Test User API
+            </button>
+          </div>
+          <p className="text-sm text-gray-400">
+            Check console for detailed error information
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  // Fallback to default data if API fails
+  const data = dashboardData || {
+    memberId: "DGT123456",
+    status: "Active",
+    rank: "Basic",
+    totalTeam: 863,
+    myDirects: 65,
+    wallet: "4926.13",
+    depositWallet: "0.00",
+    capping: {
+      total: 40800,
+      used: 5528.13,
+      balance: 35271.87
+    },
+    clubStats: {
+      clubATeam: 839,
+      clubBTeam: 24,
+      clubABusiness: 1135733.00,
+      clubBBusiness: 0.00
+    },
+    deposits: {
+      total: 100.00,
+      investment: "10200 / 1,478.26 USDG",
+      matching: 0
+    },
+    withdrawals: {
+      total: "USDG 82.19",
+      today: "USDG 0"
+    },
+    referralLinks: {
+      clubA: `http://piczelite.com/member/register/${user?.memberId || 'PIC123456'}/ClubA`,
+    },
+    incomeStats: {
+      totalIncome: "5528.13",
+      affiliateReward: "4925.13",
+      stakingReward: "603.00",
+      communityReward: "0.00"
+    }
+  };
   return (
     <div className="relative overflow-hidden">
         {/* Animated Background */}
@@ -23,7 +148,30 @@ export default function Home() {
         {/* Hero Section */}
         <div className="relative z-10 pt-8 pb-6">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center">
+          <div className="flex justify-between items-center">
+            <div></div>
+            <div className="flex items-center space-x-4">
+              <button 
+                onClick={fetchDashboardData}
+                className="btn-enhanced px-4 py-2 text-white hover-bounce text-sm flex items-center space-x-2"
+                disabled={loading}
+              >
+                <span className={`text-sm ${loading ? 'animate-spin' : ''}`}>
+                  {loading ? '⟳' : '↻'}
+                </span>
+                <span>Refresh Data</span>
+              </button>
+              {dashboardData && (
+                <div className="text-xs text-green-400">
+                  ✅ Live Data
+                </div>
+              )}
+              {!dashboardData && (
+                <div className="text-xs text-yellow-400">
+                  ⚠️ Using Fallback Data
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </div>
@@ -37,7 +185,7 @@ export default function Home() {
             <div className="text-center relative">
               <div className="absolute -top-2 -right-2 w-3 h-3 rounded-full animate-pulse" style={{backgroundColor: 'var(--primary-color)'}}></div>
               <div className="text-sm mb-2 font-medium" style={{color: 'rgba(255, 255, 255, 0.7)'}}>Member ID</div>
-              <div className="text-white font-bold text-lg gradient-text-neon">DGT123456</div>
+              <div className="text-white font-bold text-lg gradient-text-neon">{data.memberId}</div>
             </div>
             {/* Floating PICZEL SWAP Button */}
             <div className="absolute -top-3 -left-3 z-10">
@@ -58,7 +206,7 @@ export default function Home() {
             <div className="text-center relative">
               <div className="absolute -top-2 -right-2 w-3 h-3 rounded-full animate-pulse" style={{backgroundColor: 'rgb(var(--success-rgb))'}}></div>
               <div className="text-sm mb-2 font-medium" style={{color: 'rgba(255, 255, 255, 0.7)'}}>Status</div>
-              <div className="font-bold text-lg animate-neonGlow" style={{color: 'rgb(var(--success-rgb))'}}>Active</div>
+              <div className="font-bold text-lg animate-neonGlow" style={{color: 'rgb(var(--success-rgb))'}}>{data.status}</div>
             </div>
           </div>
 
@@ -67,7 +215,7 @@ export default function Home() {
             <div className="text-center relative">
               <div className="absolute -top-2 -right-2 w-3 h-3 rounded-full animate-pulse" style={{backgroundColor: 'rgb(var(--warning-rgb))'}}></div>
               <div className="text-sm mb-2 font-medium" style={{color: 'rgba(255, 255, 255, 0.7)'}}>Rank</div>
-              <div className="font-bold text-lg animate-neonGlow" style={{color: 'rgb(var(--warning-rgb))'}}>Basic</div>
+              <div className="font-bold text-lg animate-neonGlow" style={{color: 'rgb(var(--warning-rgb))'}}>{data.rank}</div>
             </div>
           </div>
 
@@ -76,7 +224,7 @@ export default function Home() {
             <div className="text-center relative">
               <div className="absolute -top-2 -right-2 w-3 h-3 rounded-full animate-pulse" style={{backgroundColor: 'rgb(var(--info-rgb))'}}></div>
               <div className="text-sm mb-2 font-medium" style={{color: 'rgba(255, 255, 255, 0.7)'}}>Total Team</div>
-              <div className="font-bold text-lg animate-neonGlow" style={{color: 'rgb(var(--info-rgb))'}}>863</div>
+              <div className="font-bold text-lg animate-neonGlow" style={{color: 'rgb(var(--info-rgb))'}}>{data.totalTeam}</div>
             </div>
           </div>
 
@@ -85,7 +233,7 @@ export default function Home() {
             <div className="text-center relative">
               <div className="absolute -top-2 -right-2 w-3 h-3 rounded-full animate-pulse" style={{backgroundColor: 'rgb(143, 0, 255)'}}></div>
               <div className="text-sm mb-2 font-medium" style={{color: 'rgba(255, 255, 255, 0.7)'}}>My Directs</div>
-              <div className="font-bold text-lg animate-neonGlow" style={{color: 'rgb(143, 0, 255)'}}>65</div>
+              <div className="font-bold text-lg animate-neonGlow" style={{color: 'rgb(143, 0, 255)'}}>{data.myDirects}</div>
             </div>
           </div>
 
@@ -94,7 +242,7 @@ export default function Home() {
             <div className="text-center relative">
               <div className="absolute -top-2 -right-2 w-3 h-3 rounded-full animate-pulse" style={{backgroundColor: 'rgb(var(--success-rgb))'}}></div>
               <div className="text-sm mb-2 font-medium" style={{color: 'rgba(255, 255, 255, 0.7)'}}>Wallet</div>
-              <div className="font-bold text-lg animate-neonGlow" style={{color: 'rgb(var(--success-rgb))'}}>$4926.13</div>
+              <div className="font-bold text-lg animate-neonGlow" style={{color: 'rgb(var(--success-rgb))'}}>${data.wallet}</div>
             </div>
           </div>
 
@@ -103,29 +251,29 @@ export default function Home() {
             <div className="text-center relative">
               <div className="absolute -top-2 -right-2 w-3 h-3 rounded-full animate-pulse" style={{backgroundColor: 'rgb(var(--secondary-rgb))'}}></div>
               <div className="text-sm mb-2 font-medium" style={{color: 'rgba(255, 255, 255, 0.7)'}}>Deposit Wallet</div>
-              <div className="font-bold text-lg animate-neonGlow" style={{color: 'rgb(var(--secondary-rgb))'}}>$0.00</div>
+              <div className="font-bold text-lg animate-neonGlow" style={{color: 'rgb(var(--secondary-rgb))'}}>${data.depositWallet}</div>
             </div>
           </div>
         </div>
 
         {/* CAPPING 4X Section */}
-        <div className="p-8 mb-8 shadow-2xl hover-lift-enhanced animate-fadeInUp rounded-2xl border" style={{animationDelay: '0.8s', backgroundColor: 'rgba(0, 0, 0, 0.1)', backdropFilter: 'blur(10px)', borderColor: 'var(--default-border)'}}>
+        {/* <div className="p-8 mb-8 shadow-2xl hover-lift-enhanced animate-fadeInUp rounded-2xl border" style={{animationDelay: '0.8s', backgroundColor: 'rgba(0, 0, 0, 0.1)', backdropFilter: 'blur(10px)', borderColor: 'var(--default-border)'}}>
           <h2 className="text-4xl font-bold text-white mb-8 text-center gradient-text-enhanced animate-neonGlow">CAPPING 4X</h2>
           <div className="grid grid-cols-3 gap-8">
             <div className="text-center group">
-              <div className="text-3xl font-bold text-white mb-2 group-hover:scale-110 transition-transform duration-300">$ 40800</div>
+              <div className="text-3xl font-bold text-white mb-2 group-hover:scale-110 transition-transform duration-300">$ {data.capping.total.toLocaleString()}</div>
               <div className="text-lg" style={{color: 'rgba(255, 255, 255, 0.8)'}}>Total</div>
             </div>
             <div className="text-center group">
-              <div className="text-3xl font-bold text-white mb-2 group-hover:scale-110 transition-transform duration-300">$ 5528.13</div>
+              <div className="text-3xl font-bold text-white mb-2 group-hover:scale-110 transition-transform duration-300">$ {typeof data.capping.used === 'number' ? data.capping.used.toLocaleString() : data.capping.used}</div>
               <div className="text-lg" style={{color: 'rgba(255, 255, 255, 0.8)'}}>Used</div>
             </div>
             <div className="text-center group">
-              <div className="text-3xl font-bold text-white mb-2 group-hover:scale-110 transition-transform duration-300">$ 35271.87</div>
+              <div className="text-3xl font-bold text-white mb-2 group-hover:scale-110 transition-transform duration-300">$ {data.capping.balance.toLocaleString()}</div>
               <div className="text-lg" style={{color: 'rgba(255, 255, 255, 0.8)'}}>Balance</div>
             </div>
           </div>
-        </div>
+        </div> */}
 
         
 
@@ -153,7 +301,7 @@ export default function Home() {
               </svg>
             </div>
             <div className="text-center">
-              <div className="text-xl font-bold mb-1 animate-neonGlow" style={{color: 'rgb(var(--default-text-color-rgb))'}}>$5,528.13</div>
+              <div className="text-xl font-bold mb-1 animate-neonGlow" style={{color: 'rgb(var(--default-text-color-rgb))'}}>${data.incomeStats.totalIncome}</div>
               <div className="text-xs" style={{color: 'rgba(255, 255, 255, 0.6)'}}>Total Earnings</div>
             </div>
           </div>
@@ -180,7 +328,7 @@ export default function Home() {
               </svg>
             </div>
             <div className="text-center">
-              <div className="text-xl font-bold mb-1 animate-neonGlow" style={{color: 'rgb(var(--success-rgb))'}}>$4,925.13</div>
+              <div className="text-xl font-bold mb-1 animate-neonGlow" style={{color: 'rgb(var(--success-rgb))'}}>${data.incomeStats.affiliateReward}</div>
               <div className="text-xs" style={{color: 'rgba(255, 255, 255, 0.6)'}}>Referral Earnings</div>
             </div>
           </div>
@@ -207,7 +355,7 @@ export default function Home() {
               </svg>
             </div>
             <div className="text-center">
-              <div className="text-xl font-bold mb-1 animate-neonGlow" style={{color: 'rgb(143, 0, 255)'}}>$603.00</div>
+              <div className="text-xl font-bold mb-1 animate-neonGlow" style={{color: 'rgb(143, 0, 255)'}}>${data.incomeStats.stakingReward}</div>
               <div className="text-xs" style={{color: 'rgba(255, 255, 255, 0.6)'}}>Staking Returns</div>
             </div>
           </div>
@@ -234,51 +382,51 @@ export default function Home() {
               </svg>
             </div>
             <div className="text-center">
-              <div className="text-xl font-bold mb-1 animate-neonGlow" style={{color: 'rgb(var(--info-rgb))'}}>$0</div>
+              <div className="text-xl font-bold mb-1 animate-neonGlow" style={{color: 'rgb(var(--info-rgb))'}}>${data.incomeStats.communityReward}</div>
               <div className="text-xs" style={{color: 'rgba(255, 255, 255, 0.6)'}}>Community Earnings</div>
             </div>
           </div>
         </div>
 
         {/* Club Statistics Section */}
-        <div className="p-6 mb-8 hover-lift-enhanced animate-fadeInUp rounded-2xl border" style={{animationDelay: '1.3s', backgroundColor: 'rgba(0, 0, 0, 0.1)', backdropFilter: 'blur(10px)', borderColor: 'var(--default-border)'}}>
+        {/* <div className="p-6 mb-8 hover-lift-enhanced animate-fadeInUp rounded-2xl border" style={{animationDelay: '1.3s', backgroundColor: 'rgba(0, 0, 0, 0.1)', backdropFilter: 'blur(10px)', borderColor: 'var(--default-border)'}}>
           <h3 className="text-lg font-semibold text-white mb-4 gradient-text-neon">Club Statistics</h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="space-y-4">
               <div className="flex justify-between group">
                 <span style={{color: 'rgba(255, 255, 255, 0.8)'}}>Club A Team:</span>
-                <span className="font-medium group-hover:scale-110 transition-transform duration-300" style={{color: 'rgb(var(--info-rgb))'}}>839</span>
+                <span className="font-medium group-hover:scale-110 transition-transform duration-300" style={{color: 'rgb(var(--info-rgb))'}}>{data.clubStats.clubATeam}</span>
               </div>
               <div className="flex justify-between group">
                 <span style={{color: 'rgba(255, 255, 255, 0.8)'}}>Club B Team:</span>
-                <span className="font-medium group-hover:scale-110 transition-transform duration-300" style={{color: 'rgb(143, 0, 255)'}}>24</span>
+                <span className="font-medium group-hover:scale-110 transition-transform duration-300" style={{color: 'rgb(143, 0, 255)'}}>{data.clubStats.clubBTeam}</span>
               </div>
             </div>
             <div className="space-y-4">
               <div className="flex justify-between group">
                 <span style={{color: 'rgba(255, 255, 255, 0.8)'}}>Total Club A Business:</span>
-                <span className="font-medium group-hover:scale-110 transition-transform duration-300" style={{color: 'rgb(var(--success-rgb))'}}>$1,135,733.00</span>
+                <span className="font-medium group-hover:scale-110 transition-transform duration-300" style={{color: 'rgb(var(--success-rgb))'}}>${data.clubStats.clubABusiness.toLocaleString()}</span>
               </div>
               <div className="flex justify-between group">
                 <span style={{color: 'rgba(255, 255, 255, 0.8)'}}>Total Club B Business:</span>
-                <span className="font-medium" style={{color: 'rgb(var(--default-text-color-rgb))'}}>$0.00</span>
+                <span className="font-medium" style={{color: 'rgb(var(--default-text-color-rgb))'}}>${data.clubStats.clubBBusiness.toLocaleString()}</span>
               </div>
             </div>
           </div>
-        </div>
+        </div> */}
 
         {/* Transaction History */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+        {/* <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
           <div className="p-6 hover-lift-enhanced animate-fadeInUp rounded-2xl border" style={{animationDelay: '1.4s', backgroundColor: 'rgba(0, 0, 0, 0.1)', backdropFilter: 'blur(10px)', borderColor: 'var(--default-border)'}}>
             <h3 className="text-lg font-semibold text-white mb-4 gradient-text-neon">Withdrawals</h3>
             <div className="space-y-3">
               <div className="flex justify-between group">
                 <span style={{color: 'rgba(255, 255, 255, 0.8)'}}>Total Withdrawal:</span>
-                <span className="font-medium group-hover:scale-110 transition-transform duration-300" style={{color: 'rgb(var(--danger-rgb))'}}>USDG 82.19</span>
+                <span className="font-medium group-hover:scale-110 transition-transform duration-300" style={{color: 'rgb(var(--danger-rgb))'}}>{data.withdrawals.total}</span>
               </div>
               <div className="flex justify-between group">
                 <span style={{color: 'rgba(255, 255, 255, 0.8)'}}>Today&apos;s Withdrawal:</span>
-                <span className="font-medium" style={{color: 'rgb(var(--default-text-color-rgb))'}}>USDG 0</span>
+                <span className="font-medium" style={{color: 'rgb(var(--default-text-color-rgb))'}}>{data.withdrawals.today}</span>
               </div>
             </div>
           </div>
@@ -288,19 +436,19 @@ export default function Home() {
             <div className="space-y-3">
               <div className="flex justify-between group">
                 <span style={{color: 'rgba(255, 255, 255, 0.8)'}}>Total Deposit:</span>
-                <span className="font-medium group-hover:scale-110 transition-transform duration-300" style={{color: 'rgb(var(--success-rgb))'}}>$100.00</span>
+                <span className="font-medium group-hover:scale-110 transition-transform duration-300" style={{color: 'rgb(var(--success-rgb))'}}>${data.deposits.total}</span>
               </div>
               <div className="flex justify-between group">
                 <span style={{color: 'rgba(255, 255, 255, 0.8)'}}>Total Investment:</span>
-                <span className="font-medium group-hover:scale-110 transition-transform duration-300" style={{color: 'rgb(var(--info-rgb))'}}>$10,200 / 1,478.26 USDG</span>
+                <span className="font-medium group-hover:scale-110 transition-transform duration-300" style={{color: 'rgb(var(--info-rgb))'}}>{data.deposits.investment}</span>
               </div>
               <div className="flex justify-between group">
                 <span style={{color: 'rgba(255, 255, 255, 0.8)'}}>Current Matching:</span>
-                <span className="font-medium" style={{color: 'rgb(var(--default-text-color-rgb))'}}>$0</span>
+                <span className="font-medium" style={{color: 'rgb(var(--default-text-color-rgb))'}}>${data.deposits.matching}</span>
               </div>
             </div>
           </div>
-        </div>
+        </div> */}
 
         {/* Referral Links */}
         <div className="p-6 hover-lift-enhanced animate-fadeInUp rounded-2xl border" style={{animationDelay: '1.6s', backgroundColor: 'rgba(0, 0, 0, 0.1)', backdropFilter: 'blur(10px)', borderColor: 'var(--default-border)'}}>
@@ -311,22 +459,7 @@ export default function Home() {
               <div className="flex items-center space-x-2">
                 <input 
                   type="text" 
-                  value="http://piczelite.com/member/register/PIC123456/ClubA" 
-                  readOnly 
-                  className="flex-1 px-3 py-2 rounded-lg text-sm focus:border-opacity-50 transition-colors duration-300"
-                  style={{backgroundColor: 'rgba(255, 255, 255, 0.1)', color: 'rgb(var(--default-text-color-rgb))', border: '1px solid var(--default-border)'}}
-                />
-                <button className="btn-enhanced px-4 py-2 text-white hover-bounce text-sm">
-                  Copy
-                </button>
-              </div>
-            </div>
-            <div>
-              <div className="text-sm mb-2" style={{color: 'rgba(255, 255, 255, 0.8)'}}>Club B Referral Code:</div>
-              <div className="flex items-center space-x-2">
-                <input 
-                  type="text" 
-                  value="http://piczelite.com/member/register/PIC123456/ClubB" 
+                  value={data.referralLinks.clubA} 
                   readOnly 
                   className="flex-1 px-3 py-2 rounded-lg text-sm focus:border-opacity-50 transition-colors duration-300"
                   style={{backgroundColor: 'rgba(255, 255, 255, 0.1)', color: 'rgb(var(--default-text-color-rgb))', border: '1px solid var(--default-border)'}}
