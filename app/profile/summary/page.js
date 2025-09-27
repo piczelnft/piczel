@@ -1,19 +1,69 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
+import { useAuth } from '@/contexts/AuthContext';
 
 export default function ProfileSummary() {
+  const { user, token, isAuthenticated } = useAuth();
   const [profileData, setProfileData] = useState({
-    fullName: 'Admin',
-    email: 'admin@gmail.com',
-    mobile: '3434847312',
-    country: 'India',
+    fullName: '',
+    email: '',
+    mobile: '',
+    country: '',
+    memberId: '',
     profileImage: null
   });
 
   const [isEditing, setIsEditing] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState(null);
+
+  // Fetch profile data
+  const fetchProfileData = useCallback(async () => {
+    if (!isAuthenticated || !token) return;
+    
+    try {
+      setLoading(true);
+      setError(null);
+      
+      const response = await fetch('/api/profile', {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch profile data');
+      }
+
+      const data = await response.json();
+      setProfileData(data.profile || profileData);
+    } catch (err) {
+      console.error('Error fetching profile data:', err);
+      setError(err.message);
+      // Fallback to auth user data if API fails
+      if (user) {
+        setProfileData({
+          fullName: user.name || '',
+          email: user.email || '',
+          mobile: user.profile?.phone || '',
+          country: user.profile?.country || '',
+          memberId: user.memberId || '',
+          profileImage: user.profile?.avatar || null
+        });
+      }
+    } finally {
+      setLoading(false);
+    }
+  }, [isAuthenticated, token, user]);
+
+  // Fetch data when component mounts
+  useEffect(() => {
+    fetchProfileData();
+  }, [fetchProfileData]);
 
   const handleInputChange = (field, value) => {
     setProfileData(prev => ({
@@ -32,12 +82,67 @@ export default function ProfileSummary() {
     }
   };
 
-  const handleSave = () => {
-    // Handle save logic here
-    console.log('Saving profile:', profileData);
-    setIsEditing(false);
-    alert('Profile updated successfully!');
+  const handleSave = async () => {
+    try {
+      setSaving(true);
+      setError(null);
+      
+      const response = await fetch('/api/profile', {
+        method: 'PUT',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(profileData),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to update profile');
+      }
+
+      const data = await response.json();
+      setProfileData(data.profile);
+      setIsEditing(false);
+      
+      // Show success message
+      alert('Profile updated successfully!');
+    } catch (err) {
+      console.error('Error updating profile:', err);
+      setError(err.message);
+      alert('Failed to update profile. Please try again.');
+    } finally {
+      setSaving(false);
+    }
   };
+
+  // Loading state
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center" style={{background: 'linear-gradient(to bottom right, var(--default-body-bg-color) 0%, var(--theme-bg-gradient) 25%, var(--default-body-bg-color) 100%)', fontFamily: 'var(--default-font-family)'}}>
+        <div className="text-white text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white mx-auto mb-4"></div>
+          <p>Loading profile...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Error state
+  if (error && !profileData.fullName) {
+    return (
+      <div className="min-h-screen flex items-center justify-center" style={{background: 'linear-gradient(to bottom right, var(--default-body-bg-color) 0%, var(--theme-bg-gradient) 25%, var(--default-body-bg-color) 100%)', fontFamily: 'var(--default-font-family)'}}>
+        <div className="text-white text-center max-w-md">
+          <p className="text-red-400 mb-4">Error: {error}</p>
+          <button 
+            onClick={fetchProfileData}
+            className="btn-enhanced px-4 py-2 text-white hover-bounce"
+          >
+            Retry
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen" style={{background: 'linear-gradient(to bottom right, var(--default-body-bg-color) 0%, var(--theme-bg-gradient) 25%, var(--default-body-bg-color) 100%)', fontFamily: 'var(--default-font-family)'}}>
@@ -51,6 +156,18 @@ export default function ProfileSummary() {
             <div className="text-center">
               <h1 className="text-2xl font-bold text-white">👤 Profile Settings</h1>
               <p className="text-gray-300 text-sm" style={{color: 'rgba(255, 255, 255, 0.7)'}}>Update your profile settings</p>
+              <div className="mt-2">
+                <button 
+                  onClick={fetchProfileData}
+                  className="btn-enhanced px-3 py-1 text-white hover-bounce text-xs flex items-center space-x-1 mx-auto"
+                  disabled={loading}
+                >
+                  <span className={`text-xs ${loading ? 'animate-spin' : ''}`}>
+                    {loading ? '⟳' : '↻'}
+                  </span>
+                  <span>Refresh</span>
+                </button>
+              </div>
             </div>
             <div className="w-24"></div> {/* Spacer for centering */}
           </div>
@@ -95,9 +212,21 @@ export default function ProfileSummary() {
                 </div>
                 
                 <div className="space-y-2">
-                  <h3 className="text-xl font-semibold text-white">{profileData.fullName}</h3>
+                  <h3 className="text-xl font-semibold text-white">{profileData.fullName || 'Loading...'}</h3>
                   <p className="text-gray-400">{profileData.email}</p>
+                  {profileData.memberId && (
+                    <p className="text-sm" style={{color: 'var(--primary-color)'}}>ID: {profileData.memberId}</p>
+                  )}
                 </div>
+
+                {/* Error Display */}
+                {error && (
+                  <div className="mt-4 p-3 rounded-lg" style={{backgroundColor: 'rgba(var(--danger-rgb), 0.2)', border: '1px solid rgba(var(--danger-rgb), 0.3)'}}>
+                    <p className="text-sm" style={{color: 'rgb(var(--danger-rgb))'}}>
+                      ⚠️ {error}
+                    </p>
+                  </div>
+                )}
 
                 {isEditing && (
                   <div className="mt-4">
@@ -237,9 +366,13 @@ export default function ProfileSummary() {
             <div className="mt-8 flex justify-end">
               <button
                 onClick={handleSave}
-                className="px-8 py-3 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white font-bold rounded-xl transition-all duration-300 hover:scale-105 shadow-lg hover:shadow-green-500/25"
+                disabled={saving}
+                className={`px-8 py-3 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white font-bold rounded-xl transition-all duration-300 hover:scale-105 shadow-lg hover:shadow-green-500/25 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 flex items-center space-x-2`}
               >
-                Save Changes
+                {saving && (
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                )}
+                <span>{saving ? 'Saving...' : 'Save Changes'}</span>
               </button>
             </div>
           )}

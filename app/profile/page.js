@@ -299,9 +299,9 @@ export default function ProfilePage() {
                 </div>
 
                 <div className="space-y-3">
-                  <button className="w-full py-3 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors">
+                  {/* <button className="w-full py-3 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors">
                     Add Funds
-                  </button>
+                  </button> */}
                   <button className="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors">
                     Withdraw Funds
                   </button>
