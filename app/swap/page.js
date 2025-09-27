@@ -232,13 +232,13 @@ export default function SwapPage() {
 
     if (swapType === "buy") {
       try {
-        // Check if MetaMask is installed
+        // Check if MetaMask is installed and connected (for UI purposes)
         if (typeof window.ethereum === "undefined") {
           alert("Please install MetaMask to purchase BNB");
           return;
         }
 
-        // Request account access
+        // Request account access (for display purposes)
         const accounts = await window.ethereum.request({
           method: "eth_requestAccounts",
         });
@@ -248,120 +248,59 @@ export default function SwapPage() {
           return;
         }
 
-        // Switch to BSC Testnet if needed
-        try {
-          await window.ethereum.request({
-            method: "wallet_switchEthereumChain",
-            params: [{ chainId: "0x61" }], // 97 in hex (BSC Testnet)
-          });
-        } catch (switchError) {
-          // If the network doesn't exist, add it
-          if (switchError.code === 4902) {
-            try {
-              await window.ethereum.request({
-                method: "wallet_addEthereumChain",
-                params: [
-                  {
-                    chainId: "0x61",
-                    chainName: "BNB Smart Chain Testnet",
-                    nativeCurrency: {
-                      name: "BNB",
-                      symbol: "tBNB",
-                      decimals: 18,
-                    },
-                    rpcUrls: ["https://data-seed-prebsc-1-s1.binance.org:8545"],
-                    blockExplorerUrls: ["https://testnet.bscscan.com"],
-                  },
-                ],
-              });
-            } catch (addError) {
-              console.error("Error adding BSC Testnet:", addError);
-              alert("Failed to add BSC Testnet to MetaMask");
-              return;
-            }
-          }
+        // Simulate the purchase by updating user balance in database
+        if (!isAuthenticated || !token) {
+          alert("Please log in to make a purchase.");
+          return;
         }
 
-        // Convert USD amount to BNB
+        // Convert USD amount to BNB for display
         const bnbAmount = (parseFloat(usdAmount) / bnbPrice).toFixed(6);
 
-        // Convert BNB amount to wei
-        const bnbAmountWei = (
-          parseFloat(bnbAmount) * Math.pow(10, 18)
-        ).toString();
-
-        // Create transaction to send BNB to a specific address (you can change this)
-        const transactionParameters = {
-          to: "0x5fbdb2315678afecb367f032d93f642f64180aa3", // Your DGTek contract address
-          from: accounts[0],
-          value: "0x" + parseInt(bnbAmountWei).toString(16), // Convert to hex
-          gas: "0x5208", // 21000 gas limit for simple transfer
-        };
-
-        // Send transaction
-        const txHash = await window.ethereum.request({
-          method: "eth_sendTransaction",
-          params: [transactionParameters],
+        // Call API to simulate purchase and update balance
+        const res = await fetch("/api/purchase/simulate", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            usdAmount: parseFloat(usdAmount),
+            bnbAmount: parseFloat(bnbAmount),
+            packages: packages,
+            bnbPrice: bnbPrice,
+          }),
         });
 
+        const data = await res.json();
+
+        if (!res.ok) {
+          alert(data.error || "Purchase failed");
+          return;
+        }
+
+        // Update local state
+        setDailyBuyCount((prev) => prev + 1);
+
+        // Update user context with new balance
+        if (updateUser) {
+          updateUser(data.user);
+        }
+
         alert(
-          `Transaction submitted!\n\nTransaction Hash: ${txHash}\n\nBNB Amount: ${bnbAmount} BNB\nUSD Value: $${usdAmount}\n\nPlease wait for confirmation...`
+          `Purchase Successful!\n\nAmount: ${bnbAmount} BNB (${usdAmount} USD)\nYour wallet balance has been updated!\n\nNew Balance: $${data.user.wallet.balance.toFixed(
+            2
+          )}`
         );
-
-        // Wait for transaction confirmation
-        const receipt = await waitForTransactionConfirmation(txHash);
-
-        if (receipt.status === "0x1") {
-          // Transaction successful
-          setDailyBuyCount((prev) => prev + 1);
-          alert(
-            "Purchase successful!\n\nTransaction confirmed on BSC Testnet.\nYour purchase has been recorded."
-          );
-          // Optionally redirect to a success page or dashboard
-          // router.push("/");
-        } else {
-          alert("Transaction failed. Please try again.");
-        }
       } catch (error) {
-        console.error("Transaction error:", error);
-        if (error.code === 4001) {
-          alert("Transaction rejected by user");
-        } else if (error.code === -32602) {
-          alert("Invalid transaction parameters");
-        } else {
-          alert(`Transaction failed: ${error.message}`);
-        }
+        console.error("Purchase error:", error);
+        alert(`Purchase failed: ${error.message}`);
       }
     } else {
       alert(
         `Transaction initiated!\n\n${action}ing ${amount} BNB for $${usdAmount}\n\nNote: This is a demo transaction.`
       );
     }
-  };
-
-  // Helper function to wait for transaction confirmation
-  const waitForTransactionConfirmation = async (txHash) => {
-    return new Promise((resolve, reject) => {
-      const checkTransaction = async () => {
-        try {
-          const receipt = await window.ethereum.request({
-            method: "eth_getTransactionReceipt",
-            params: [txHash],
-          });
-
-          if (receipt) {
-            resolve(receipt);
-          } else {
-            // Transaction not yet mined, check again in 2 seconds
-            setTimeout(checkTransaction, 2000);
-          }
-        } catch (error) {
-          reject(error);
-        }
-      };
-
-      checkTransaction();
-    });
   };
 
   return (

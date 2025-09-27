@@ -27,7 +27,7 @@ async function buildSubtree(root, depth, visitedNodes = new Set()) {
     status: root.isActivated ? "Active" : "Inactive",
     directs: 0, // computed below
     totalCount: 0,
-    business: "$0",
+    business: `$${(root.wallet?.balance || 0).toFixed(2)}`,
   };
 
   if (depth === 0) {
@@ -39,7 +39,9 @@ async function buildSubtree(root, depth, visitedNodes = new Set()) {
     sponsor: root._id,
     isActivated: true,
   })
-    .select("_id memberId name profile package sponsor activatedAt isActivated")
+    .select(
+      "_id memberId name profile package sponsor activatedAt isActivated wallet"
+    )
     .lean();
 
   console.log(
@@ -112,7 +114,9 @@ export async function GET(request) {
     // Identify root user
     let rootUser = null;
     if (memberId) {
-      rootUser = await User.findOne({ memberId, isActivated: true });
+      rootUser = await User.findOne({ memberId, isActivated: true }).select(
+        "_id memberId name profile package sponsor activatedAt isActivated wallet"
+      );
       if (!rootUser) {
         return NextResponse.json(
           { error: "Member not found or not activated" },
@@ -124,7 +128,9 @@ export async function GET(request) {
       if (!userId) {
         return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
       }
-      rootUser = await User.findOne({ _id: userId, isActivated: true });
+      rootUser = await User.findOne({ _id: userId, isActivated: true }).select(
+        "_id memberId name profile package sponsor activatedAt isActivated wallet"
+      );
       if (!rootUser) {
         return NextResponse.json(
           { error: "User not activated" },
