@@ -30,6 +30,17 @@ const COMMISSION_RATES = {
   // Levels 11+ get no commission
 };
 
+function calculateTotalCommissions(purchaseAmount) {
+  // Calculate total commission percentage across all levels
+  let totalCommissionRate = 0;
+  for (let level = 1; level <= 10; level++) {
+    if (COMMISSION_RATES[level]) {
+      totalCommissionRate += COMMISSION_RATES[level];
+    }
+  }
+  return purchaseAmount * totalCommissionRate;
+}
+
 async function distributeCommissions(buyerId, purchaseAmount) {
   const commissions = [];
   let currentUser = await User.findById(buyerId);
@@ -99,9 +110,16 @@ export async function POST(request) {
       return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
-    // Simulate purchase by updating user's wallet balance
+    // First, calculate total commissions that will be paid
+    const purchaseAmount = parseFloat(usdAmount);
+    const totalCommissions = calculateTotalCommissions(purchaseAmount);
+
+    // The buyer gets the remaining amount after commissions are deducted
+    const buyerAmount = purchaseAmount - totalCommissions;
+
+    // Update buyer's wallet balance with the net amount
     const currentBalance = user.wallet?.balance || 0;
-    const newBalance = currentBalance + parseFloat(usdAmount);
+    const newBalance = currentBalance + buyerAmount;
 
     const updated = await User.findOneAndUpdate(
       { _id: userId },
@@ -122,10 +140,7 @@ export async function POST(request) {
     }
 
     // Distribute commissions to upline sponsors
-    const commissions = await distributeCommissions(
-      userId,
-      parseFloat(usdAmount)
-    );
+    const commissions = await distributeCommissions(userId, purchaseAmount);
 
     return NextResponse.json(
       {
