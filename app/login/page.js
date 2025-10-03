@@ -1,9 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useAuth } from "@/contexts/AuthContext";
+import { useRedirectIfAuthenticated } from "../../lib/auth-utils";
 
 export default function LoginPage() {
   const [formData, setFormData] = useState({
@@ -15,6 +16,7 @@ export default function LoginPage() {
   const [message, setMessage] = useState("");
   const router = useRouter();
   const { login } = useAuth();
+  const { isAuthenticated, isLoading: authLoading } = useRedirectIfAuthenticated();
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -79,20 +81,129 @@ export default function LoginPage() {
     }
   };
 
+  // Show loading while checking authentication
+  if (authLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
+        <div className="text-white text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white mx-auto mb-4"></div>
+          <p>Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Don't render login form if already authenticated (will redirect to dashboard)
+  if (isAuthenticated) {
+    return null;
+  }
+
   return (
-    <div className="min-h-screen flex items-center justify-center px-4 py-12" style={{background: 'linear-gradient(to bottom right, var(--default-body-bg-color) 0%, var(--theme-bg-gradient) 25%, var(--default-body-bg-color) 100%)', fontFamily: 'var(--default-font-family)'}}>
-      <div className="max-w-md w-full space-y-8">
-        <div className="text-center">
-          <h2 className="mt-6 text-3xl font-bold text-white gradient-text-enhanced animate-fadeInUp">
-            Welcome Back
-          </h2>
-          <p className="mt-2 text-sm animate-fadeInUp" style={{color: 'rgba(255, 255, 255, 0.7)', animationDelay: '0.2s'}}>
-            Sign in to your PICZEL account
-          </p>
+    <div className="min-h-screen flex" style={{background: 'linear-gradient(to bottom right, var(--default-body-bg-color) 0%, var(--theme-bg-gradient) 25%, var(--default-body-bg-color) 100%)', fontFamily: 'var(--default-font-family)'}}>
+      {/* Left Half - Trading Animation */}
+      <div className="hidden lg:flex lg:w-1/2 relative overflow-hidden">
+        {/* Animated Background */}
+        <div className="absolute inset-0 overflow-hidden">
+          {/* Floating particles */}
+          <div className="particle" style={{top: '10%', left: '10%'}}></div>
+          <div className="particle" style={{top: '20%', left: '80%'}}></div>
+          <div className="particle" style={{top: '60%', left: '20%'}}></div>
+          <div className="particle" style={{top: '80%', left: '70%'}}></div>
+          <div className="particle" style={{top: '40%', left: '90%'}}></div>
+          
+          {/* Gradient orbs */}
+          <div className="absolute -top-40 -right-40 w-80 h-80 bg-gradient-to-br from-cyan-500/10 to-teal-500/10 rounded-full blur-3xl animate-pulse"></div>
+          <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-gradient-to-br from-teal-500/10 to-cyan-400/10 rounded-full blur-3xl animate-pulse delay-1000"></div>
+          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-gradient-to-br from-emerald-700/5 to-teal-600/5 rounded-full blur-3xl animate-float"></div>
         </div>
 
-        <div className="card-enhanced rounded-xl shadow-2xl p-8 animate-fadeInUp" style={{animationDelay: '0.4s'}}>
-          <form className="space-y-6" onSubmit={handleSubmit}>
+        {/* Trading Visualization */}
+        <div className="relative z-10 flex flex-col justify-center items-center w-full px-8">
+          <div className="text-center mb-12">
+            <h1 className="text-5xl font-bold text-white gradient-text-enhanced mb-4 animate-fadeInUp">
+              PICZEL
+            </h1>
+            <p className="text-xl text-white/80 animate-fadeInUp" style={{animationDelay: '0.2s'}}>
+              Professional Crypto Trading Platform
+            </p>
+          </div>
+
+          {/* Animated Trading Charts */}
+          <div className="w-full max-w-md space-y-6">
+            {/* Price Chart Animation */}
+            <div className="card-enhanced rounded-xl p-6 animate-fadeInUp" style={{animationDelay: '0.4s', backgroundColor: 'rgba(0, 0, 0, 0.1)', backdropFilter: 'blur(10px)', borderColor: 'var(--default-border)'}}>
+              <div className="flex justify-between items-center mb-4">
+                <div>
+                  <div className="text-white font-semibold">BTC/USD</div>
+                  <div className="text-green-400 text-sm">+2.45%</div>
+                </div>
+                <div className="text-white font-bold text-xl">$67,234.56</div>
+              </div>
+              <div className="relative h-24">
+                <svg className="w-full h-full" viewBox="0 0 200 100" preserveAspectRatio="none">
+                  <path
+                    d="M0,70 L20,50 L40,80 L60,30 L80,90 L100,40 L120,85 L140,20 L160,70 L180,45 L200,65"
+                    stroke="url(#tradingGradient)"
+                    strokeWidth="3"
+                    fill="none"
+                    className="animate-zigzag"
+                  />
+                  <defs>
+                    <linearGradient id="tradingGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                      <stop offset="0%" stopColor="rgb(34, 197, 94)" />
+                      <stop offset="50%" stopColor="rgb(59, 130, 246)" />
+                      <stop offset="100%" stopColor="rgb(34, 197, 94)" />
+                    </linearGradient>
+                  </defs>
+                </svg>
+              </div>
+            </div>
+
+            {/* Live Trading Stats */}
+            <div className="grid grid-cols-2 gap-4 animate-fadeInUp" style={{animationDelay: '0.6s'}}>
+              <div className="card-enhanced rounded-lg p-4 text-center" style={{backgroundColor: 'rgba(0, 0, 0, 0.1)', backdropFilter: 'blur(10px)', borderColor: 'var(--default-border)'}}>
+                <div className="text-white font-bold text-lg">24h Volume</div>
+                <div className="text-green-400 font-semibold">$2.4B</div>
+              </div>
+              <div className="card-enhanced rounded-lg p-4 text-center" style={{backgroundColor: 'rgba(0, 0, 0, 0.1)', backdropFilter: 'blur(10px)', borderColor: 'var(--default-border)'}}>
+                <div className="text-white font-bold text-lg">Active Users</div>
+                <div className="text-blue-400 font-semibold">125K+</div>
+              </div>
+            </div>
+
+            {/* Trading Features */}
+            <div className="space-y-3 animate-fadeInUp" style={{animationDelay: '0.8s'}}>
+              <div className="flex items-center space-x-3 text-white/80">
+                <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
+                <span>Real-time Market Data</span>
+              </div>
+              <div className="flex items-center space-x-3 text-white/80">
+                <div className="w-2 h-2 bg-blue-400 rounded-full animate-pulse"></div>
+                <span>Advanced Trading Tools</span>
+              </div>
+              <div className="flex items-center space-x-3 text-white/80">
+                <div className="w-2 h-2 bg-purple-400 rounded-full animate-pulse"></div>
+                <span>Secure & Fast Execution</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Right Half - Login Form */}
+      <div className="w-full lg:w-1/2 flex items-center justify-center px-4 py-12">
+        <div className="max-w-md w-full space-y-8">
+          <div className="text-center">
+            <h2 className="mt-6 text-3xl font-bold text-white gradient-text-enhanced animate-fadeInUp">
+              Welcome Back
+            </h2>
+            <p className="mt-2 text-sm animate-fadeInUp" style={{color: 'rgba(255, 255, 255, 0.7)', animationDelay: '0.2s'}}>
+              Sign in to your PICZEL account
+            </p>
+          </div>
+
+          <div className="card-enhanced rounded-xl shadow-2xl p-8 animate-fadeInUp" style={{animationDelay: '0.4s'}}>
+            <form className="space-y-6" onSubmit={handleSubmit}>
             {errors.general && (
               <div className="px-4 py-3 rounded-lg animate-fadeInUp" style={{backgroundColor: 'rgba(255, 74, 74, 0.2)', border: '1px solid rgba(255, 74, 74, 0.3)', color: 'rgb(var(--danger-rgb))'}}>
                 {errors.general}
@@ -208,17 +319,45 @@ export default function LoginPage() {
               </button>
             </div>
 
-            <div className="text-center">
-              <span className="transition-colors duration-200" style={{color: 'rgba(255, 255, 255, 0.7)'}}>Don&apos;t have an account? </span>
+            {/* Admin Login Button */}
+            <div className="relative">
+              <div className="absolute inset-0 flex items-center">
+                <div className="w-full border-t" style={{borderColor: 'rgba(255, 255, 255, 0.2)'}}></div>
+              </div>
+              <div className="relative flex justify-center text-sm">
+                <span className="px-2" style={{backgroundColor: 'var(--default-body-bg-color)', color: 'rgba(255, 255, 255, 0.6)'}}>
+                  Admin Access
+                </span>
+              </div>
+            </div>
+
+            <div>
               <Link
-                href="/signup"
-                className="font-medium transition-colors duration-200"
-                style={{color: 'var(--primary-color)'}}
+                href="/admin/login"
+                className="w-full flex justify-center items-center py-3 px-4 rounded-lg text-sm font-medium text-white transition-all duration-200 hover:scale-105"
+                style={{
+                  background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                  border: '1px solid rgba(102, 126, 234, 0.3)',
+                  boxShadow: '0 4px 15px rgba(102, 126, 234, 0.2)'
+                }}
               >
-                Create one here
+                <span className="mr-2">👑</span>
+                Admin Login
               </Link>
             </div>
-          </form>
+
+              <div className="text-center">
+                <span className="transition-colors duration-200" style={{color: 'rgba(255, 255, 255, 0.7)'}}>Don&apos;t have an account? </span>
+                <Link
+                  href="/signup"
+                  className="font-medium transition-colors duration-200"
+                  style={{color: 'var(--primary-color)'}}
+                >
+                  Create one here
+                </Link>
+              </div>
+            </form>
+          </div>
         </div>
       </div>
     </div>

@@ -131,16 +131,16 @@ export default function Sidebar({ isOpen, onClose }) {
         { name: 'Import Fund History', icon: 'scroll', href: '/import-fund/history' }
       ]
     },
-    { 
-      name: 'Staking Section', 
-      icon: 'coins',
-      hasDropdown: true,
-      dropdownItems: [
-        { name: 'Create Staking', icon: 'shield', href: '/staking/create' },
-        { name: 'Staking Details', icon: 'bar-chart', href: '/staking/details' },
-        { name: 'Monthly Staking Rewards', icon: 'gift', href: '/staking/rewards' }
-      ]
-    },
+    // { 
+    //   name: 'Staking Section', 
+    //   icon: 'coins',
+    //   hasDropdown: true,
+    //   dropdownItems: [
+    //     { name: 'Create Staking', icon: 'shield', href: '/staking/create' },
+    //     { name: 'Staking Details', icon: 'bar-chart', href: '/staking/details' },
+    //     { name: 'Monthly Staking Rewards', icon: 'gift', href: '/staking/rewards' }
+    //   ]
+    // },
     { 
       name: 'Income Section', 
       icon: 'eye',

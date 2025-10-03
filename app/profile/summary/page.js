@@ -49,7 +49,7 @@ export default function ProfileSummary() {
         setProfileData({
           fullName: user.name || '',
           email: user.email || '',
-          mobile: user.profile?.phone || '',
+          mobile: user.mobile || '',
           country: user.profile?.country || '',
           memberId: user.memberId || '',
           profileImage: user.profile?.avatar || null

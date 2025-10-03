@@ -60,7 +60,7 @@ export async function GET() {
         id: user._id,
         fullName: user.name || '',
         email: user.email || '',
-        mobile: user.profile?.phone || '',
+        mobile: user.mobile || '',
         country: user.profile?.country || '',
         memberId: user.memberId || '',
         profileImage: user.profile?.avatar || null,
@@ -155,7 +155,7 @@ export async function PUT(request) {
       const updateData = {
         name: fullName || user.name,
         email: email || user.email,
-        'profile.phone': mobile || user.profile?.phone || '',
+        mobile: mobile || user.mobile || '',
         'profile.country': country || user.profile?.country || '',
         ...(profileImage && { 'profile.avatar': profileImage })
       };
@@ -188,7 +188,7 @@ export async function PUT(request) {
         id: updatedUser._id,
         fullName: updatedUser.name || '',
         email: updatedUser.email || '',
-        mobile: updatedUser.profile?.phone || '',
+        mobile: updatedUser.mobile || '',
         country: updatedUser.profile?.country || '',
         memberId: updatedUser.memberId || '',
         profileImage: updatedUser.profile?.avatar || null,

@@ -3,9 +3,11 @@
 import Link from 'next/link';
 import { useAuth } from '@/contexts/AuthContext';
 import { useEffect, useState, useCallback } from 'react';
+import { useAuthGuard } from '../lib/auth-utils';
 
 export default function Home() {
-  const { user, token, isAuthenticated } = useAuth();
+  const { user, token } = useAuth();
+  const { isAuthenticated, isLoading } = useAuthGuard();
   const [dashboardData, setDashboardData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -38,6 +40,23 @@ export default function Home() {
       fetchDashboardData();
     }
   }, [isAuthenticated, token, fetchDashboardData]);
+
+  // Show loading while checking authentication
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
+        <div className="text-white text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white mx-auto mb-4"></div>
+          <p>Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Don't render anything if not authenticated (will redirect to login)
+  if (!isAuthenticated) {
+    return null;
+  }
 
   if (loading) {
     return (

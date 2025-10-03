@@ -24,12 +24,12 @@ export async function POST(request) {
 
     await dbConnect();
 
-    const { name, email, password, sponsorId } = await request.json();
+    const { name, email, mobile, password, sponsorId } = await request.json();
 
     // Validation
-    if (!name || !email || !password || !sponsorId) {
+    if (!name || !email || !mobile || !password || !sponsorId) {
       return NextResponse.json(
-        { error: "All fields are required including sponsorship ID" },
+        { error: "All fields are required including mobile number and sponsorship ID" },
         { status: 400 }
       );
     }
@@ -42,12 +42,19 @@ export async function POST(request) {
     }
 
     // Check if user already exists
-    const existingUser = await User.findOne({ email });
+    const existingUser = await User.findOne({ $or: [{ email }, { mobile }] });
     if (existingUser) {
-      return NextResponse.json(
-        { error: "User with this email already exists" },
-        { status: 400 }
-      );
+      if (existingUser.email === email) {
+        return NextResponse.json(
+          { error: "User with this email already exists" },
+          { status: 400 }
+        );
+      } else {
+        return NextResponse.json(
+          { error: "User with this mobile number already exists" },
+          { status: 400 }
+        );
+      }
     }
 
     // Validate sponsor exists
@@ -64,6 +71,7 @@ export async function POST(request) {
     const user = await User.create({
       name,
       email,
+      mobile,
       password,
       sponsor: sponsor._id,
       isActivated: true,

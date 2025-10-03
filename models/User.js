@@ -24,6 +24,16 @@ const UserSchema = new mongoose.Schema({
       "Please provide a valid email",
     ],
   },
+  mobile: {
+    type: String,
+    required: [true, "Please provide a mobile number"],
+    unique: true,
+    trim: true,
+    match: [
+      /^[\+]?[1-9][\d]{0,15}$/,
+      "Please provide a valid mobile number",
+    ],
+  },
   password: {
     type: String,
     required: [true, "Please provide a password"],
@@ -69,6 +79,68 @@ const UserSchema = new mongoose.Schema({
       type: String,
       default: "",
     },
+  },
+  // MetaMask wallet integration
+  metamaskWallet: {
+    address: {
+      type: String,
+      default: "",
+    },
+    isConnected: {
+      type: Boolean,
+      default: false,
+    },
+    connectedAt: {
+      type: Date,
+      default: null,
+    },
+    network: {
+      type: String,
+      default: "",
+    },
+  },
+  // Financial tracking fields
+  walletBalance: {
+    type: Number,
+    default: 0,
+  },
+  fundBalance: {
+    type: Number,
+    default: 0,
+  },
+  totalDeposit: {
+    type: Number,
+    default: 0,
+  },
+  totalWithdrawal: {
+    type: Number,
+    default: 0,
+  },
+  // Income tracking
+  sponsorIncome: {
+    type: Number,
+    default: 0,
+  },
+  levelIncome: {
+    type: Number,
+    default: 0,
+  },
+  roiIncome: {
+    type: Number,
+    default: 0,
+  },
+  committeeIncome: {
+    type: Number,
+    default: 0,
+  },
+  rewardIncome: {
+    type: Number,
+    default: 0,
+  },
+  // User status
+  isBlocked: {
+    type: Boolean,
+    default: false,
   },
   profile: {
     avatar: {

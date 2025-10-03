@@ -1,8 +1,6 @@
 import { Geist, Geist_Mono, Rajdhani } from "next/font/google";
 import "./globals.css";
-import Navbar from "./components/Navbar";
-import LayoutWithSidebar from "./components/LayoutWithSidebar";
-import CryptoPriceTicker from "./components/CryptoPriceTicker";
+import ConditionalLayout from "./components/ConditionalLayout";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { SidebarProvider } from "./contexts/SidebarContext";
 
@@ -37,11 +35,9 @@ export default function RootLayout({ children }) {
       >
         <AuthProvider>
           <SidebarProvider>
-            <Navbar />
-            <CryptoPriceTicker />
-            <LayoutWithSidebar>
-              <main className="pt-28">{children}</main>
-            </LayoutWithSidebar>
+            <ConditionalLayout>
+              {children}
+            </ConditionalLayout>
           </SidebarProvider>
         </AuthProvider>
       </body>
