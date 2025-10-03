@@ -33,13 +33,22 @@ function SwapPage() {
 
   const wsRef = useRef(null);
   const reconnectTimeoutRef = useRef(null);
+  const reconnectAttempts = useRef(0);
+  const maxReconnectAttempts = useRef(5);
+  const isManualClose = useRef(false);
 
   // Initialize WebSocket connection for BNB price
   const initializeWebSocket = useCallback(() => {
     try {
+      // Close existing connection if any
+      if (wsRef.current && wsRef.current.readyState !== WebSocket.CLOSED) {
+        isManualClose.current = true;
+        wsRef.current.close();
+      }
+
       const wsUrl = `wss://stream.binance.com:9443/ws/${BINANCE_COIN.binanceSymbol}@ticker`;
 
-      console.log("Connecting to BNB WebSocket:", wsUrl);
+      console.log(`Connecting to BNB WebSocket (attempt ${reconnectAttempts.current + 1}):`, wsUrl);
       wsRef.current = new WebSocket(wsUrl);
 
       wsRef.current.onopen = () => {
@@ -47,6 +56,7 @@ function SwapPage() {
         setConnectionStatus("Connected");
         setError(null);
         setLoading(false);
+        reconnectAttempts.current = 0; // Reset attempts on successful connection
       };
 
       wsRef.current.onmessage = (event) => {
@@ -68,25 +78,58 @@ function SwapPage() {
 
       wsRef.current.onerror = (error) => {
         console.error("BNB WebSocket error:", error);
-        setError("Connection error");
+        setError("Connection error - attempting to reconnect...");
         setConnectionStatus("Error");
       };
 
       wsRef.current.onclose = (event) => {
         console.log("BNB WebSocket closed:", event.code, event.reason);
-        setConnectionStatus("Disconnected");
-
+        isManualClose.current = false;
+        
+        // Don't reconnect if it was a manual close or if we've exceeded max attempts
+        if (isManualClose.current || reconnectAttempts.current >= maxReconnectAttempts.current) {
+          if (reconnectAttempts.current >= maxReconnectAttempts.current) {
+            setError("Connection failed after multiple attempts. Please refresh the page.");
+            setConnectionStatus("Failed");
+          } else {
+            setConnectionStatus("Disconnected");
+          }
+          return;
+        }
+        
+        // Reconnect with exponential backoff
         if (event.code !== 1000) {
+          reconnectAttempts.current += 1;
+          const delay = Math.min(1000 * Math.pow(2, reconnectAttempts.current - 1), 30000); // Max 30 seconds
+          
+          console.log(`Attempting to reconnect BNB WebSocket in ${delay}ms (attempt ${reconnectAttempts.current}/${maxReconnectAttempts.current})`);
+          setConnectionStatus(`Reconnecting in ${Math.ceil(delay / 1000)}s...`);
+          
           reconnectTimeoutRef.current = setTimeout(() => {
-            console.log("Attempting to reconnect BNB WebSocket...");
-            initializeWebSocket();
-          }, 5000);
+            if (!isManualClose.current) {
+              initializeWebSocket();
+            }
+          }, delay);
+        } else {
+          setConnectionStatus("Disconnected");
         }
       };
     } catch (error) {
       console.error("Error initializing BNB WebSocket:", error);
       setError("Failed to initialize connection");
       setConnectionStatus("Error");
+      
+      // Retry initialization if not manual close
+      if (!isManualClose.current && reconnectAttempts.current < maxReconnectAttempts.current) {
+        reconnectAttempts.current += 1;
+        const delay = Math.min(1000 * Math.pow(2, reconnectAttempts.current - 1), 30000);
+        
+        setTimeout(() => {
+          if (!isManualClose.current) {
+            initializeWebSocket();
+          }
+        }, delay);
+      }
     }
   }, []);
 
@@ -203,7 +246,8 @@ function SwapPage() {
     initializeWebSocket();
 
     return () => {
-      if (wsRef.current) {
+      isManualClose.current = true;
+      if (wsRef.current && wsRef.current.readyState !== WebSocket.CLOSED) {
         wsRef.current.close();
       }
       if (reconnectTimeoutRef.current) {
