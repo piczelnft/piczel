@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import AdminLayout from '../components/AdminLayout';
 
 export default function WalletAddressPage() {
@@ -12,11 +12,7 @@ export default function WalletAddressPage() {
   const [limit, setLimit] = useState(10);
   const [pagination, setPagination] = useState({});
 
-  useEffect(() => {
-    fetchWalletAddresses();
-  }, [currentPage, limit, searchTerm]);
-
-  const fetchWalletAddresses = async () => {
+  const fetchWalletAddresses = useCallback(async () => {
     try {
       setLoading(true);
       const adminToken = localStorage.getItem('adminToken');
@@ -53,7 +49,11 @@ export default function WalletAddressPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [currentPage, limit, searchTerm]);
+
+  useEffect(() => {
+    fetchWalletAddresses();
+  }, [fetchWalletAddresses]);
 
   const formatDate = (dateString) => {
     return new Date(dateString).toLocaleDateString('en-GB', {

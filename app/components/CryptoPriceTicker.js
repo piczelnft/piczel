@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 
 // Crypto symbols to track with their Binance symbols
 const CRYPTO_SYMBOLS = [
@@ -31,7 +31,7 @@ export default function CryptoPriceTicker() {
   const reconnectTimeoutRef = useRef(null);
 
   // Initialize WebSocket connection
-  const initializeWebSocket = () => {
+  const initializeWebSocket = useCallback(() => {
     try {
       // Create WebSocket connection to Binance stream
       const streams = CRYPTO_SYMBOLS.map(crypto => `${crypto.binanceSymbol}@ticker`).join('/');
@@ -125,7 +125,7 @@ export default function CryptoPriceTicker() {
       setError('Failed to initialize WebSocket connection');
       setConnectionStatus('Error');
     }
-  };
+  }, [previousPrices]);
 
   // Initialize WebSocket connection on component mount
   useEffect(() => {
@@ -140,7 +140,7 @@ export default function CryptoPriceTicker() {
         clearTimeout(reconnectTimeoutRef.current);
       }
     };
-  }, []);
+  }, [initializeWebSocket]);
 
   // Duplicate the data to create seamless loop
   const duplicatedData = [...cryptoData, ...cryptoData];

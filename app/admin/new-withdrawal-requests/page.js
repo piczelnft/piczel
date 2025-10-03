@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import AdminLayout from '../components/AdminLayout';
 
 export default function NewWithdrawalRequests() {
@@ -12,11 +12,7 @@ export default function NewWithdrawalRequests() {
   const [limit, setLimit] = useState(10);
   const [pagination, setPagination] = useState({});
 
-  useEffect(() => {
-    fetchWithdrawalRequests();
-  }, [currentPage, limit, searchTerm]);
-
-  const fetchWithdrawalRequests = async () => {
+  const fetchWithdrawalRequests = useCallback(async () => {
     try {
       setLoading(true);
       const adminToken = localStorage.getItem('adminToken');
@@ -53,7 +49,11 @@ export default function NewWithdrawalRequests() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [currentPage, limit, searchTerm]);
+
+  useEffect(() => {
+    fetchWithdrawalRequests();
+  }, [fetchWithdrawalRequests]);
 
   const formatCurrency = (amount) => {
     return new Intl.NumberFormat('en-US', {

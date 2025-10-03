@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import AdminLayout from '../components/AdminLayout';
 
 export default function SupportTickets() {
@@ -15,12 +15,7 @@ export default function SupportTickets() {
   const [selectedPriority, setSelectedPriority] = useState('all');
   const [stats, setStats] = useState({});
 
-  useEffect(() => {
-    fetchTickets();
-    fetchTicketStats();
-  }, [currentPage, limit, searchTerm, selectedStatus, selectedPriority]);
-
-  const fetchTickets = async () => {
+  const fetchTickets = useCallback(async () => {
     try {
       setLoading(true);
       const adminToken = localStorage.getItem('adminToken');
@@ -59,9 +54,9 @@ export default function SupportTickets() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [currentPage, limit, searchTerm, selectedStatus, selectedPriority]);
 
-  const fetchTicketStats = async () => {
+  const fetchTicketStats = useCallback(async () => {
     try {
       const adminToken = localStorage.getItem('adminToken');
       if (!adminToken) return;
@@ -80,7 +75,12 @@ export default function SupportTickets() {
     } catch (err) {
       console.error('Error fetching ticket stats:', err);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    fetchTickets();
+    fetchTicketStats();
+  }, [fetchTickets, fetchTicketStats]);
 
   const formatDate = (dateString) => {
     return new Date(dateString).toLocaleDateString('en-GB', {

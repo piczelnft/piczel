@@ -40,7 +40,7 @@ export default function ProfileSummary() {
       }
 
       const data = await response.json();
-      setProfileData(data.profile || profileData);
+      setProfileData(prev => data.profile || prev);
     } catch (err) {
       console.error('Error fetching profile data:', err);
       setError(err.message);

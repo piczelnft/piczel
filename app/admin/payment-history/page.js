@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import AdminLayout from '../components/AdminLayout';
 
 export default function PaymentHistory() {
@@ -12,11 +12,7 @@ export default function PaymentHistory() {
   const [limit, setLimit] = useState(10);
   const [pagination, setPagination] = useState({});
 
-  useEffect(() => {
-    fetchPaymentHistory();
-  }, [currentPage, limit, searchTerm]);
-
-  const fetchPaymentHistory = async () => {
+  const fetchPaymentHistory = useCallback(async () => {
     try {
       setLoading(true);
       const adminToken = localStorage.getItem('adminToken');
@@ -53,7 +49,11 @@ export default function PaymentHistory() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [currentPage, limit, searchTerm]);
+
+  useEffect(() => {
+    fetchPaymentHistory();
+  }, [fetchPaymentHistory]);
 
   const formatCurrency = (amount) => {
     return new Intl.NumberFormat('en-US', {

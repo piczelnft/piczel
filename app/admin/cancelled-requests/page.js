@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import AdminLayout from '../components/AdminLayout';
 
 export default function CancelledRequests() {
@@ -12,11 +12,7 @@ export default function CancelledRequests() {
   const [limit, setLimit] = useState(10);
   const [pagination, setPagination] = useState({});
 
-  useEffect(() => {
-    fetchCancelledRequests();
-  }, [currentPage, limit, searchTerm]);
-
-  const fetchCancelledRequests = async () => {
+  const fetchCancelledRequests = useCallback(async () => {
     try {
       setLoading(true);
       const adminToken = localStorage.getItem('adminToken');
@@ -53,7 +49,11 @@ export default function CancelledRequests() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [currentPage, limit, searchTerm]);
+
+  useEffect(() => {
+    fetchCancelledRequests();
+  }, [fetchCancelledRequests]);
 
   const formatCurrency = (amount) => {
     return new Intl.NumberFormat('en-US', {

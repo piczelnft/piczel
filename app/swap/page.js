@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -12,7 +12,7 @@ const BINANCE_COIN = {
   binanceSymbol: "bnbusdt",
 };
 
-export default function SwapPage() {
+function SwapPage() {
   const { token, updateUser, isAuthenticated } = useAuth();
   const router = useRouter();
   const [bnbPrice, setBnbPrice] = useState(0);
@@ -35,7 +35,7 @@ export default function SwapPage() {
   const reconnectTimeoutRef = useRef(null);
 
   // Initialize WebSocket connection for BNB price
-  const initializeWebSocket = () => {
+  const initializeWebSocket = useCallback(() => {
     try {
       const wsUrl = `wss://stream.binance.com:9443/ws/${BINANCE_COIN.binanceSymbol}@ticker`;
 
@@ -88,7 +88,7 @@ export default function SwapPage() {
       setError("Failed to initialize connection");
       setConnectionStatus("Error");
     }
-  };
+  }, []);
 
   // Calculate amounts based on input
   useEffect(() => {
@@ -136,13 +136,8 @@ export default function SwapPage() {
     return true;
   };
 
-  // Check wallet connection on mount
-  useEffect(() => {
-    checkWalletConnection();
-  }, []);
-
   // Check if wallet is connected
-  const checkWalletConnection = async () => {
+  const checkWalletConnection = useCallback(async () => {
     if (typeof window.ethereum !== "undefined") {
       try {
         const accounts = await window.ethereum.request({
@@ -158,7 +153,12 @@ export default function SwapPage() {
         console.error("Error checking wallet connection:", error);
       }
     }
-  };
+  }, []);
+
+  // Check wallet connection on mount
+  useEffect(() => {
+    checkWalletConnection();
+  }, [checkWalletConnection]);
 
   // Get BNB balance
   const getBnbBalance = async (address) => {
@@ -210,7 +210,7 @@ export default function SwapPage() {
         clearTimeout(reconnectTimeoutRef.current);
       }
     };
-  }, []);
+  }, [initializeWebSocket]);
 
   const handleSwap = async () => {
     if (!amount || !bnbPrice) {
@@ -785,3 +785,5 @@ export default function SwapPage() {
     </div>
   );
 }
+
+export default SwapPage;

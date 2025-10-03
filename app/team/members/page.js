@@ -48,7 +48,7 @@ const TeamMembersPage = () => {
 
       const data = await response.json();
       setMembersData(data.members || []);
-      setPagination(data.pagination || pagination);
+      setPagination(prev => data.pagination || prev);
     } catch (err) {
       console.error('Error fetching team members:', err);
       setError(err.message);

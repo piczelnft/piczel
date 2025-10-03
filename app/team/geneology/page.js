@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import Image from 'next/image';
 import { useAuth } from "@/contexts/AuthContext";
 
 const GenealogyPage = () => {
@@ -262,9 +263,11 @@ const GenealogyPage = () => {
                     }}
                   >
                     {selectedMember.profile ? (
-                      <img
+                      <Image
                         src={selectedMember.profile}
                         alt={selectedMember.name}
+                        width={80}
+                        height={80}
                         className="w-full h-full rounded-full object-cover"
                       />
                     ) : (
@@ -346,9 +349,11 @@ const GenealogyPage = () => {
                         }}
                       >
                         {clickedNode.profile ? (
-                          <img
+                          <Image
                             src={clickedNode.profile}
                             alt={clickedNode.name}
+                            width={64}
+                            height={64}
                             className="w-full h-full rounded-full object-cover"
                           />
                         ) : (

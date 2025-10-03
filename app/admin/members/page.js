@@ -1,6 +1,7 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
+import Image from 'next/image';
 import AdminLayout from '../components/AdminLayout';
 
 export default function MemberManagement() {
@@ -13,11 +14,7 @@ export default function MemberManagement() {
   const [pagination, setPagination] = useState({});
   const [searchTimeout, setSearchTimeout] = useState(null);
 
-  useEffect(() => {
-    fetchMembers();
-  }, [currentPage, limit, searchTerm]);
-
-  const fetchMembers = async () => {
+  const fetchMembers = useCallback(async () => {
     try {
       setLoading(true);
       const adminToken = localStorage.getItem('adminToken');
@@ -54,7 +51,11 @@ export default function MemberManagement() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [currentPage, limit, searchTerm]);
+
+  useEffect(() => {
+    fetchMembers();
+  }, [fetchMembers]);
 
   const handleSearch = (value) => {
     setSearchTerm(value);
@@ -275,9 +276,11 @@ export default function MemberManagement() {
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     {member.avatar ? (
-                      <img
+                      <Image
                         src={member.avatar}
                         alt="Avatar"
+                        width={32}
+                        height={32}
                         className="w-8 h-8 rounded-full"
                       />
                     ) : (

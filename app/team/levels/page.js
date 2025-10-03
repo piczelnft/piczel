@@ -37,7 +37,7 @@ const TeamLevelsPage = () => {
 
       const data = await response.json();
       setLevelsData(data.levels || []);
-      setStatistics(data.statistics || statistics);
+      setStatistics(prev => data.statistics || prev);
     } catch (err) {
       console.error('Error fetching team levels:', err);
       setError(err.message);

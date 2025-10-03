@@ -147,7 +147,7 @@ export default function AdminDashboard() {
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
             <div className="flex items-center justify-between">
               <div>
-                <h3 className="text-lg font-medium text-gray-900">Today's Activation</h3>
+                <h3 className="text-lg font-medium text-gray-900">Today&apos;s Activation</h3>
                 <p className="text-3xl font-bold text-purple-600 mt-2">{formatNumber(stats?.members?.todayActivation || 0)}</p>
               </div>
               <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
@@ -165,7 +165,7 @@ export default function AdminDashboard() {
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
             <div className="flex items-center justify-between">
               <div>
-                <h3 className="text-lg font-medium text-gray-900">Today's Upgrade</h3>
+                <h3 className="text-lg font-medium text-gray-900">Today&apos;s Upgrade</h3>
                 <p className="text-2xl font-bold text-green-600 mt-2">{formatCurrency(stats?.financial?.todayUpgrade || 0)}</p>
               </div>
               <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
@@ -177,7 +177,7 @@ export default function AdminDashboard() {
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
             <div className="flex items-center justify-between">
               <div>
-                <h3 className="text-lg font-medium text-gray-900">Today's Withdrawal</h3>
+                <h3 className="text-lg font-medium text-gray-900">Today&apos;s Withdrawal</h3>
                 <p className="text-2xl font-bold text-red-600 mt-2">{formatCurrency(stats?.financial?.todayWithdrawal || 0)}</p>
               </div>
               <div className="w-12 h-12 bg-red-100 rounded-lg flex items-center justify-center">
