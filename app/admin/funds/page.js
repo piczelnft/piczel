@@ -15,6 +15,8 @@ export default function FundManagement() {
   const [walletConnected, setWalletConnected] = useState(false);
   const [walletAddress, setWalletAddress] = useState("");
   const [bnbBalance, setBnbBalance] = useState("0.0000");
+  const [bnbPrice, setBnbPrice] = useState(null);
+  const [priceLoading, setPriceLoading] = useState(false);
 
   // Check if wallet is connected
   const checkWalletConnection = useCallback(async () => {
@@ -74,10 +76,50 @@ export default function FundManagement() {
     }
   };
 
+  // Fetch BNB price on mount with timeout
+  const fetchBnbPrice = useCallback(async () => {
+    setPriceLoading(true);
+    try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 second timeout
+
+      const response = await fetch(
+        "https://api.binance.com/api/v3/ticker/price?symbol=BNBUSDT",
+        {
+          signal: controller.signal,
+          headers: {
+            Accept: "application/json",
+          },
+        }
+      );
+
+      clearTimeout(timeoutId);
+
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}`);
+      }
+
+      const data = await response.json();
+      const price = parseFloat(data.price);
+
+      if (isNaN(price) || price <= 0) {
+        throw new Error("Invalid price data");
+      }
+
+      setBnbPrice(price);
+    } catch (error) {
+      console.warn("Failed to fetch BNB price:", error);
+      setBnbPrice(300); // fallback
+    } finally {
+      setPriceLoading(false);
+    }
+  }, []);
+
   // Check wallet connection on mount
   useEffect(() => {
     checkWalletConnection();
-  }, [checkWalletConnection]);
+    fetchBnbPrice();
+  }, [checkWalletConnection, fetchBnbPrice]);
 
   const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -99,8 +141,20 @@ export default function FundManagement() {
       return;
     }
 
-    if (parseFloat(addFundsForm.amount) <= 0) {
-      setMessage({ type: "error", text: "Amount must be greater than 0" });
+    const amount = parseFloat(addFundsForm.amount);
+    if (isNaN(amount) || amount <= 0) {
+      setMessage({
+        type: "error",
+        text: "Please enter a valid amount greater than 0",
+      });
+      return;
+    }
+
+    if (amount > 10000) {
+      setMessage({
+        type: "error",
+        text: "Amount cannot exceed $10,000 per transaction",
+      });
       return;
     }
 
@@ -129,10 +183,9 @@ export default function FundManagement() {
         throw new Error("Please connect your wallet to MetaMask");
       }
 
-      // Get current BNB price (you might want to use an API for this)
-      // For now, we'll use a placeholder price
-      const bnbPrice = 300; // This should be fetched from an API
-      const bnbAmount = (parseFloat(addFundsForm.amount) / bnbPrice).toFixed(6);
+      // Use cached BNB price or fallback
+      const currentBnbPrice = bnbPrice || 300;
+      const bnbAmount = (amount / currentBnbPrice).toFixed(6);
 
       // Confirm the transaction
       const confirmMessage = `Transfer ${bnbAmount} BNB?\n\nFrom: Your Wallet (${accounts[0].slice(
@@ -148,6 +201,18 @@ export default function FundManagement() {
         return;
       }
 
+      // Validate recipient address
+      if (!/^0x[a-fA-F0-9]{40}$/.test(addFundsForm.walletAddress)) {
+        throw new Error("Invalid recipient wallet address format");
+      }
+
+      // Prevent sending to self
+      if (
+        addFundsForm.walletAddress.toLowerCase() === accounts[0].toLowerCase()
+      ) {
+        throw new Error("Cannot send funds to your own wallet address");
+      }
+
       // Send BNB transaction via MetaMask
       const transactionHash = await window.ethereum.request({
         method: "eth_sendTransaction",
@@ -158,7 +223,7 @@ export default function FundManagement() {
             value: `0x${(parseFloat(bnbAmount) * Math.pow(10, 18)).toString(
               16
             )}`,
-            gas: "0x5208", // 21000 gas limit
+            gas: "0x5208", // 21000 gas limit for simple transfer
           },
         ],
       });
@@ -178,7 +243,7 @@ export default function FundManagement() {
           },
           body: JSON.stringify({
             ...addFundsForm,
-            amount: parseFloat(addFundsForm.amount),
+            amount: amount,
             transactionHash: transactionHash,
           }),
         });
@@ -193,10 +258,12 @@ export default function FundManagement() {
 
         // Create success message with transaction details
         let successMessage = `✅ Transaction Successful!\n\n`;
-        successMessage += `Hash: ${transactionHash}\n`;
-        successMessage += `Amount: ${bnbAmount} BNB ($${addFundsForm.amount})\n`;
+        successMessage += `Transaction Hash: ${transactionHash}\n`;
+        successMessage += `Amount: ${bnbAmount} BNB ($${amount})\n`;
         successMessage += `Recipient: ${data.user.memberId}\n`;
-        successMessage += `Status: Confirmed`;
+        successMessage += `To Address: ${addFundsForm.walletAddress}\n`;
+        successMessage += `Status: Confirmed\n`;
+        successMessage += `BNB Price: $${currentBnbPrice.toFixed(2)}`;
 
         if (data.commissions && data.commissions.length > 0) {
           successMessage += `\n\n🎉 COMMISSIONS DISTRIBUTED:\n`;
@@ -272,6 +339,14 @@ export default function FundManagement() {
                       {walletAddress.slice(-4)}
                     </div>
                     <div>Your BNB Balance: {bnbBalance} BNB</div>
+                    <div>
+                      Current BNB Price: $
+                      {bnbPrice
+                        ? bnbPrice.toFixed(2)
+                        : priceLoading
+                        ? "Loading..."
+                        : "N/A"}
+                    </div>
                   </div>
                 )}
               </div>
@@ -336,7 +411,7 @@ export default function FundManagement() {
                 htmlFor="walletAddress"
                 className="block text-sm font-medium text-gray-700 mb-2"
               >
-                Recipient's Wallet Address
+                Recipient&apos;s Wallet Address
               </label>
               <input
                 type="text"
@@ -371,6 +446,7 @@ export default function FundManagement() {
                   placeholder="Enter $ amount to add"
                   step="0.01"
                   min="0.01"
+                  max="10000"
                   className="w-full pl-8 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200"
                   required
                 />

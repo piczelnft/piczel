@@ -1,14 +1,14 @@
-'use client';
+"use client";
 
-import { useState, useEffect, useCallback } from 'react';
-import AdminLayout from '../components/AdminLayout';
+import { useState, useEffect, useCallback } from "react";
+import AdminLayout from "../components/AdminLayout";
 
 export default function NewWithdrawalRequests() {
   const [withdrawalRequests, setWithdrawalRequests] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [statusFilter, setStatusFilter] = useState('all');
+  const [searchTerm, setSearchTerm] = useState("");
+  const [statusFilter, setStatusFilter] = useState("all");
   const [currentPage, setCurrentPage] = useState(1);
   const [limit, setLimit] = useState(10);
   const [pagination, setPagination] = useState({});
@@ -17,9 +17,9 @@ export default function NewWithdrawalRequests() {
   const fetchWithdrawalRequests = useCallback(async () => {
     try {
       setLoading(true);
-      const adminToken = localStorage.getItem('adminToken');
+      const adminToken = localStorage.getItem("adminToken");
       if (!adminToken) {
-        setError('No admin token found');
+        setError("No admin token found");
         return;
       }
 
@@ -28,26 +28,26 @@ export default function NewWithdrawalRequests() {
         limit: limit.toString(),
         search: searchTerm,
         status: statusFilter,
-        sortBy: 'createdAt',
-        sortOrder: 'desc'
+        sortBy: "createdAt",
+        sortOrder: "desc",
       });
 
       const response = await fetch(`/api/admin/withdrawal-requests?${params}`, {
         headers: {
-          'Authorization': `Bearer ${adminToken}`,
-          'Content-Type': 'application/json',
+          Authorization: `Bearer ${adminToken}`,
+          "Content-Type": "application/json",
         },
       });
 
       if (!response.ok) {
-        throw new Error('Failed to fetch withdrawal requests');
+        throw new Error("Failed to fetch withdrawal requests");
       }
 
       const data = await response.json();
       setWithdrawalRequests(data.requests || []);
       setPagination(data.pagination || {});
     } catch (err) {
-      console.error('Error fetching withdrawal requests:', err);
+      console.error("Error fetching withdrawal requests:", err);
       setError(err.message);
     } finally {
       setLoading(false);
@@ -59,98 +59,108 @@ export default function NewWithdrawalRequests() {
   }, [fetchWithdrawalRequests]);
 
   const formatCurrency = (amount) => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD',
+    return new Intl.NumberFormat("en-US", {
+      style: "currency",
+      currency: "USD",
       minimumFractionDigits: 2,
     }).format(amount);
   };
 
   const formatDate = (dateString) => {
-    return new Date(dateString).toLocaleDateString('en-GB', {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-      second: '2-digit'
+    return new Date(dateString).toLocaleDateString("en-GB", {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit",
     });
   };
 
   const handleMetaMaskPayment = async (request) => {
     try {
       setProcessingPayment(request.requestId);
-      
+
       // Show confirmation dialog
-      const confirmMessage = `Are you sure you want to process this payment?\n\n` +
+      const confirmMessage =
+        `Are you sure you want to process this payment?\n\n` +
         `Amount: $${request.net}\n` +
         `To: ${request.walletAddress}\n` +
         `Member: ${request.memberId}`;
-      
+
       if (!confirm(confirmMessage)) {
         setProcessingPayment(null);
         return;
       }
-      
+
       // Check if MetaMask is installed
-      if (typeof window.ethereum === 'undefined') {
-        alert('MetaMask is not installed. Please install MetaMask to process payments.');
+      if (typeof window.ethereum === "undefined") {
+        alert(
+          "MetaMask is not installed. Please install MetaMask to process payments."
+        );
         setProcessingPayment(null);
         return;
       }
 
       // Request account access
-      const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+      const accounts = await window.ethereum.request({
+        method: "eth_requestAccounts",
+      });
       if (accounts.length === 0) {
-        alert('No accounts found. Please connect your MetaMask wallet.');
+        alert("No accounts found. Please connect your MetaMask wallet.");
         setProcessingPayment(null);
         return;
       }
 
       // Get the current account
       const fromAddress = accounts[0];
-      
+
       // Convert amount to wei (assuming ETH payments)
       // You might want to adjust this based on your token
-      const amountInWei = (parseFloat(request.net) * Math.pow(10, 18)).toString(16);
-      
+      const amountInWei = (parseFloat(request.net) * Math.pow(10, 18)).toString(
+        16
+      );
+
       // Get current gas price
       const gasPrice = await window.ethereum.request({
-        method: 'eth_gasPrice',
+        method: "eth_gasPrice",
       });
-      
+
       // Create transaction parameters
       const transactionParams = {
         from: fromAddress,
         to: request.walletAddress,
-        value: '0x' + amountInWei,
-        gas: '0x5208', // 21000 gas limit for simple ETH transfer
+        value: "0x" + amountInWei,
+        gas: "0x5208", // 21000 gas limit for simple ETH transfer
         gasPrice: gasPrice,
       };
 
-      console.log('Sending transaction with params:', transactionParams);
+      console.log("Sending transaction with params:", transactionParams);
 
       // Send transaction
       const txHash = await window.ethereum.request({
-        method: 'eth_sendTransaction',
+        method: "eth_sendTransaction",
         params: [transactionParams],
       });
 
-      console.log('Transaction sent:', txHash);
+      console.log("Transaction sent:", txHash);
 
       // Update withdrawal status to processing with transaction hash
-      await handleWithdrawalAction(request.requestId, 'approve', txHash);
-      
-      alert(`Payment initiated successfully!\n\nTransaction Hash: ${txHash}\n\nYou can track this transaction on Etherscan.`);
-      
+      await handleWithdrawalAction(request.requestId, "approve", txHash);
+
+      alert(
+        `Payment initiated successfully!\n\nTransaction Hash: ${txHash}\n\nYou can track this transaction on Etherscan.`
+      );
     } catch (error) {
-      console.error('MetaMask payment error:', error);
+      console.error("MetaMask payment error:", error);
       if (error.code === 4001) {
-        alert('Transaction was rejected by user.');
+        alert("Transaction was rejected by user.");
       } else if (error.code === -32602) {
-        alert('Invalid transaction parameters. Please check the wallet address and amount.');
+        alert(
+          "Invalid transaction parameters. Please check the wallet address and amount."
+        );
       } else if (error.code === -32603) {
-        alert('Internal JSON-RPC error. Please try again.');
+        alert("Internal JSON-RPC error. Please try again.");
       } else {
         alert(`Payment failed: ${error.message}`);
       }
@@ -159,52 +169,59 @@ export default function NewWithdrawalRequests() {
     }
   };
 
-  const handleWithdrawalAction = async (requestId, action, transactionHash = null) => {
+  const handleWithdrawalAction = async (
+    requestId,
+    action,
+    transactionHash = null
+  ) => {
     try {
-      const adminToken = localStorage.getItem('adminToken');
+      const adminToken = localStorage.getItem("adminToken");
       if (!adminToken) return;
 
       // Add confirmation for reject action
-      if (action === 'reject') {
-        const request = withdrawalRequests.find(req => req.requestId === requestId);
+      if (action === "reject") {
+        const request = withdrawalRequests.find(
+          (req) => req.requestId === requestId
+        );
         if (request) {
-          const confirmMessage = `Are you sure you want to reject this withdrawal request?\n\n` +
+          const confirmMessage =
+            `Are you sure you want to reject this withdrawal request?\n\n` +
             `Request ID: ${request.requestId}\n` +
             `Member: ${request.memberId}\n` +
             `Amount: $${request.net}\n\n` +
             `This action will refund the amount back to the user's balance.`;
-          
+
           if (!confirm(confirmMessage)) {
             return;
           }
         }
       }
 
-      const response = await fetch('/api/admin/withdrawal-requests/action', {
-        method: 'PUT',
+      const response = await fetch("/api/admin/withdrawal-requests/action", {
+        method: "PUT",
         headers: {
-          'Authorization': `Bearer ${adminToken}`,
-          'Content-Type': 'application/json',
+          Authorization: `Bearer ${adminToken}`,
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({
           requestId,
           action,
-          transactionHash
+          transactionHash,
         }),
       });
 
       if (response.ok) {
         const data = await response.json();
-        console.log('Withdrawal action successful:', data.message);
+        console.log("Withdrawal action successful:", data.message);
         fetchWithdrawalRequests(); // Refresh the list
       } else {
         const errorData = await response.json();
-        console.error('Error updating withdrawal request:', errorData.error);
-        setError(errorData.error || 'Failed to update withdrawal request');
+        console.error("Error updating withdrawal request:", errorData.error);
+        setError(errorData.error || "Failed to update withdrawal request");
       }
     } catch (err) {
-      console.error('Error updating withdrawal request:', err);
-      setError('Network error. Please try again.');
+      console.error("Error updating withdrawal request:", err);
+      setError("Network error. Please try again.");
     }
   };
 
@@ -214,7 +231,10 @@ export default function NewWithdrawalRequests() {
     const pages = [];
     const maxVisiblePages = 5;
     let startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2));
-    let endPage = Math.min(pagination.totalPages, startPage + maxVisiblePages - 1);
+    let endPage = Math.min(
+      pagination.totalPages,
+      startPage + maxVisiblePages - 1
+    );
 
     if (endPage - startPage + 1 < maxVisiblePages) {
       startPage = Math.max(1, endPage - maxVisiblePages + 1);
@@ -227,8 +247,8 @@ export default function NewWithdrawalRequests() {
           onClick={() => setCurrentPage(i)}
           className={`px-3 py-2 text-sm font-medium rounded-md ${
             currentPage === i
-              ? 'bg-purple-600 text-white'
-              : 'text-gray-700 bg-white border border-gray-300 hover:bg-gray-50'
+              ? "bg-purple-600 text-white"
+              : "text-gray-700 bg-white border border-gray-300 hover:bg-gray-50"
           }`}
         >
           {i}
@@ -239,7 +259,8 @@ export default function NewWithdrawalRequests() {
     return (
       <div className="flex items-center justify-between px-6 py-4 bg-white border-t border-gray-200">
         <div className="flex items-center text-sm text-gray-700">
-          Showing {pagination.startIndex} to {pagination.endIndex} of {pagination.totalCount} entries
+          Showing {pagination.startIndex} to {pagination.endIndex} of{" "}
+          {pagination.totalCount} entries
         </div>
         <div className="flex items-center space-x-2">
           <button
@@ -279,7 +300,9 @@ export default function NewWithdrawalRequests() {
     <AdminLayout>
       {/* Header */}
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900">New Withdrawal Requests</h1>
+        <h1 className="text-3xl font-bold text-gray-900">
+          New Withdrawal Requests
+        </h1>
         <p className="mt-2 text-gray-600">New Withdrawal Requests to verify</p>
         <div className="mt-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
           <div className="flex items-start">
@@ -287,9 +310,15 @@ export default function NewWithdrawalRequests() {
               <span className="text-blue-400">ℹ️</span>
             </div>
             <div className="ml-3">
-              <h3 className="text-sm font-medium text-blue-800">MetaMask Integration</h3>
+              <h3 className="text-sm font-medium text-blue-800">
+                MetaMask Integration
+              </h3>
               <div className="mt-1 text-sm text-blue-700">
-                <p>To process payments, you need MetaMask installed and connected. Click "Pay with MetaMask" to initiate blockchain transactions directly from your wallet.</p>
+                <p>
+                  To process payments, you need MetaMask installed and
+                  connected. Click &quot;Pay with MetaMask&quot; to initiate
+                  blockchain transactions directly from your wallet.
+                </p>
               </div>
             </div>
           </div>
@@ -349,23 +378,48 @@ export default function NewWithdrawalRequests() {
           <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-50">
               <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">S.No</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Request Date</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Request Id</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Member Id</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Wallet Address</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Gross</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Charges</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Net</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Gateway</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Action</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  S.No
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Request Date
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Request Id
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Member Id
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Wallet Address
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Gross
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Charges
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Net
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Gateway
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Status
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Action
+                </th>
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
               {withdrawalRequests.length === 0 ? (
                 <tr>
-                  <td colSpan="11" className="px-6 py-12 text-center text-gray-500">
+                  <td
+                    colSpan="11"
+                    className="px-6 py-12 text-center text-gray-500"
+                  >
                     No data available in table
                   </td>
                 </tr>
@@ -386,7 +440,12 @@ export default function NewWithdrawalRequests() {
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                       <code className="text-xs bg-gray-100 px-2 py-1 rounded">
-                        {request.walletAddress ? `${request.walletAddress.slice(0, 6)}...${request.walletAddress.slice(-4)}` : 'N/A'}
+                        {request.walletAddress
+                          ? `${request.walletAddress.slice(
+                              0,
+                              6
+                            )}...${request.walletAddress.slice(-4)}`
+                          : "N/A"}
                       </code>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
@@ -399,58 +458,78 @@ export default function NewWithdrawalRequests() {
                       {formatCurrency(request.net)}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      {request.gateway || 'N/A'}
+                      {request.gateway || "N/A"}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm">
-                      <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                        request.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
-                        request.status === 'processing' ? 'bg-blue-100 text-blue-800' :
-                        request.status === 'completed' ? 'bg-green-100 text-green-800' :
-                        request.status === 'rejected' ? 'bg-red-100 text-red-800' :
-                        request.status === 'cancelled' ? 'bg-gray-100 text-gray-800' :
-                        'bg-gray-100 text-gray-800'
-                      }`}>
-                        {request.status?.charAt(0).toUpperCase() + request.status?.slice(1) || 'Unknown'}
+                      <span
+                        className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
+                          request.status === "pending"
+                            ? "bg-yellow-100 text-yellow-800"
+                            : request.status === "processing"
+                            ? "bg-blue-100 text-blue-800"
+                            : request.status === "completed"
+                            ? "bg-green-100 text-green-800"
+                            : request.status === "rejected"
+                            ? "bg-red-100 text-red-800"
+                            : request.status === "cancelled"
+                            ? "bg-gray-100 text-gray-800"
+                            : "bg-gray-100 text-gray-800"
+                        }`}
+                      >
+                        {request.status?.charAt(0).toUpperCase() +
+                          request.status?.slice(1) || "Unknown"}
                       </span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                       <div className="flex space-x-2">
-                        {request.status === 'pending' && (
+                        {request.status === "pending" && (
                           <>
                             <button
                               onClick={() => handleMetaMaskPayment(request)}
                               disabled={processingPayment === request.requestId}
                               className={`${
-                                processingPayment === request.requestId 
-                                  ? 'text-gray-400 cursor-not-allowed' 
-                                  : 'text-green-600 hover:text-green-900'
+                                processingPayment === request.requestId
+                                  ? "text-gray-400 cursor-not-allowed"
+                                  : "text-green-600 hover:text-green-900"
                               }`}
                             >
-                              {processingPayment === request.requestId ? 'Processing...' : 'Pay with MetaMask'}
+                              {processingPayment === request.requestId
+                                ? "Processing..."
+                                : "Pay with MetaMask"}
                             </button>
                             <button
-                              onClick={() => handleWithdrawalAction(request.requestId, 'reject')}
+                              onClick={() =>
+                                handleWithdrawalAction(
+                                  request.requestId,
+                                  "reject"
+                                )
+                              }
                               className="text-red-600 hover:text-red-900"
                             >
                               Reject
                             </button>
                           </>
                         )}
-                        {request.status === 'processing' && (
+                        {request.status === "processing" && (
                           <button
-                            onClick={() => handleWithdrawalAction(request.requestId, 'completed')}
+                            onClick={() =>
+                              handleWithdrawalAction(
+                                request.requestId,
+                                "completed"
+                              )
+                            }
                             className="text-blue-600 hover:text-blue-900"
                           >
                             Complete
                           </button>
                         )}
-                        {request.status === 'completed' && (
+                        {request.status === "completed" && (
                           <span className="text-green-600">Completed</span>
                         )}
-                        {request.status === 'rejected' && (
+                        {request.status === "rejected" && (
                           <span className="text-red-600">Rejected</span>
                         )}
-                        {request.status === 'cancelled' && (
+                        {request.status === "cancelled" && (
                           <span className="text-gray-600">Cancelled</span>
                         )}
                       </div>
@@ -474,7 +553,9 @@ export default function NewWithdrawalRequests() {
                   <span className="text-red-400">❌</span>
                 </div>
                 <div className="ml-3">
-                  <h3 className="text-sm font-medium text-red-800">Error loading withdrawal requests</h3>
+                  <h3 className="text-sm font-medium text-red-800">
+                    Error loading withdrawal requests
+                  </h3>
                   <div className="mt-2 text-sm text-red-700">
                     <p>{error}</p>
                   </div>
