@@ -8,9 +8,11 @@ export default function NewWithdrawalRequests() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
+  const [statusFilter, setStatusFilter] = useState('all');
   const [currentPage, setCurrentPage] = useState(1);
   const [limit, setLimit] = useState(10);
   const [pagination, setPagination] = useState({});
+  const [processingPayment, setProcessingPayment] = useState(null);
 
   const fetchWithdrawalRequests = useCallback(async () => {
     try {
@@ -25,7 +27,8 @@ export default function NewWithdrawalRequests() {
         page: currentPage.toString(),
         limit: limit.toString(),
         search: searchTerm,
-        sortBy: 'requestDate',
+        status: statusFilter,
+        sortBy: 'createdAt',
         sortOrder: 'desc'
       });
 
@@ -49,7 +52,7 @@ export default function NewWithdrawalRequests() {
     } finally {
       setLoading(false);
     }
-  }, [currentPage, limit, searchTerm]);
+  }, [currentPage, limit, searchTerm, statusFilter]);
 
   useEffect(() => {
     fetchWithdrawalRequests();
@@ -74,7 +77,89 @@ export default function NewWithdrawalRequests() {
     });
   };
 
-  const handleWithdrawalAction = async (requestId, action) => {
+  const handleMetaMaskPayment = async (request) => {
+    try {
+      setProcessingPayment(request.requestId);
+      
+      // Show confirmation dialog
+      const confirmMessage = `Are you sure you want to process this payment?\n\n` +
+        `Amount: $${request.net}\n` +
+        `To: ${request.walletAddress}\n` +
+        `Member: ${request.memberId}`;
+      
+      if (!confirm(confirmMessage)) {
+        setProcessingPayment(null);
+        return;
+      }
+      
+      // Check if MetaMask is installed
+      if (typeof window.ethereum === 'undefined') {
+        alert('MetaMask is not installed. Please install MetaMask to process payments.');
+        setProcessingPayment(null);
+        return;
+      }
+
+      // Request account access
+      const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+      if (accounts.length === 0) {
+        alert('No accounts found. Please connect your MetaMask wallet.');
+        setProcessingPayment(null);
+        return;
+      }
+
+      // Get the current account
+      const fromAddress = accounts[0];
+      
+      // Convert amount to wei (assuming ETH payments)
+      // You might want to adjust this based on your token
+      const amountInWei = (parseFloat(request.net) * Math.pow(10, 18)).toString(16);
+      
+      // Get current gas price
+      const gasPrice = await window.ethereum.request({
+        method: 'eth_gasPrice',
+      });
+      
+      // Create transaction parameters
+      const transactionParams = {
+        from: fromAddress,
+        to: request.walletAddress,
+        value: '0x' + amountInWei,
+        gas: '0x5208', // 21000 gas limit for simple ETH transfer
+        gasPrice: gasPrice,
+      };
+
+      console.log('Sending transaction with params:', transactionParams);
+
+      // Send transaction
+      const txHash = await window.ethereum.request({
+        method: 'eth_sendTransaction',
+        params: [transactionParams],
+      });
+
+      console.log('Transaction sent:', txHash);
+
+      // Update withdrawal status to processing with transaction hash
+      await handleWithdrawalAction(request.requestId, 'approve', txHash);
+      
+      alert(`Payment initiated successfully!\n\nTransaction Hash: ${txHash}\n\nYou can track this transaction on Etherscan.`);
+      
+    } catch (error) {
+      console.error('MetaMask payment error:', error);
+      if (error.code === 4001) {
+        alert('Transaction was rejected by user.');
+      } else if (error.code === -32602) {
+        alert('Invalid transaction parameters. Please check the wallet address and amount.');
+      } else if (error.code === -32603) {
+        alert('Internal JSON-RPC error. Please try again.');
+      } else {
+        alert(`Payment failed: ${error.message}`);
+      }
+    } finally {
+      setProcessingPayment(null);
+    }
+  };
+
+  const handleWithdrawalAction = async (requestId, action, transactionHash = null) => {
     try {
       const adminToken = localStorage.getItem('adminToken');
       if (!adminToken) return;
@@ -87,15 +172,23 @@ export default function NewWithdrawalRequests() {
         },
         body: JSON.stringify({
           requestId,
-          action
+          action,
+          transactionHash
         }),
       });
 
       if (response.ok) {
-        fetchWithdrawalRequests();
+        const data = await response.json();
+        console.log('Withdrawal action successful:', data.message);
+        fetchWithdrawalRequests(); // Refresh the list
+      } else {
+        const errorData = await response.json();
+        console.error('Error updating withdrawal request:', errorData.error);
+        setError(errorData.error || 'Failed to update withdrawal request');
       }
     } catch (err) {
       console.error('Error updating withdrawal request:', err);
+      setError('Network error. Please try again.');
     }
   };
 
@@ -172,6 +265,19 @@ export default function NewWithdrawalRequests() {
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-gray-900">New Withdrawal Requests</h1>
         <p className="mt-2 text-gray-600">New Withdrawal Requests to verify</p>
+        <div className="mt-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+          <div className="flex items-start">
+            <div className="flex-shrink-0">
+              <span className="text-blue-400">ℹ️</span>
+            </div>
+            <div className="ml-3">
+              <h3 className="text-sm font-medium text-blue-800">MetaMask Integration</h3>
+              <div className="mt-1 text-sm text-blue-700">
+                <p>To process payments, you need MetaMask installed and connected. Click "Pay with MetaMask" to initiate blockchain transactions directly from your wallet.</p>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
 
       {/* Main Content */}
@@ -194,6 +300,19 @@ export default function NewWithdrawalRequests() {
               </div>
             </div>
             <div className="flex items-center space-x-4">
+              <label className="text-sm text-gray-700">Status:</label>
+              <select
+                value={statusFilter}
+                onChange={(e) => setStatusFilter(e.target.value)}
+                className="border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+              >
+                <option value="all">All Status</option>
+                <option value="pending">Pending</option>
+                <option value="processing">Processing</option>
+                <option value="completed">Completed</option>
+                <option value="rejected">Rejected</option>
+                <option value="cancelled">Cancelled</option>
+              </select>
               <label className="text-sm text-gray-700">Show:</label>
               <select
                 value={limit}
@@ -223,13 +342,14 @@ export default function NewWithdrawalRequests() {
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Charges</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Net</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Gateway</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Action</th>
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
               {withdrawalRequests.length === 0 ? (
                 <tr>
-                  <td colSpan="10" className="px-6 py-12 text-center text-gray-500">
+                  <td colSpan="11" className="px-6 py-12 text-center text-gray-500">
                     No data available in table
                   </td>
                 </tr>
@@ -265,20 +385,58 @@ export default function NewWithdrawalRequests() {
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                       {request.gateway || 'N/A'}
                     </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm">
+                      <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
+                        request.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
+                        request.status === 'processing' ? 'bg-blue-100 text-blue-800' :
+                        request.status === 'completed' ? 'bg-green-100 text-green-800' :
+                        request.status === 'rejected' ? 'bg-red-100 text-red-800' :
+                        request.status === 'cancelled' ? 'bg-gray-100 text-gray-800' :
+                        'bg-gray-100 text-gray-800'
+                      }`}>
+                        {request.status?.charAt(0).toUpperCase() + request.status?.slice(1) || 'Unknown'}
+                      </span>
+                    </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                       <div className="flex space-x-2">
-                        <button
-                          onClick={() => handleWithdrawalAction(request.requestId, 'approve')}
-                          className="text-green-600 hover:text-green-900"
-                        >
-                          Approve
-                        </button>
-                        <button
-                          onClick={() => handleWithdrawalAction(request.requestId, 'reject')}
-                          className="text-red-600 hover:text-red-900"
-                        >
-                          Reject
-                        </button>
+                        {request.status === 'pending' && (
+                          <>
+                            <button
+                              onClick={() => handleMetaMaskPayment(request)}
+                              disabled={processingPayment === request.requestId}
+                              className={`${
+                                processingPayment === request.requestId 
+                                  ? 'text-gray-400 cursor-not-allowed' 
+                                  : 'text-green-600 hover:text-green-900'
+                              }`}
+                            >
+                              {processingPayment === request.requestId ? 'Processing...' : 'Pay with MetaMask'}
+                            </button>
+                            <button
+                              onClick={() => handleWithdrawalAction(request.requestId, 'reject')}
+                              className="text-red-600 hover:text-red-900"
+                            >
+                              Reject
+                            </button>
+                          </>
+                        )}
+                        {request.status === 'processing' && (
+                          <button
+                            onClick={() => handleWithdrawalAction(request.requestId, 'completed')}
+                            className="text-blue-600 hover:text-blue-900"
+                          >
+                            Complete
+                          </button>
+                        )}
+                        {request.status === 'completed' && (
+                          <span className="text-green-600">Completed</span>
+                        )}
+                        {request.status === 'rejected' && (
+                          <span className="text-red-600">Rejected</span>
+                        )}
+                        {request.status === 'cancelled' && (
+                          <span className="text-gray-600">Cancelled</span>
+                        )}
                       </div>
                     </td>
                   </tr>

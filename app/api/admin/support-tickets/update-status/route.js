@@ -1,7 +1,10 @@
 import { NextResponse } from "next/server";
 import { headers } from "next/headers";
 import jwt from "jsonwebtoken";
+import mongoose from "mongoose";
 import { corsHeaders, handleCors } from "@/lib/cors";
+import dbConnect from "@/lib/mongodb";
+import SupportTicket from "@/models/SupportTicket";
 
 export async function OPTIONS(request) {
   return handleCors(request);
@@ -12,7 +15,7 @@ const JWT_SECRET = process.env.JWT_SECRET || "fallback-jwt-secret-for-developmen
 export async function PUT(request) {
   try {
     // Handle CORS preflight
-    const headersList = headers();
+    const headersList = await headers();
     
     // Verify admin authentication
     const authorization = headersList.get("authorization");
@@ -43,6 +46,9 @@ export async function PUT(request) {
       );
     }
 
+    // Connect to database
+    await dbConnect();
+
     const { ticketId, status, assignedTo, notes } = await request.json();
 
     // Validate input
@@ -62,43 +68,34 @@ export async function PUT(request) {
       );
     }
 
-    // In a real application, you would:
-    // 1. Find the ticket by ID
-    // 2. Update the status and other fields
-    // 3. Log the status change
-    // 4. Send notifications if needed
+    // Find the ticket by ID
+    const ticket = await SupportTicket.findById(ticketId);
+    if (!ticket) {
+      return NextResponse.json(
+        { error: "Ticket not found" },
+        { status: 404, headers: corsHeaders() }
+      );
+    }
 
-    // Mock response for demonstration
-    const updatedTicket = {
-      _id: ticketId,
-      status: status,
-      assignedTo: assignedTo || decoded.userId,
-      updatedAt: new Date(),
-      updatedBy: decoded.userId,
-      statusHistory: [
-        {
-          status: status,
-          changedAt: new Date(),
-          changedBy: decoded.userId,
-          notes: notes || null
+    // Update the ticket status
+    const updatedTicket = await SupportTicket.findByIdAndUpdate(
+      ticketId,
+      {
+        status: status,
+        assignedTo: assignedTo || decoded.userId,
+        updatedAt: new Date(),
+        updatedBy: new mongoose.Types.ObjectId(decoded.userId),
+        $push: {
+          statusHistory: {
+            status: status,
+            changedAt: new Date(),
+            changedBy: new mongoose.Types.ObjectId(decoded.userId),
+            notes: notes || null
+          }
         }
-      ]
-    };
-
-    // In a real application, you would save this to the database
-    // await SupportTicket.findByIdAndUpdate(ticketId, {
-    //   status: status,
-    //   assignedTo: assignedTo,
-    //   updatedAt: new Date(),
-    //   $push: {
-    //     statusHistory: {
-    //       status: status,
-    //       changedAt: new Date(),
-    //       changedBy: decoded.userId,
-    //       notes: notes
-    //     }
-    //   }
-    // });
+      },
+      { new: true }
+    );
 
     return NextResponse.json(
       { 

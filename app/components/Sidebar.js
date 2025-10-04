@@ -105,6 +105,21 @@ export default function Sidebar({ isOpen, onClose }) {
         <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
         </svg>
+      ),
+      'arrow-up': (
+        <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 11l5-5m0 0l5 5m-5-5v12" />
+        </svg>
+      ),
+      'arrow-down': (
+        <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 13l-5 5m0 0l-5-5m5 5V6" />
+        </svg>
+      ),
+      'clock': (
+        <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
       )
     };
     return icons[iconName] || null;
@@ -141,15 +156,15 @@ export default function Sidebar({ isOpen, onClose }) {
     //     { name: 'Monthly Staking Rewards', icon: 'gift', href: '/staking/rewards' }
     //   ]
     // },
-    { 
-      name: 'Income Section', 
-      icon: 'eye',
-      hasDropdown: true,
-      dropdownItems: [
-        { name: 'Affiliate Rewards', icon: 'users', href: '/income/affiliate' },
-        { name: 'Community Rewards', icon: 'users', href: '/income/community' }
-      ]
-    },
+    // { 
+    //   name: 'Income Section', 
+    //   icon: 'eye',
+    //   hasDropdown: true,
+    //   dropdownItems: [
+    //     { name: 'Affiliate Rewards', icon: 'users', href: '/income/affiliate' },
+    //     { name: 'Community Rewards', icon: 'users', href: '/income/community' }
+    //   ]
+    // },
     { 
       name: 'Wallet Section', 
       icon: 'wallet',
@@ -157,6 +172,15 @@ export default function Sidebar({ isOpen, onClose }) {
       dropdownItems: [
         { name: 'Main Wallet', icon: 'wallet', href: '/wallet/main' },
         { name: 'Wallet History', icon: 'scroll', href: '/wallet/history' },
+      ]
+    },
+    { 
+      name: 'Withdrawal Section', 
+      icon: 'arrow-up',
+      hasDropdown: true,
+      dropdownItems: [
+        { name: 'Request Withdrawal', icon: 'arrow-up', href: '/withdrawal/request' },
+        { name: 'Withdrawal History', icon: 'scroll', href: '/withdrawal/history' },
       ]
     },
     { 

@@ -8,6 +8,7 @@ export default function PaymentHistory() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
+  const [dateFilter, setDateFilter] = useState('all');
   const [currentPage, setCurrentPage] = useState(1);
   const [limit, setLimit] = useState(10);
   const [pagination, setPagination] = useState({});
@@ -25,7 +26,8 @@ export default function PaymentHistory() {
         page: currentPage.toString(),
         limit: limit.toString(),
         search: searchTerm,
-        sortBy: 'paymentDate',
+        dateFilter: dateFilter,
+        sortBy: 'processedAt',
         sortOrder: 'desc'
       });
 
@@ -37,19 +39,21 @@ export default function PaymentHistory() {
       });
 
       if (!response.ok) {
-        throw new Error('Failed to fetch payment history');
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to fetch payment history');
       }
 
       const data = await response.json();
       setPaymentHistory(data.payments || []);
       setPagination(data.pagination || {});
+      setError(null); // Clear any previous errors
     } catch (err) {
       console.error('Error fetching payment history:', err);
       setError(err.message);
     } finally {
       setLoading(false);
     }
-  }, [currentPage, limit, searchTerm]);
+  }, [currentPage, limit, searchTerm, dateFilter]);
 
   useEffect(() => {
     fetchPaymentHistory();
@@ -169,6 +173,18 @@ export default function PaymentHistory() {
               </div>
             </div>
             <div className="flex items-center space-x-4">
+              <label className="text-sm text-gray-700">Date:</label>
+              <select
+                value={dateFilter}
+                onChange={(e) => setDateFilter(e.target.value)}
+                className="border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+              >
+                <option value="all">All Time</option>
+                <option value="today">Today</option>
+                <option value="week">This Week</option>
+                <option value="month">This Month</option>
+                <option value="year">This Year</option>
+              </select>
               <label className="text-sm text-gray-700">Show:</label>
               <select
                 value={limit}
@@ -198,11 +214,19 @@ export default function PaymentHistory() {
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Charges</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Net</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Payment Date</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Transaction Hash</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
-              {paymentHistory.map((payment, index) => (
+              {paymentHistory.length === 0 ? (
+                <tr>
+                  <td colSpan="11" className="px-6 py-12 text-center text-gray-500">
+                    No payment history available
+                  </td>
+                </tr>
+              ) : (
+                paymentHistory.map((payment, index) => (
                 <tr key={payment.requestId} className="hover:bg-gray-50">
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                     {(currentPage - 1) * limit + index + 1}
@@ -231,13 +255,23 @@ export default function PaymentHistory() {
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                     {formatDate(payment.paymentDate)}
                   </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    {payment.transactionHash ? (
+                      <code className="text-xs bg-gray-100 px-2 py-1 rounded">
+                        {payment.transactionHash.slice(0, 8)}...{payment.transactionHash.slice(-8)}
+                      </code>
+                    ) : (
+                      <span className="text-gray-400">N/A</span>
+                    )}
+                  </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <span className="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800">
                       Paid
                     </span>
                   </td>
                 </tr>
-              ))}
+                ))
+              )}
             </tbody>
           </table>
         </div>

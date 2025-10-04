@@ -41,11 +41,6 @@ const navigation = [
         icon: '⏳'
       },
       {
-        name: 'Cancelled Requests',
-        href: '/admin/cancelled-requests',
-        icon: '❌'
-      },
-      {
         name: 'Payment History',
         href: '/admin/payment-history',
         icon: '📜'

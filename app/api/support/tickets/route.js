@@ -4,7 +4,7 @@ import jwt from "jsonwebtoken";
 import mongoose from "mongoose";
 import { corsHeaders, handleCors } from "@/lib/cors";
 import dbConnect from "@/lib/mongodb";
-import Withdrawal from "@/models/Withdrawal";
+import SupportTicket from "@/models/SupportTicket";
 
 export async function OPTIONS(request) {
   return handleCors(request);
@@ -12,12 +12,14 @@ export async function OPTIONS(request) {
 
 const JWT_SECRET = process.env.JWT_SECRET || "fallback-jwt-secret-for-development-only";
 
-// GET endpoint to fetch withdrawal requests for admin
+// GET endpoint to fetch user's support tickets
 export async function GET(request) {
   try {
+    // Handle CORS preflight
     const headersList = await headers();
-    const authorization = headersList.get("authorization");
     
+    // Verify user authentication
+    const authorization = headersList.get("authorization");
     if (!authorization || !authorization.startsWith("Bearer ")) {
       return NextResponse.json(
         { error: "Unauthorized - No token provided" },
@@ -37,75 +39,37 @@ export async function GET(request) {
       );
     }
 
-    // Check if user is admin (you might want to add admin role check here)
-    // For now, we'll assume the token is from an admin user
-
+    // Connect to database
     await dbConnect();
 
     const { searchParams } = new URL(request.url);
     const page = parseInt(searchParams.get('page')) || 1;
     const limit = parseInt(searchParams.get('limit')) || 10;
-    const search = searchParams.get('search') || '';
     const status = searchParams.get('status') || 'all';
     const sortBy = searchParams.get('sortBy') || 'createdAt';
     const sortOrder = searchParams.get('sortOrder') || 'desc';
 
     // Build query
-    const query = {};
-    
-    // Filter by status
+    const query = { userId: new mongoose.Types.ObjectId(decoded.userId) };
     if (status !== 'all') {
       query.status = status;
-    }
-    
-    // Search functionality
-    if (search) {
-      query.$or = [
-        { withdrawalId: { $regex: search, $options: 'i' } },
-        { memberId: { $regex: search, $options: 'i' } },
-        { userName: { $regex: search, $options: 'i' } },
-        { userEmail: { $regex: search, $options: 'i' } },
-        { walletAddress: { $regex: search, $options: 'i' } }
-      ];
     }
 
     // Build sort object
     const sort = {};
     sort[sortBy] = sortOrder === 'desc' ? -1 : 1;
 
-    // Calculate pagination
+    // Get tickets with pagination
     const skip = (page - 1) * limit;
-
-    // Fetch withdrawals
-    const withdrawals = await Withdrawal.find(query)
+    const tickets = await SupportTicket.find(query)
       .sort(sort)
       .skip(skip)
       .limit(limit)
-      .select('-__v');
+      .select('-responses') // Exclude responses for list view
+      .lean();
 
-    // Get total count
-    const totalCount = await Withdrawal.countDocuments(query);
+    const totalCount = await SupportTicket.countDocuments(query);
     const totalPages = Math.ceil(totalCount / limit);
-
-    // Format data to match frontend expectations
-    const requests = withdrawals.map(withdrawal => ({
-      requestId: withdrawal.withdrawalId,
-      requestDate: withdrawal.createdAt,
-      memberId: withdrawal.memberId,
-      userName: withdrawal.userName,
-      userEmail: withdrawal.userEmail,
-      walletAddress: withdrawal.walletAddress,
-      gross: withdrawal.amount,
-      charges: withdrawal.fees || 0,
-      net: withdrawal.netAmount || (withdrawal.amount - (withdrawal.fees || 0)),
-      gateway: withdrawal.paymentMethod,
-      status: withdrawal.status,
-      notes: withdrawal.notes,
-      adminNotes: withdrawal.adminNotes,
-      processedBy: withdrawal.processedBy,
-      processedAt: withdrawal.processedAt,
-      transactionHash: withdrawal.transactionHash
-    }));
 
     const pagination = {
       totalCount,
@@ -119,19 +83,16 @@ export async function GET(request) {
     };
 
     return NextResponse.json(
-      { 
-        requests,
-        pagination
-      },
+      { tickets, pagination },
       { status: 200, headers: corsHeaders() }
     );
 
   } catch (error) {
-    console.error("Admin withdrawal requests API error:", error);
+    console.error("Get user support tickets API error:", error);
     return NextResponse.json(
       { 
         error: "Internal server error", 
-        details: error.message
+        details: error.message 
       },
       { status: 500, headers: corsHeaders() }
     );

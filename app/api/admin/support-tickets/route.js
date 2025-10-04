@@ -1,7 +1,10 @@
 import { NextResponse } from "next/server";
 import { headers } from "next/headers";
 import jwt from "jsonwebtoken";
+import mongoose from "mongoose";
 import { corsHeaders, handleCors } from "@/lib/cors";
+import dbConnect from "@/lib/mongodb";
+import SupportTicket from "@/models/SupportTicket";
 
 export async function OPTIONS(request) {
   return handleCors(request);
@@ -57,7 +60,7 @@ const generateMockSupportTickets = (count = 30) => {
 export async function GET(request) {
   try {
     // Handle CORS preflight
-    const headersList = headers();
+    const headersList = await headers();
     
     // Verify admin authentication
     const authorization = headersList.get("authorization");
@@ -88,6 +91,9 @@ export async function GET(request) {
       );
     }
 
+    // Connect to database
+    await dbConnect();
+
     const { searchParams } = new URL(request.url);
     const page = parseInt(searchParams.get('page')) || 1;
     const limit = parseInt(searchParams.get('limit')) || 10;
@@ -97,50 +103,47 @@ export async function GET(request) {
     const sortBy = searchParams.get('sortBy') || 'createdAt';
     const sortOrder = searchParams.get('sortOrder') || 'desc';
 
-    // Generate mock support tickets
-    let allTickets = generateMockSupportTickets();
-
-    // Apply filters
-    if (search) {
-      allTickets = allTickets.filter(ticket => 
-        ticket.ticketId.toLowerCase().includes(search.toLowerCase()) ||
-        ticket.subject.toLowerCase().includes(search.toLowerCase()) ||
-        ticket.userName.toLowerCase().includes(search.toLowerCase()) ||
-        ticket.userEmail.toLowerCase().includes(search.toLowerCase()) ||
-        ticket.description.toLowerCase().includes(search.toLowerCase())
-      );
-    }
-
+    // Build query
+    const query = {};
+    
+    // Apply status filter
     if (status !== 'all') {
-      allTickets = allTickets.filter(ticket => ticket.status === status);
+      query.status = status;
     }
-
+    
+    // Apply priority filter
     if (priority !== 'all') {
-      allTickets = allTickets.filter(ticket => ticket.priority === priority);
+      query.priority = priority;
+    }
+    
+    // Apply search filter
+    if (search) {
+      query.$or = [
+        { ticketId: { $regex: search, $options: 'i' } },
+        { subject: { $regex: search, $options: 'i' } },
+        { userName: { $regex: search, $options: 'i' } },
+        { userEmail: { $regex: search, $options: 'i' } },
+        { description: { $regex: search, $options: 'i' } }
+      ];
     }
 
-    // Sort tickets
-    allTickets.sort((a, b) => {
-      let aVal = a[sortBy];
-      let bVal = b[sortBy];
-      
-      if (sortBy === 'createdAt' || sortBy === 'updatedAt') {
-        aVal = new Date(aVal);
-        bVal = new Date(bVal);
-      }
-      
-      if (sortOrder === 'desc') {
-        return bVal > aVal ? 1 : -1;
-      } else {
-        return aVal > bVal ? 1 : -1;
-      }
-    });
+    // Build sort object
+    const sort = {};
+    sort[sortBy] = sortOrder === 'desc' ? -1 : 1;
 
-    // Apply pagination
-    const totalCount = allTickets.length;
-    const totalPages = Math.ceil(totalCount / limit);
+    // Calculate pagination
     const skip = (page - 1) * limit;
-    const tickets = allTickets.slice(skip, skip + limit);
+
+    // Fetch tickets with pagination
+    const tickets = await SupportTicket.find(query)
+      .sort(sort)
+      .skip(skip)
+      .limit(limit)
+      .select('-__v');
+
+    // Get total count for pagination
+    const totalCount = await SupportTicket.countDocuments(query);
+    const totalPages = Math.ceil(totalCount / limit);
 
     const pagination = {
       totalCount,
@@ -174,7 +177,7 @@ export async function GET(request) {
 export async function POST(request) {
   try {
     // Handle CORS preflight
-    const headersList = headers();
+    const headersList = await headers();
     
     // Verify admin authentication
     const authorization = headersList.get("authorization");
@@ -205,6 +208,9 @@ export async function POST(request) {
       );
     }
 
+    // Connect to database
+    await dbConnect();
+
     const { userId, subject, description, category, priority } = await request.json();
 
     // Validate input
@@ -215,30 +221,26 @@ export async function POST(request) {
       );
     }
 
-    // Create ticket record (in real app, this would be saved to a SupportTicket collection)
-    const ticket = {
-      _id: `ticket_${Date.now()}`,
-      ticketId: `TK${Date.now()}${Math.random().toString().substr(2, 4)}`,
-      userId: userId,
+    // Create ticket record
+    const ticketData = {
+      userId: new mongoose.Types.ObjectId(userId),
       subject: subject,
       description: description,
       category: category || 'General',
       priority: priority || 'medium',
       status: 'open',
-      createdAt: new Date(),
-      updatedAt: new Date(),
-      createdBy: decoded.userId
+      createdBy: new mongoose.Types.ObjectId(decoded.userId)
     };
 
-    // In a real application, you would save this to a SupportTicket collection
-    // await SupportTicket.create(ticket);
+    // Save ticket to database
+    const ticket = await SupportTicket.create(ticketData);
 
     return NextResponse.json(
       { 
         message: "Support ticket created successfully",
         ticket: ticket
       },
-      { status: 200, headers: corsHeaders() }
+      { status: 201, headers: corsHeaders() }
     );
 
   } catch (error) {

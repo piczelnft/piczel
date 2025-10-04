@@ -1,65 +1,54 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useAuth } from '@/contexts/AuthContext';
 
 const SupportTicketsPage = () => {
+  const { token } = useAuth();
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const [entriesPerPage, setEntriesPerPage] = useState(10);
+  const [ticketsData, setTicketsData] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+  const [pagination, setPagination] = useState({});
 
-  // Sample support tickets data
-  const ticketsData = [
-    {
-      id: 1,
-      ticketId: 'TKT001',
-      subject: 'Account Verification Issue',
-      status: 'Open',
-      priority: 'High',
-      createdDate: '2025-01-15',
-      lastUpdated: '2025-01-15',
-      category: 'Account'
-    },
-    {
-      id: 2,
-      ticketId: 'TKT002',
-      subject: 'Withdrawal Problem',
-      status: 'In Progress',
-      priority: 'Medium',
-      createdDate: '2025-01-14',
-      lastUpdated: '2025-01-15',
-      category: 'Financial'
-    },
-    {
-      id: 3,
-      ticketId: 'TKT003',
-      subject: 'Login Issues',
-      status: 'Resolved',
-      priority: 'Low',
-      createdDate: '2025-01-13',
-      lastUpdated: '2025-01-14',
-      category: 'Technical'
-    },
-    {
-      id: 4,
-      ticketId: 'TKT004',
-      subject: 'Package Upgrade Request',
-      status: 'Open',
-      priority: 'Medium',
-      createdDate: '2025-01-12',
-      lastUpdated: '2025-01-12',
-      category: 'General'
-    },
-    {
-      id: 5,
-      ticketId: 'TKT005',
-      subject: 'Team Management Help',
-      status: 'Closed',
-      priority: 'Low',
-      createdDate: '2025-01-11',
-      lastUpdated: '2025-01-13',
-      category: 'Support'
-    }
-  ];
+  // Fetch tickets from API
+  useEffect(() => {
+    const fetchTickets = async () => {
+      if (!token) {
+        setError('Please login to view support tickets');
+        setLoading(false);
+        return;
+      }
+
+      try {
+        const response = await fetch(`/api/support/tickets?page=${currentPage}&limit=${entriesPerPage}`, {
+          method: 'GET',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          setTicketsData(data.tickets);
+          setPagination(data.pagination);
+        } else {
+          const errorData = await response.json();
+          setError(errorData.error || 'Failed to fetch support tickets');
+        }
+      } catch (err) {
+        setError('Network error. Please try again.');
+        console.error('Error fetching tickets:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchTickets();
+  }, [token, currentPage, entriesPerPage]);
 
   const filteredData = ticketsData.filter(item =>
     item.ticketId.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -68,11 +57,11 @@ const SupportTicketsPage = () => {
     item.category.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  const totalEntries = filteredData.length;
-  const totalPages = Math.ceil(totalEntries / entriesPerPage);
-  const startIndex = (currentPage - 1) * entriesPerPage;
-  const endIndex = startIndex + entriesPerPage;
-  const currentData = filteredData.slice(startIndex, endIndex);
+  const totalEntries = pagination.totalCount || filteredData.length;
+  const totalPages = pagination.totalPages || Math.ceil(totalEntries / entriesPerPage);
+  const startIndex = pagination.startIndex || (currentPage - 1) * entriesPerPage;
+  const endIndex = pagination.endIndex || startIndex + entriesPerPage;
+  const currentData = filteredData;
 
   const handleSearch = (e) => {
     setSearchTerm(e.target.value);
@@ -116,13 +105,31 @@ const SupportTicketsPage = () => {
     }
   };
 
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-cyan-400 mx-auto mb-4"></div>
+          <p className="text-white text-lg">Loading support tickets...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen flex bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 p-8">
       <div className="w-full max-w-6xl mx-auto">
         <div className="text-center mb-12">
           <h1 className="text-4xl font-bold text-white mb-2">Support Tickets</h1>
-          <p className="text-lg text-gray-300">Send message</p>
+          <p className="text-lg text-gray-300">View and manage your support tickets</p>
         </div>
+
+        {/* Error Message */}
+        {error && (
+          <div className="mb-6 p-4 bg-red-500/20 border border-red-500/30 rounded-lg">
+            <p className="text-red-300 text-center">{error}</p>
+          </div>
+        )}
 
         <div className="bg-gradient-to-br from-slate-800/50 to-purple-800/50 backdrop-blur-sm rounded-2xl p-8 border border-purple-500/20 shadow-lg">
           <h2 className="text-2xl font-semibold text-white mb-8 text-center">Support Ticket</h2>
@@ -173,31 +180,43 @@ const SupportTicketsPage = () => {
                 </tr>
               </thead>
               <tbody>
-                {currentData.map((ticket, index) => (
-                  <tr key={ticket.id} className="border-b border-purple-500/20 hover:bg-slate-700/30 transition-colors">
-                    <td className="px-6 py-4 text-gray-300">{startIndex + index + 1}</td>
-                    <td className="px-6 py-4 text-cyan-400 font-medium">{ticket.ticketId}</td>
-                    <td className="px-6 py-4 text-white font-medium">{ticket.subject}</td>
-                    <td className="px-6 py-4">
-                      <span className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(ticket.status)}`}>
-                        {ticket.status}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4">
-                      <span className={`px-3 py-1 rounded-full text-xs font-medium ${getPriorityColor(ticket.priority)}`}>
-                        {ticket.priority}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 text-purple-400 font-medium">{ticket.category}</td>
-                    <td className="px-6 py-4 text-gray-300">{ticket.createdDate}</td>
-                    <td className="px-6 py-4 text-gray-300">{ticket.lastUpdated}</td>
-                    <td className="px-6 py-4">
-                      <button className="px-3 py-1 bg-gradient-to-r from-cyan-500 to-purple-600 text-white rounded-lg text-xs font-medium hover:from-cyan-600 hover:to-purple-700 transition-all duration-300">
-                        View
-                      </button>
+                {currentData.length === 0 ? (
+                  <tr>
+                    <td colSpan="9" className="px-6 py-8 text-center text-gray-400">
+                      {searchTerm ? 'No tickets found matching your search.' : 'No support tickets found.'}
                     </td>
                   </tr>
-                ))}
+                ) : (
+                  currentData.map((ticket, index) => (
+                    <tr key={ticket._id} className="border-b border-purple-500/20 hover:bg-slate-700/30 transition-colors">
+                      <td className="px-6 py-4 text-gray-300">{startIndex + index}</td>
+                      <td className="px-6 py-4 text-cyan-400 font-medium">{ticket.ticketId}</td>
+                      <td className="px-6 py-4 text-white font-medium">{ticket.subject}</td>
+                      <td className="px-6 py-4">
+                        <span className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(ticket.status)}`}>
+                          {ticket.status.charAt(0).toUpperCase() + ticket.status.slice(1).replace('_', ' ')}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4">
+                        <span className={`px-3 py-1 rounded-full text-xs font-medium ${getPriorityColor(ticket.priority)}`}>
+                          {ticket.priority.charAt(0).toUpperCase() + ticket.priority.slice(1)}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 text-purple-400 font-medium">{ticket.category}</td>
+                      <td className="px-6 py-4 text-gray-300">
+                        {new Date(ticket.createdAt).toLocaleDateString()}
+                      </td>
+                      <td className="px-6 py-4 text-gray-300">
+                        {new Date(ticket.updatedAt).toLocaleDateString()}
+                      </td>
+                      <td className="px-6 py-4">
+                        <button className="px-3 py-1 bg-gradient-to-r from-cyan-500 to-purple-600 text-white rounded-lg text-xs font-medium hover:from-cyan-600 hover:to-purple-700 transition-all duration-300">
+                          View
+                        </button>
+                      </td>
+                    </tr>
+                  ))
+                )}
               </tbody>
             </table>
           </div>

@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import { headers } from "next/headers";
 import jwt from "jsonwebtoken";
 import { corsHeaders, handleCors } from "@/lib/cors";
+import dbConnect from "@/lib/mongodb";
+import SupportTicket from "@/models/SupportTicket";
 
 export async function OPTIONS(request) {
   return handleCors(request);
@@ -12,7 +14,7 @@ const JWT_SECRET = process.env.JWT_SECRET || "fallback-jwt-secret-for-developmen
 export async function GET(request) {
   try {
     // Handle CORS preflight
-    const headersList = headers();
+    const headersList = await headers();
     
     // Verify admin authentication
     const authorization = headersList.get("authorization");
@@ -43,61 +45,105 @@ export async function GET(request) {
       );
     }
 
-    // Mock support ticket statistics
-    // In a real application, these would be calculated from actual database queries
+    // Connect to database
+    await dbConnect();
+
+    // Calculate real support ticket statistics
+    const now = new Date();
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const thisWeek = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000);
+    const thisMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+
+    // Get all tickets for statistics
+    const [
+      totalTickets,
+      openTickets,
+      inProgressTickets,
+      resolvedTickets,
+      closedTickets,
+      pendingTickets,
+      urgentTickets,
+      highPriorityTickets,
+      mediumPriorityTickets,
+      lowPriorityTickets,
+      ticketsToday,
+      ticketsThisWeek,
+      ticketsThisMonth,
+      categoryStats
+    ] = await Promise.all([
+      SupportTicket.countDocuments(),
+      SupportTicket.countDocuments({ status: 'open' }),
+      SupportTicket.countDocuments({ status: 'in_progress' }),
+      SupportTicket.countDocuments({ status: 'resolved' }),
+      SupportTicket.countDocuments({ status: 'closed' }),
+      SupportTicket.countDocuments({ status: 'pending' }),
+      SupportTicket.countDocuments({ priority: 'urgent' }),
+      SupportTicket.countDocuments({ priority: 'high' }),
+      SupportTicket.countDocuments({ priority: 'medium' }),
+      SupportTicket.countDocuments({ priority: 'low' }),
+      SupportTicket.countDocuments({ createdAt: { $gte: today } }),
+      SupportTicket.countDocuments({ createdAt: { $gte: thisWeek } }),
+      SupportTicket.countDocuments({ createdAt: { $gte: thisMonth } }),
+      SupportTicket.aggregate([
+        {
+          $group: {
+            _id: '$category',
+            count: { $sum: 1 }
+          }
+        }
+      ])
+    ]);
+
+    // Format category stats
+    const formattedCategoryStats = {};
+    categoryStats.forEach(cat => {
+      formattedCategoryStats[cat._id?.toLowerCase() || 'general'] = cat.count;
+    });
+
+    // Get recent activity (last 10 tickets)
+    const recentTickets = await SupportTicket.find()
+      .sort({ createdAt: -1 })
+      .limit(10)
+      .select('ticketId subject userName userEmail status createdAt');
+
+    const recentActivity = recentTickets.map(ticket => ({
+      type: "ticket_created",
+      description: `New ticket created by ${ticket.userEmail}`,
+      ticketId: ticket.ticketId,
+      status: ticket.status,
+      timestamp: ticket.createdAt
+    }));
+
     const stats = {
-      totalTickets: 127,
-      openTickets: 23,
-      inProgressTickets: 15,
-      resolvedTickets: 67,
-      closedTickets: 18,
-      pendingTickets: 4,
-      urgentTickets: 8,
-      highPriorityTickets: 12,
-      mediumPriorityTickets: 45,
-      lowPriorityTickets: 62,
+      totalTickets,
+      openTickets,
+      inProgressTickets,
+      resolvedTickets,
+      closedTickets,
+      pendingTickets,
+      urgentTickets,
+      highPriorityTickets,
+      mediumPriorityTickets,
+      lowPriorityTickets,
       
       // Category breakdown
-      categoryStats: {
-        technical: 45,
-        account: 23,
-        payment: 18,
-        general: 28,
-        bugReport: 8,
-        featureRequest: 5
-      },
+      categoryStats: formattedCategoryStats,
       
       // Time-based statistics
-      ticketsToday: 7,
-      ticketsThisWeek: 23,
-      ticketsThisMonth: 89,
+      ticketsToday,
+      ticketsThisWeek,
+      ticketsThisMonth,
       
-      // Response time statistics
+      // Response time statistics (mock for now)
       averageResponseTime: "2.5 hours",
       averageResolutionTime: "1.2 days",
       
-      // Agent performance
+      // Agent performance (mock for now)
       activeAgents: 3,
-      totalResponses: 234,
+      totalResponses: totalTickets,
       
       // Recent activity
-      recentActivity: [
-        {
-          type: "ticket_created",
-          description: "New ticket created by user@example.com",
-          timestamp: new Date(Date.now() - 5 * 60 * 1000) // 5 minutes ago
-        },
-        {
-          type: "ticket_resolved",
-          description: "Ticket #TK123456 resolved by Admin",
-          timestamp: new Date(Date.now() - 15 * 60 * 1000) // 15 minutes ago
-        },
-        {
-          type: "ticket_assigned",
-          description: "Ticket #TK123457 assigned to Support Agent",
-          timestamp: new Date(Date.now() - 30 * 60 * 1000) // 30 minutes ago
-        }
-      ]
+      recentActivity
     };
 
     return NextResponse.json(

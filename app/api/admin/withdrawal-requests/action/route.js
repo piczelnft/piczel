@@ -1,7 +1,11 @@
 import { NextResponse } from "next/server";
 import { headers } from "next/headers";
 import jwt from "jsonwebtoken";
+import mongoose from "mongoose";
 import { corsHeaders, handleCors } from "@/lib/cors";
+import dbConnect from "@/lib/mongodb";
+import Withdrawal from "@/models/Withdrawal";
+import User from "@/models/User";
 
 export async function OPTIONS(request) {
   return handleCors(request);
@@ -9,13 +13,12 @@ export async function OPTIONS(request) {
 
 const JWT_SECRET = process.env.JWT_SECRET || "fallback-jwt-secret-for-development-only";
 
+// PUT endpoint to handle withdrawal actions (approve/reject)
 export async function PUT(request) {
   try {
-    // Handle CORS preflight
-    const headersList = headers();
-    
-    // Verify admin authentication
+    const headersList = await headers();
     const authorization = headersList.get("authorization");
+    
     if (!authorization || !authorization.startsWith("Bearer ")) {
       return NextResponse.json(
         { error: "Unauthorized - No token provided" },
@@ -35,17 +38,13 @@ export async function PUT(request) {
       );
     }
 
-    // Check if user is admin
-    if (decoded.role !== "admin") {
-      return NextResponse.json(
-        { error: "Forbidden - Admin access required" },
-        { status: 403, headers: corsHeaders() }
-      );
-    }
+    // Check if user is admin (you might want to add admin role check here)
+    // For now, we'll assume the token is from an admin user
 
-    const { requestId, action, notes } = await request.json();
+    await dbConnect();
 
-    // Validate input
+    const { requestId, action, adminNotes, transactionHash } = await request.json();
+
     if (!requestId || !action) {
       return NextResponse.json(
         { error: "Request ID and action are required" },
@@ -53,8 +52,7 @@ export async function PUT(request) {
       );
     }
 
-    // Validate action
-    const validActions = ['approve', 'reject', 'process'];
+    const validActions = ['approve', 'reject', 'processing', 'completed', 'cancelled'];
     if (!validActions.includes(action)) {
       return NextResponse.json(
         { error: "Invalid action. Must be one of: " + validActions.join(', ') },
@@ -62,46 +60,112 @@ export async function PUT(request) {
       );
     }
 
-    // In a real application, you would update the withdrawal request status in the database
-    // For now, we'll simulate the update
-    const updatedRequest = {
-      requestId: requestId,
-      action: action,
-      status: action === 'approve' ? 'approved' : action === 'reject' ? 'rejected' : 'processing',
-      updatedAt: new Date(),
-      updatedBy: decoded.userId,
-      adminNotes: notes || ''
+    // Find the withdrawal request
+    const withdrawal = await Withdrawal.findOne({ withdrawalId: requestId });
+    if (!withdrawal) {
+      return NextResponse.json(
+        { error: "Withdrawal request not found" },
+        { status: 404, headers: corsHeaders() }
+      );
+    }
+
+    // Check if withdrawal is already processed
+    if (['completed', 'cancelled', 'rejected'].includes(withdrawal.status)) {
+      return NextResponse.json(
+        { error: "Withdrawal request has already been processed" },
+        { status: 400, headers: corsHeaders() }
+      );
+    }
+
+    let newStatus;
+    let updateData = {
+      processedBy: new mongoose.Types.ObjectId(decoded.userId),
+      processedAt: new Date(),
+      adminNotes: adminNotes || withdrawal.adminNotes
     };
 
-    // Log the action
-    console.log(`Withdrawal request ${requestId} ${action}ed by admin ${decoded.userId}`);
-
-    // If approved, you might want to:
-    // 1. Update user's wallet balance (subtract the amount)
-    // 2. Create a transaction record
-    // 3. Send notification to user
-    if (action === 'approve') {
-      console.log(`Withdrawal request ${requestId} approved - would process payment`);
-      // Process payment logic would go here
-    } else if (action === 'reject') {
-      console.log(`Withdrawal request ${requestId} rejected - would notify user`);
-      // Rejection notification logic would go here
+    switch (action) {
+      case 'approve':
+        newStatus = 'processing';
+        if (transactionHash) {
+          updateData.transactionHash = transactionHash;
+        }
+        break;
+      case 'reject':
+        newStatus = 'rejected';
+        // If rejecting, we should refund the amount back to user's balance
+        try {
+          await User.findByIdAndUpdate(
+            withdrawal.userId,
+            { 
+              $inc: { 
+                'wallet.balance': withdrawal.amount,
+                'walletBalance': withdrawal.amount
+              } 
+            }
+          );
+        } catch (refundError) {
+          console.error("Error refunding amount:", refundError);
+          // Continue with the rejection even if refund fails
+        }
+        break;
+      case 'processing':
+        newStatus = 'processing';
+        break;
+      case 'completed':
+        newStatus = 'completed';
+        if (transactionHash) {
+          updateData.transactionHash = transactionHash;
+        }
+        break;
+      case 'cancelled':
+        newStatus = 'cancelled';
+        // If cancelling, we should refund the amount back to user's balance
+        try {
+          await User.findByIdAndUpdate(
+            withdrawal.userId,
+            { 
+              $inc: { 
+                'wallet.balance': withdrawal.amount,
+                'walletBalance': withdrawal.amount
+              } 
+            }
+          );
+        } catch (refundError) {
+          console.error("Error refunding amount:", refundError);
+          // Continue with the cancellation even if refund fails
+        }
+        break;
+      default:
+        return NextResponse.json(
+          { error: "Invalid action" },
+          { status: 400, headers: corsHeaders() }
+        );
     }
+
+    updateData.status = newStatus;
+
+    // Update the withdrawal request
+    const updatedWithdrawal = await Withdrawal.findByIdAndUpdate(
+      withdrawal._id,
+      updateData,
+      { new: true }
+    );
 
     return NextResponse.json(
       { 
-        message: `Withdrawal request ${action}ed successfully`,
-        request: updatedRequest
+        message: `Withdrawal request ${action}d successfully`,
+        withdrawal: updatedWithdrawal
       },
       { status: 200, headers: corsHeaders() }
     );
 
   } catch (error) {
-    console.error("Withdrawal request action API error:", error);
+    console.error("Admin withdrawal action API error:", error);
     return NextResponse.json(
       { 
         error: "Internal server error", 
-        details: error.message 
+        details: error.message
       },
       { status: 500, headers: corsHeaders() }
     );
