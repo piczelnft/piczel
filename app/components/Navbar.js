@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { useAuth } from "@/contexts/AuthContext";
 import { useSidebar } from "../contexts/SidebarContext";
 
@@ -180,9 +181,18 @@ export default function Navbar() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             <div className="flex items-center space-x-2">
-              <div className="text-2xl font-bold bg-gradient-to-r from-purple-400 to-cyan-400 bg-clip-text text-transparent">
-                PICZEL
-              </div>
+              <Link href="/" className="flex items-center space-x-2">
+                <Image
+                  src="/logo.png"
+                  alt="Piczel Logo"
+                  width={32}
+                  height={32}
+                  className="w-8 h-8 object-contain"
+                />
+                <span className="text-2xl font-bold bg-gradient-to-r from-purple-400 to-cyan-400 bg-clip-text text-transparent">
+                  PICZEL
+                </span>
+              </Link>
             </div>
             <div className="animate-pulse bg-slate-700 h-8 w-20 rounded"></div>
           </div>
@@ -217,16 +227,18 @@ export default function Navbar() {
               
               {/* Logo */}
               <div className="flex items-center space-x-2 group">
-                <div className="flex items-center space-x-2">
-                  <div className="w-8 h-8 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform duration-300 animate-cardFloat" style={{background: 'linear-gradient(135deg, var(--primary-color), var(--secondary-color))'}}>
-                    <div className="w-4 h-4 bg-white rounded-full flex items-center justify-center">
-                      <div className="w-2 h-2 rounded-full animate-pulse" style={{backgroundColor: 'var(--primary-color)'}}></div>
-                    </div>
-                  </div>
+                <Link href="/" className="flex items-center space-x-2 group-hover:scale-105 transition-transform duration-300">
+                  <Image
+                    src="/logo.png"
+                    alt="Piczel Logo"
+                    width={32}
+                    height={32}
+                    className="w-8 h-8 object-contain animate-cardFloat"
+                  />
                   <div className="text-2xl font-bold text-white gradient-text-enhanced animate-neonGlow">
                     PICZEL
                   </div>
-                </div>
+                </Link>
               </div>
             </div>
 
