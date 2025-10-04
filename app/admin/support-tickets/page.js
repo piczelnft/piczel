@@ -14,6 +14,10 @@ export default function SupportTickets() {
   const [selectedStatus, setSelectedStatus] = useState('all');
   const [selectedPriority, setSelectedPriority] = useState('all');
   const [stats, setStats] = useState({});
+  const [selectedTicket, setSelectedTicket] = useState(null);
+  const [showModal, setShowModal] = useState(false);
+  const [showCloseConfirm, setShowCloseConfirm] = useState(false);
+  const [ticketToClose, setTicketToClose] = useState(null);
 
   const fetchTickets = useCallback(async () => {
     try {
@@ -134,6 +138,7 @@ export default function SupportTickets() {
       const adminToken = localStorage.getItem('adminToken');
       if (!adminToken) return;
 
+
       const response = await fetch('/api/admin/support-tickets/update-status', {
         method: 'PUT',
         headers: {
@@ -153,6 +158,57 @@ export default function SupportTickets() {
     } catch (err) {
       console.error('Error updating ticket status:', err);
     }
+  };
+
+  const handleViewTicket = (ticket) => {
+    setSelectedTicket(ticket);
+    setShowModal(true);
+  };
+
+  const handleCloseTicket = (ticket) => {
+    setTicketToClose(ticket);
+    setShowCloseConfirm(true);
+  };
+
+  const confirmCloseTicket = async () => {
+    if (!ticketToClose) return;
+    
+    try {
+      const adminToken = localStorage.getItem('adminToken');
+      if (!adminToken) return;
+
+
+      const response = await fetch('/api/admin/support-tickets/update-status', {
+        method: 'PUT',
+        headers: {
+          'Authorization': `Bearer ${adminToken}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          ticketId: ticketToClose._id,
+          status: 'closed'
+        }),
+      });
+
+      if (response.ok) {
+        fetchTickets();
+        fetchTicketStats();
+        setShowCloseConfirm(false);
+        setTicketToClose(null);
+      }
+    } catch (err) {
+      console.error('Error closing ticket:', err);
+    }
+  };
+
+  const closeModal = () => {
+    setShowModal(false);
+    setSelectedTicket(null);
+  };
+
+  const closeConfirmModal = () => {
+    setShowCloseConfirm(false);
+    setTicketToClose(null);
   };
 
   const renderPagination = () => {
@@ -455,12 +511,20 @@ export default function SupportTickets() {
                           Resolve
                         </button>
                       )}
-                      <button className="text-purple-600 hover:text-purple-900">
+                      <button 
+                        onClick={() => handleViewTicket(ticket)}
+                        className="text-purple-600 hover:text-purple-900 transition-colors"
+                      >
                         View
                       </button>
-                      <button className="text-red-600 hover:text-red-900">
-                        Close
-                      </button>
+                      {ticket.status !== 'closed' && (
+                        <button 
+                          onClick={() => handleCloseTicket(ticket)}
+                          className="text-red-600 hover:text-red-900 transition-colors"
+                        >
+                          Close
+                        </button>
+                      )}
                     </div>
                   </td>
                 </tr>
@@ -510,6 +574,139 @@ export default function SupportTickets() {
           </div>
         )}
       </div>
+
+      {/* View Ticket Modal */}
+      {showModal && selectedTicket && (
+        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+          <div className="relative top-20 mx-auto p-5 border w-11/12 md:w-3/4 lg:w-1/2 shadow-lg rounded-md bg-white">
+            <div className="mt-3">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-medium text-gray-900">
+                  Ticket #{selectedTicket.ticketId}
+                </h3>
+                <button
+                  onClick={closeModal}
+                  className="text-gray-400 hover:text-gray-600"
+                >
+                  <span className="sr-only">Close</span>
+                  <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+              
+              <div className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700">User</label>
+                    <p className="mt-1 text-sm text-gray-900">{selectedTicket.userName || 'Unknown'}</p>
+                    <p className="text-sm text-gray-500">{selectedTicket.userEmail || 'N/A'}</p>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700">Member ID</label>
+                    <p className="mt-1 text-sm text-gray-900">{selectedTicket.memberId || 'N/A'}</p>
+                  </div>
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">Subject</label>
+                  <p className="mt-1 text-sm text-gray-900">{selectedTicket.subject}</p>
+                </div>
+                
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700">Category</label>
+                    <p className="mt-1 text-sm text-gray-900">{selectedTicket.category || 'General'}</p>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700">Priority</label>
+                    <div className="mt-1">{getPriorityBadge(selectedTicket.priority)}</div>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700">Status</label>
+                    <div className="mt-1">{getStatusBadge(selectedTicket.status)}</div>
+                  </div>
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">Message</label>
+                  <div className="mt-1 p-3 bg-gray-50 rounded-md">
+                    <p className="text-sm text-gray-900 whitespace-pre-wrap">{selectedTicket.message || selectedTicket.description}</p>
+                  </div>
+                </div>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700">Created</label>
+                    <p className="mt-1 text-sm text-gray-900">{formatDate(selectedTicket.createdAt)}</p>
+                  </div>
+                  {selectedTicket.updatedAt && selectedTicket.updatedAt !== selectedTicket.createdAt && (
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700">Last Updated</label>
+                      <p className="mt-1 text-sm text-gray-900">{formatDate(selectedTicket.updatedAt)}</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+              
+              <div className="mt-6 flex justify-end space-x-3">
+                <button
+                  onClick={closeModal}
+                  className="px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400 transition-colors"
+                >
+                  Close
+                </button>
+                {selectedTicket.status !== 'closed' && (
+                  <button
+                    onClick={() => {
+                      closeModal();
+                      handleCloseTicket(selectedTicket);
+                    }}
+                    className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors"
+                  >
+                    Close Ticket
+                  </button>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Close Confirmation Modal */}
+      {showCloseConfirm && ticketToClose && (
+        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+          <div className="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+            <div className="mt-3 text-center">
+              <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-red-100">
+                <svg className="h-6 w-6 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
+                </svg>
+              </div>
+              <h3 className="text-lg font-medium text-gray-900 mt-4">Close Support Ticket</h3>
+              <div className="mt-2">
+                <p className="text-sm text-gray-500">
+                  Are you sure you want to close ticket #{ticketToClose.ticketId}? This action cannot be undone.
+                </p>
+              </div>
+              <div className="mt-6 flex justify-center space-x-3">
+                <button
+                  onClick={closeConfirmModal}
+                  className="px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400 transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={confirmCloseTicket}
+                  className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors"
+                >
+                  Close Ticket
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </AdminLayout>
   );
 }
