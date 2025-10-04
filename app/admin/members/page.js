@@ -1,25 +1,25 @@
-'use client';
+"use client";
 
-import { useState, useEffect, useCallback } from 'react';
-import Image from 'next/image';
-import AdminLayout from '../components/AdminLayout';
+import { useState, useEffect, useCallback } from "react";
+import Image from "next/image";
+import AdminLayout from "../components/AdminLayout";
 
 export default function MemberManagement() {
   const [members, setMembers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [searchTerm, setSearchTerm] = useState('');
+  const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
-  const [limit, setLimit] = useState(10);
+  const [limit, setLimit] = useState(20);
   const [pagination, setPagination] = useState({});
   const [searchTimeout, setSearchTimeout] = useState(null);
 
   const fetchMembers = useCallback(async () => {
     try {
       setLoading(true);
-      const adminToken = localStorage.getItem('adminToken');
+      const adminToken = localStorage.getItem("adminToken");
       if (!adminToken) {
-        setError('No admin token found');
+        setError("No admin token found");
         return;
       }
 
@@ -27,26 +27,26 @@ export default function MemberManagement() {
         page: currentPage.toString(),
         limit: limit.toString(),
         search: searchTerm,
-        sortBy: 'createdAt',
-        sortOrder: 'desc'
+        sortBy: "createdAt",
+        sortOrder: "desc",
       });
 
       const response = await fetch(`/api/admin/members?${params}`, {
         headers: {
-          'Authorization': `Bearer ${adminToken}`,
-          'Content-Type': 'application/json',
+          Authorization: `Bearer ${adminToken}`,
+          "Content-Type": "application/json",
         },
       });
 
       if (!response.ok) {
-        throw new Error('Failed to fetch members');
+        throw new Error("Failed to fetch members");
       }
 
       const data = await response.json();
       setMembers(data.members);
       setPagination(data.pagination);
     } catch (err) {
-      console.error('Error fetching members:', err);
+      console.error("Error fetching members:", err);
       setError(err.message);
     } finally {
       setLoading(false);
@@ -71,23 +71,68 @@ export default function MemberManagement() {
     setCurrentPage(1); // Reset to first page when changing limit
   };
 
+  const handleDeleteMember = async (memberId) => {
+    if (
+      !window.confirm(
+        "Are you sure you want to delete this member? This action cannot be undone."
+      )
+    ) {
+      return;
+    }
+
+    try {
+      const adminToken = localStorage.getItem("adminToken");
+      if (!adminToken) {
+        setError("No admin token found");
+        return;
+      }
+
+      const response = await fetch(`/api/admin/members/${memberId}`, {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${adminToken}`,
+          "Content-Type": "application/json",
+        },
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Failed to delete member");
+      }
+
+      // Refresh the members list after successful deletion
+      await fetchMembers();
+
+      // Show success message (you could add a toast notification here)
+      alert("Member deleted successfully");
+    } catch (err) {
+      console.error("Error deleting member:", err);
+      setError(err.message);
+      alert(`Error deleting member: ${err.message}`);
+    }
+  };
+
   const formatCurrency = (amount) => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD',
+    return new Intl.NumberFormat("en-US", {
+      style: "currency",
+      currency: "USD",
       minimumFractionDigits: 4,
     }).format(amount);
   };
 
   const getStatusBadge = (status) => {
     const statusClasses = {
-      'Active': 'bg-green-100 text-green-800',
-      'Inactive': 'bg-yellow-100 text-yellow-800',
-      'Blocked': 'bg-red-100 text-red-800'
+      Active: "bg-green-100 text-green-800",
+      Inactive: "bg-yellow-100 text-yellow-800",
+      Blocked: "bg-red-100 text-red-800",
     };
-    
+
     return (
-      <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${statusClasses[status] || 'bg-gray-100 text-gray-800'}`}>
+      <span
+        className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
+          statusClasses[status] || "bg-gray-100 text-gray-800"
+        }`}
+      >
         {status}
       </span>
     );
@@ -110,8 +155,8 @@ export default function MemberManagement() {
           onClick={() => handlePageChange(i)}
           className={`px-3 py-1 mx-1 text-sm rounded ${
             i === currentPage
-              ? 'bg-blue-600 text-white'
-              : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'
+              ? "bg-blue-600 text-white"
+              : "bg-white text-gray-700 border border-gray-300 hover:bg-gray-50"
           }`}
         >
           {i}
@@ -122,7 +167,8 @@ export default function MemberManagement() {
     return (
       <div className="flex items-center justify-between mt-4">
         <div className="text-sm text-gray-700">
-          Showing {pagination.startIndex} to {pagination.endIndex} of {pagination.totalCount} entries
+          Showing {pagination.startIndex} to {pagination.endIndex} of{" "}
+          {pagination.totalCount} entries
         </div>
         <div className="flex items-center space-x-2">
           <button
@@ -146,7 +192,9 @@ export default function MemberManagement() {
           {pages}
           {endPage < pagination.totalPages && (
             <>
-              {endPage < pagination.totalPages - 1 && <span className="px-2">…</span>}
+              {endPage < pagination.totalPages - 1 && (
+                <span className="px-2">…</span>
+              )}
               <button
                 onClick={() => handlePageChange(pagination.totalPages)}
                 className="px-3 py-1 text-sm bg-white border border-gray-300 rounded hover:bg-gray-50"
@@ -192,7 +240,9 @@ export default function MemberManagement() {
         <div className="px-6 py-4 border-b border-gray-200">
           <div className="flex justify-between items-center">
             <div>
-              <h2 className="text-xl font-semibold text-gray-900">Member Details</h2>
+              <h2 className="text-xl font-semibold text-gray-900">
+                Member Details
+              </h2>
               <p className="text-sm text-gray-600">Members Details</p>
             </div>
             <div className="flex items-center space-x-4">
@@ -202,6 +252,7 @@ export default function MemberManagement() {
                 className="px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
                 <option value={10}>10</option>
+                <option value={20}>20</option>
                 <option value={25}>25</option>
                 <option value={50}>50</option>
                 <option value={100}>100</option>
@@ -308,13 +359,15 @@ export default function MemberManagement() {
                     {formatCurrency(member.walletBalance)}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    {getStatusBadge(member.status)}
+                    {getStatusBadge(
+                      member.rank === "Basic" ? "Inactive" : member.status
+                    )}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                    <button className="text-blue-600 hover:text-blue-900 mr-3">
-                      Edit
-                    </button>
-                    <button className="text-red-600 hover:text-red-900">
+                    <button
+                      onClick={() => handleDeleteMember(member.memberId)}
+                      className="text-red-600 hover:text-red-900"
+                    >
                       Delete
                     </button>
                   </td>
@@ -331,8 +384,10 @@ export default function MemberManagement() {
         {error && (
           <div className="px-6 py-4 bg-red-50 border-t border-red-200">
             <div className="text-center">
-              <p className="text-red-600 mb-4">Error loading members: {error}</p>
-              <button 
+              <p className="text-red-600 mb-4">
+                Error loading members: {error}
+              </p>
+              <button
                 onClick={fetchMembers}
                 className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors"
               >
