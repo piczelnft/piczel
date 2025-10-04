@@ -47,13 +47,19 @@ export async function GET(request) {
     const limit = parseInt(searchParams.get('limit')) || 10;
     const search = searchParams.get('search') || '';
     const dateFilter = searchParams.get('dateFilter') || 'all';
+    const statusFilter = searchParams.get('statusFilter') || 'all';
     const sortBy = searchParams.get('sortBy') || 'processedAt';
     const sortOrder = searchParams.get('sortOrder') || 'desc';
 
-    // Build query - only fetch completed withdrawals
+    // Build query - fetch completed and rejected withdrawals
     const query = {
-      status: 'completed'
+      status: { $in: ['completed', 'rejected'] }
     };
+    
+    // Status filter
+    if (statusFilter !== 'all') {
+      query.status = statusFilter;
+    }
     
     // Date filter
     if (dateFilter !== 'all') {

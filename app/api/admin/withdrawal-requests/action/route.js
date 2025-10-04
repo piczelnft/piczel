@@ -79,10 +79,18 @@ export async function PUT(request) {
 
     let newStatus;
     let updateData = {
-      processedBy: new mongoose.Types.ObjectId(decoded.userId),
       processedAt: new Date(),
       adminNotes: adminNotes || withdrawal.adminNotes
     };
+
+    // Only set processedBy if userId is a valid ObjectId
+    // For admin tokens, userId might be "admin" string, so we skip processedBy
+    if (decoded.userId && decoded.userId !== "admin" && mongoose.Types.ObjectId.isValid(decoded.userId)) {
+      updateData.processedBy = new mongoose.Types.ObjectId(decoded.userId);
+    } else if (decoded.userId === "admin") {
+      // For admin users, we can set a special identifier or leave it null
+      updateData.processedBy = null; // or you could set it to a special admin ObjectId
+    }
 
     switch (action) {
       case 'approve':
@@ -145,10 +153,31 @@ export async function PUT(request) {
 
     updateData.status = newStatus;
 
-    // Update the withdrawal request
+    // Prepare status history update
+    const statusHistoryUpdate = {
+      status: newStatus,
+      changedAt: new Date(),
+      notes: adminNotes || null
+    };
+
+    // Only add changedBy if userId is a valid ObjectId
+    // For admin tokens, userId might be "admin" string, so we skip changedBy
+    if (decoded.userId && decoded.userId !== "admin" && mongoose.Types.ObjectId.isValid(decoded.userId)) {
+      statusHistoryUpdate.changedBy = new mongoose.Types.ObjectId(decoded.userId);
+    } else if (decoded.userId === "admin") {
+      // For admin users, we can set a special identifier or leave it null
+      statusHistoryUpdate.changedBy = null; // or you could set it to a special admin ObjectId
+    }
+
+    // Update the withdrawal request with status history
     const updatedWithdrawal = await Withdrawal.findByIdAndUpdate(
       withdrawal._id,
-      updateData,
+      {
+        ...updateData,
+        $push: {
+          statusHistory: statusHistoryUpdate
+        }
+      },
       { new: true }
     );
 

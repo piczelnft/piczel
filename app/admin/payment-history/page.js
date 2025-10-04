@@ -9,6 +9,7 @@ export default function PaymentHistory() {
   const [error, setError] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [dateFilter, setDateFilter] = useState('all');
+  const [statusFilter, setStatusFilter] = useState('all');
   const [currentPage, setCurrentPage] = useState(1);
   const [limit, setLimit] = useState(10);
   const [pagination, setPagination] = useState({});
@@ -27,6 +28,7 @@ export default function PaymentHistory() {
         limit: limit.toString(),
         search: searchTerm,
         dateFilter: dateFilter,
+        statusFilter: statusFilter,
         sortBy: 'processedAt',
         sortOrder: 'desc'
       });
@@ -53,7 +55,7 @@ export default function PaymentHistory() {
     } finally {
       setLoading(false);
     }
-  }, [currentPage, limit, searchTerm, dateFilter]);
+  }, [currentPage, limit, searchTerm, dateFilter, statusFilter]);
 
   useEffect(() => {
     fetchPaymentHistory();
@@ -138,7 +140,7 @@ export default function PaymentHistory() {
         <div className="flex items-center justify-center min-h-screen">
           <div className="text-center">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600 mx-auto"></div>
-            <p className="mt-4 text-gray-600">Loading payment history...</p>
+            <p className="mt-4 text-gray-600">Loading withdrawal history...</p>
           </div>
         </div>
       </AdminLayout>
@@ -149,8 +151,8 @@ export default function PaymentHistory() {
     <AdminLayout>
       {/* Header */}
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900">Paid Withdrawal Requests</h1>
-        <p className="mt-2 text-gray-600">All Paid Withdrawal Requests</p>
+        <h1 className="text-3xl font-bold text-gray-900">Withdrawal History</h1>
+        <p className="mt-2 text-gray-600">All Processed Withdrawal Requests (Completed & Rejected)</p>
       </div>
 
       {/* Main Content */}
@@ -173,6 +175,16 @@ export default function PaymentHistory() {
               </div>
             </div>
             <div className="flex items-center space-x-4">
+              <label className="text-sm text-gray-700">Status:</label>
+              <select
+                value={statusFilter}
+                onChange={(e) => setStatusFilter(e.target.value)}
+                className="border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+              >
+                <option value="all">All Status</option>
+                <option value="completed">Completed</option>
+                <option value="rejected">Rejected</option>
+              </select>
               <label className="text-sm text-gray-700">Date:</label>
               <select
                 value={dateFilter}
@@ -222,7 +234,7 @@ export default function PaymentHistory() {
               {paymentHistory.length === 0 ? (
                 <tr>
                   <td colSpan="11" className="px-6 py-12 text-center text-gray-500">
-                    No payment history available
+                    No withdrawal history available
                   </td>
                 </tr>
               ) : (
@@ -265,8 +277,14 @@ export default function PaymentHistory() {
                     )}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <span className="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800">
-                      Paid
+                    <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
+                      payment.status === 'completed' ? 'bg-green-100 text-green-800' :
+                      payment.status === 'rejected' ? 'bg-red-100 text-red-800' :
+                      'bg-gray-100 text-gray-800'
+                    }`}>
+                      {payment.status === 'completed' ? 'Paid' : 
+                       payment.status === 'rejected' ? 'Rejected' : 
+                       payment.status?.charAt(0).toUpperCase() + payment.status?.slice(1) || 'Unknown'}
                     </span>
                   </td>
                 </tr>
@@ -288,7 +306,7 @@ export default function PaymentHistory() {
                   <span className="text-red-400">❌</span>
                 </div>
                 <div className="ml-3">
-                  <h3 className="text-sm font-medium text-red-800">Error loading payment history</h3>
+                  <h3 className="text-sm font-medium text-red-800">Error loading withdrawal history</h3>
                   <div className="mt-2 text-sm text-red-700">
                     <p>{error}</p>
                   </div>

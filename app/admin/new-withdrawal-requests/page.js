@@ -164,6 +164,22 @@ export default function NewWithdrawalRequests() {
       const adminToken = localStorage.getItem('adminToken');
       if (!adminToken) return;
 
+      // Add confirmation for reject action
+      if (action === 'reject') {
+        const request = withdrawalRequests.find(req => req.requestId === requestId);
+        if (request) {
+          const confirmMessage = `Are you sure you want to reject this withdrawal request?\n\n` +
+            `Request ID: ${request.requestId}\n` +
+            `Member: ${request.memberId}\n` +
+            `Amount: $${request.net}\n\n` +
+            `This action will refund the amount back to the user's balance.`;
+          
+          if (!confirm(confirmMessage)) {
+            return;
+          }
+        }
+      }
+
       const response = await fetch('/api/admin/withdrawal-requests/action', {
         method: 'PUT',
         headers: {
