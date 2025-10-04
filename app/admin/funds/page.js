@@ -336,7 +336,7 @@ export default function FundManagement() {
                 htmlFor="walletAddress"
                 className="block text-sm font-medium text-gray-700 mb-2"
               >
-                Recipient's Wallet Address
+                Recipient&apos;s Wallet Address
               </label>
               <input
                 type="text"

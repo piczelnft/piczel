@@ -289,7 +289,7 @@ export default function NewWithdrawalRequests() {
             <div className="ml-3">
               <h3 className="text-sm font-medium text-blue-800">MetaMask Integration</h3>
               <div className="mt-1 text-sm text-blue-700">
-                <p>To process payments, you need MetaMask installed and connected. Click "Pay with MetaMask" to initiate blockchain transactions directly from your wallet.</p>
+                <p>To process payments, you need MetaMask installed and connected. Click &quot;Pay with MetaMask&quot; to initiate blockchain transactions directly from your wallet.</p>
               </div>
             </div>
           </div>
