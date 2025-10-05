@@ -59,6 +59,14 @@ export async function PUT(request) {
       );
     }
 
+    // Validate ticketId is a valid ObjectId
+    if (!mongoose.Types.ObjectId.isValid(ticketId)) {
+      return NextResponse.json(
+        { error: `Invalid ticket ID format: ${ticketId}` },
+        { status: 400, headers: corsHeaders() }
+      );
+    }
+
     // Validate status
     const validStatuses = ['open', 'in_progress', 'resolved', 'closed', 'pending'];
     if (!validStatuses.includes(status)) {
@@ -77,23 +85,26 @@ export async function PUT(request) {
       );
     }
 
-    // Update the ticket status
+    // Note: We're not using statusHistory or updatedBy fields as they don't exist in the schema
+
+    // Update the ticket status - only update fields that exist in the schema
+    const updateData = {
+      status: status,
+      updatedAt: new Date()
+    };
+
+    // Add assignedTo if provided and it's a valid ObjectId
+    if (assignedTo && mongoose.Types.ObjectId.isValid(assignedTo)) {
+      updateData.assignedTo = new mongoose.Types.ObjectId(assignedTo);
+    } else if (decoded.userId && mongoose.Types.ObjectId.isValid(decoded.userId)) {
+      updateData.assignedTo = new mongoose.Types.ObjectId(decoded.userId);
+    } else if (decoded.id && mongoose.Types.ObjectId.isValid(decoded.id)) {
+      updateData.assignedTo = new mongoose.Types.ObjectId(decoded.id);
+    }
+
     const updatedTicket = await SupportTicket.findByIdAndUpdate(
       ticketId,
-      {
-        status: status,
-        assignedTo: assignedTo || decoded.userId,
-        updatedAt: new Date(),
-        updatedBy: new mongoose.Types.ObjectId(decoded.userId),
-        $push: {
-          statusHistory: {
-            status: status,
-            changedAt: new Date(),
-            changedBy: new mongoose.Types.ObjectId(decoded.userId),
-            notes: notes || null
-          }
-        }
-      },
+      updateData,
       { new: true }
     );
 
