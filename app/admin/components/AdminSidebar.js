@@ -1,58 +1,64 @@
-'use client';
+"use client";
 
-import Link from 'next/link';
-import { usePathname } from 'next/navigation';
-import React, { useState } from 'react';
-import { useSidebar } from '../contexts/SidebarContext';
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import React, { useState } from "react";
+import { useSidebar } from "../contexts/SidebarContext";
 
 const navigation = [
   {
-    name: 'Dashboard',
-    href: '/admin/dashboard',
-    icon: '📊',
-    current: false
+    name: "Dashboard",
+    href: "/admin/dashboard",
+    icon: "📊",
+    current: false,
   },
   {
-    name: 'Member Management',
-    href: '/admin/members',
-    icon: '👥',
-    current: false
+    name: "Member Management",
+    href: "/admin/members",
+    icon: "👥",
+    current: false,
   },
   {
-    name: 'Fund Management',
-    href: '/admin/funds',
-    icon: '💰',
-    current: false
+    name: "Create User",
+    href: "/admin/create-user",
+    icon: "➕",
+    current: false,
   },
   {
-    name: 'Wallet Address',
-    href: '/admin/wallet-address',
-    icon: '🔗',
-    current: false
+    name: "Fund Management",
+    href: "/admin/funds",
+    icon: "💰",
+    current: false,
   },
   {
-    name: 'Payment Management',
-    icon: '💳',
+    name: "Wallet Address",
+    href: "/admin/wallet-address",
+    icon: "🔗",
+    current: false,
+  },
+  {
+    name: "Payment Management",
+    icon: "💳",
     hasDropdown: true,
     subItems: [
       {
-        name: 'New Withdrawal Requests',
-        href: '/admin/new-withdrawal-requests',
-        icon: '⏳'
+        name: "New Withdrawal Requests",
+        href: "/admin/new-withdrawal-requests",
+        icon: "⏳",
       },
       {
-        name: 'Payment History',
-        href: '/admin/payment-history',
-        icon: '📜'
-      }
-    ]
+        name: "Payment History",
+        href: "/admin/payment-history",
+        icon: "📜",
+      },
+    ],
   },
   {
-    name: 'Support Tickets',
-    href: '/admin/support-tickets',
-    icon: '🎫',
-    current: false
-  }
+    name: "Support Tickets",
+    href: "/admin/support-tickets",
+    icon: "🎫",
+    current: false,
+  },
 ];
 
 export default function AdminSidebar() {
@@ -61,7 +67,10 @@ export default function AdminSidebar() {
   const [paymentDropdownOpen, setPaymentDropdownOpen] = useState(false);
 
   // Check if current path is a payment-related page
-  const isPaymentPage = pathname.startsWith('/admin/payment-') || pathname.startsWith('/admin/new-withdrawal-') || pathname.startsWith('/admin/cancelled-');
+  const isPaymentPage =
+    pathname.startsWith("/admin/payment-") ||
+    pathname.startsWith("/admin/new-withdrawal-") ||
+    pathname.startsWith("/admin/cancelled-");
 
   // Auto-open dropdown if on payment page
   React.useEffect(() => {
@@ -78,7 +87,11 @@ export default function AdminSidebar() {
   }, [isCollapsed]);
 
   return (
-    <div className={`bg-gray-800 transition-all duration-300 ${isCollapsed ? 'w-16' : 'w-64'} flex flex-col fixed left-0 top-16 bottom-0`}>
+    <div
+      className={`bg-gray-800 transition-all duration-300 ${
+        isCollapsed ? "w-16" : "w-64"
+      } flex flex-col fixed left-0 top-16 bottom-0`}
+    >
       {/* Sidebar Header */}
       <div className="flex items-center justify-between p-4 border-b border-gray-700">
         {!isCollapsed && (
@@ -93,9 +106,7 @@ export default function AdminSidebar() {
           onClick={() => setIsCollapsed(!isCollapsed)}
           className="p-1 rounded-md text-gray-400 hover:text-white hover:bg-gray-700 transition-colors"
         >
-          <span className="text-lg">
-            {isCollapsed ? '▶️' : '◀️'}
-          </span>
+          <span className="text-lg">{isCollapsed ? "▶️" : "◀️"}</span>
         </button>
       </div>
 
@@ -104,26 +115,32 @@ export default function AdminSidebar() {
         {navigation.map((item) => {
           if (item.hasDropdown) {
             // Check if any sub-item is active
-            const isAnySubItemActive = item.subItems?.some(subItem => pathname === subItem.href);
-            
+            const isAnySubItemActive = item.subItems?.some(
+              (subItem) => pathname === subItem.href
+            );
+
             return (
               <div key={item.name} className="relative">
                 {/* Dropdown Trigger */}
                 <button
-                  onClick={() => !isCollapsed && setPaymentDropdownOpen(!paymentDropdownOpen)}
+                  onClick={() =>
+                    !isCollapsed && setPaymentDropdownOpen(!paymentDropdownOpen)
+                  }
                   className={`w-full group flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors duration-200 ${
                     isAnySubItemActive
-                      ? 'bg-purple-600 text-white'
-                      : 'text-gray-300 hover:bg-gray-700 hover:text-white'
+                      ? "bg-purple-600 text-white"
+                      : "text-gray-300 hover:bg-gray-700 hover:text-white"
                   }`}
                 >
                   <span className="mr-3 text-lg">{item.icon}</span>
                   {!isCollapsed && (
                     <>
                       <span className="flex-1 text-left">{item.name}</span>
-                      <span className={`ml-auto transition-transform duration-200 ${
-                        paymentDropdownOpen ? 'rotate-180' : 'rotate-0'
-                      }`}>
+                      <span
+                        className={`ml-auto transition-transform duration-200 ${
+                          paymentDropdownOpen ? "rotate-180" : "rotate-0"
+                        }`}
+                      >
                         ▼
                       </span>
                     </>
@@ -141,8 +158,8 @@ export default function AdminSidebar() {
                           href={subItem.href}
                           className={`group flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors duration-200 ${
                             isSubItemActive
-                              ? 'bg-purple-600 text-white'
-                              : 'text-gray-300 hover:bg-gray-700 hover:text-white'
+                              ? "bg-purple-600 text-white"
+                              : "text-gray-300 hover:bg-gray-700 hover:text-white"
                           }`}
                         >
                           <span className="mr-3 text-lg">{subItem.icon}</span>
@@ -166,14 +183,12 @@ export default function AdminSidebar() {
                 href={item.href}
                 className={`group flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors duration-200 ${
                   isActive
-                    ? 'bg-purple-600 text-white'
-                    : 'text-gray-300 hover:bg-gray-700 hover:text-white'
+                    ? "bg-purple-600 text-white"
+                    : "text-gray-300 hover:bg-gray-700 hover:text-white"
                 }`}
               >
                 <span className="mr-3 text-lg">{item.icon}</span>
-                {!isCollapsed && (
-                  <span className="flex-1">{item.name}</span>
-                )}
+                {!isCollapsed && <span className="flex-1">{item.name}</span>}
                 {isActive && (
                   <span className="ml-auto w-2 h-2 bg-white rounded-full"></span>
                 )}
