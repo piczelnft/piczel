@@ -310,13 +310,11 @@ export default function NewWithdrawalRequests() {
               <span className="text-blue-400">ℹ️</span>
             </div>
             <div className="ml-3">
-              <h3 className="text-sm font-medium text-blue-800">
-                MetaMask Integration
-              </h3>
+              <h3 className="text-sm font-medium text-blue-800">Integration</h3>
               <div className="mt-1 text-sm text-blue-700">
                 <p>
-                  To process payments, you need MetaMask installed and
-                  connected. Click &quot;Pay with MetaMask&quot; to initiate
+                  To process payments, you need MetaMask or TokenPocket
+                  installed and connected. Click &quot;Pay&quot; to initiate
                   blockchain transactions directly from your wallet.
                 </p>
               </div>
@@ -495,7 +493,7 @@ export default function NewWithdrawalRequests() {
                             >
                               {processingPayment === request.requestId
                                 ? "Processing..."
-                                : "Pay with MetaMask"}
+                                : "Pay"}
                             </button>
                             <button
                               onClick={() =>
