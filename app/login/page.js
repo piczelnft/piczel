@@ -14,6 +14,8 @@ function LoginForm() {
   });
   const [errors, setErrors] = useState({});
   const [isLoading, setIsLoading] = useState(false);
+  const [walletConnected, setWalletConnected] = useState(false);
+  const [walletAddress, setWalletAddress] = useState("");
   const [message, setMessage] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [prefilledInfo, setPrefilledInfo] = useState(null);
@@ -78,10 +80,35 @@ function LoginForm() {
     return newErrors;
   };
 
+  // Lightweight wallet connect (no backend save required before auth)
+  const connectWallet = async () => {
+    try {
+      if (typeof window === "undefined" || !window.ethereum) {
+        alert("Please install MetaMask to continue.");
+        return;
+      }
+      const accounts = await window.ethereum.request({ method: "eth_requestAccounts" });
+      if (accounts && accounts.length > 0) {
+        setWalletAddress(accounts[0]);
+        setWalletConnected(true);
+      }
+    } catch (e) {
+      console.error("Wallet connect error:", e);
+      setWalletConnected(false);
+      setWalletAddress("");
+      alert(e?.message || "Failed to connect wallet.");
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setMessage("");
     setErrors({});
+
+    if (!walletConnected) {
+      setErrors({ general: "Please connect your wallet before signing in." });
+      return;
+    }
 
     const validationErrors = validateForm();
     if (Object.keys(validationErrors).length > 0) {
@@ -300,6 +327,37 @@ function LoginForm() {
             className="card-enhanced rounded-xl shadow-2xl p-8 animate-fadeInUp"
             style={{ animationDelay: "0.4s" }}
           >
+            {/* Wallet Connect Required */}
+            <div className="mb-6">
+              {!walletConnected ? (
+                <button
+                  type="button"
+                  onClick={connectWallet}
+                  className="w-full flex items-center justify-center px-6 py-3 rounded-lg text-sm font-medium text-white transition-all duration-200 hover-lift-enhanced"
+                  style={{ backgroundColor: "rgba(29, 68, 67, 0.8)", border: "1px solid var(--default-border)" }}
+                >
+                  <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+                  </svg>
+                  Connect Wallet (required)
+                </button>
+              ) : (
+                <div className="flex items-center justify-between px-4 py-3 rounded-lg" style={{ backgroundColor: "rgba(0,0,0,0.1)", border: "1px solid var(--default-border)" }}>
+                  <div className="text-sm" style={{ color: "rgba(255,255,255,0.9)" }}>
+                    Wallet connected
+                  </div>
+                  <div className="text-xs font-mono" style={{ color: "rgba(255,255,255,0.7)" }}>
+                    {walletAddress.slice(0,6)}...{walletAddress.slice(-4)}
+                  </div>
+                </div>
+              )}
+              {!walletConnected && (
+                <p className="mt-2 text-xs" style={{ color: "rgb(var(--danger-rgb))" }}>
+                  You must connect your wallet before signing in.
+                </p>
+              )}
+            </div>
+
             <form className="space-y-6" onSubmit={handleSubmit}>
               {errors.general && (
                 <div
@@ -469,7 +527,7 @@ function LoginForm() {
               <div>
                 <button
                   type="submit"
-                  disabled={isLoading}
+                  disabled={isLoading || !walletConnected}
                   className="btn-enhanced w-full flex justify-center py-3 px-4 rounded-lg text-sm font-medium text-white transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {isLoading ? (

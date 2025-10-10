@@ -169,7 +169,8 @@ export async function GET() {
       });
 
       // Calculate wallet balance (convert to number for consistency)
-      const walletBalance = user.wallet?.balance || 0;
+      // Use same logic as wallet balance API for consistency
+      const walletBalance = user.wallet?.balance || user.walletBalance || 0;
 
       // Get club statistics (Club A and Club B teams) with error handling
       let clubAStats = { count: 0, business: 0 };

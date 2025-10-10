@@ -68,8 +68,8 @@ export async function POST(request) {
     // Connect to database
     await dbConnect();
 
-    // Get user information
-    const user = await User.findById(decoded.userId).select('name email memberId wallet.balance walletBalance');
+    // Get user information (include incomes for withdrawal balance)
+    const user = await User.findById(decoded.userId).select('name email memberId wallet.balance walletBalance sponsorIncome levelIncome');
     if (!user) {
       return NextResponse.json(
         { error: "User not found" },
@@ -77,23 +77,38 @@ export async function POST(request) {
       );
     }
 
-    // Get current balance (use wallet.balance as primary, fallback to walletBalance)
+    // Compute balances
     const currentBalance = user.wallet?.balance || user.walletBalance || 0;
+    const sponsorIncome = user.sponsorIncome || 0;
+    const withdrawalBalance = sponsorIncome; // Only sponsor income is withdrawable
 
-    // Check if user has sufficient balance
-    if (currentBalance < amount) {
+    // Check minimum withdrawal amount ($5)
+    if (amount < 5) {
       return NextResponse.json(
-        { error: "Insufficient balance" },
+        { error: "Minimum withdrawal amount is $5" },
         { status: 400, headers: corsHeaders() }
       );
     }
 
-    // Check minimum withdrawal amount
-    if (amount < 10) {
+    // Check if user has sufficient withdrawal balance (sponsor income)
+    if (withdrawalBalance < amount) {
       return NextResponse.json(
-        { error: "Minimum withdrawal amount is $10" },
+        { error: "Insufficient withdrawal balance" },
         { status: 400, headers: corsHeaders() }
       );
+    }
+
+    // Enforce one withdrawal request per 24 hours
+    const lastWithdrawal = await Withdrawal.findOne({ userId: decoded.userId }).sort({ createdAt: -1 });
+    if (lastWithdrawal) {
+      const hoursSinceLast = (Date.now() - new Date(lastWithdrawal.createdAt).getTime()) / (1000 * 60 * 60);
+      if (hoursSinceLast < 24) {
+        const remaining = Math.ceil(24 - hoursSinceLast);
+        return NextResponse.json(
+          { error: `Only one withdrawal request allowed every 24 hours. Try again in ${remaining} hour(s).` },
+          { status: 429, headers: corsHeaders() }
+        );
+      }
     }
 
     // Create withdrawal record
@@ -115,14 +130,15 @@ export async function POST(request) {
     // Save withdrawal to database
     const withdrawal = await Withdrawal.create(withdrawalData);
 
-    // Update user balance (deduct the withdrawal amount)
-    // Update both wallet.balance and walletBalance for consistency
+    // Update user balances (deduct from wallet and sponsorIncome)
+    // Keep wallet and walletBalance consistent; decrease sponsorIncome since only sponsor income is withdrawable
     await User.findByIdAndUpdate(
       decoded.userId,
       { 
         $inc: { 
           'wallet.balance': -parseFloat(amount),
-          'walletBalance': -parseFloat(amount)
+          'walletBalance': -parseFloat(amount),
+          'sponsorIncome': -parseFloat(amount)
         } 
       }
     );

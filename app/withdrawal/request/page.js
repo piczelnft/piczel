@@ -14,6 +14,7 @@ export default function WithdrawalRequestPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [message, setMessage] = useState("");
   const [userBalance, setUserBalance] = useState(0);
+  const [withdrawalBalance, setWithdrawalBalance] = useState(0);
   const [walletAddresses, setWalletAddresses] = useState([]);
   const { token, user } = useAuth();
 
@@ -33,6 +34,7 @@ export default function WithdrawalRequestPage() {
         if (balanceResponse.ok) {
           const balanceData = await balanceResponse.json();
           setUserBalance(balanceData.balance || 0);
+          setWithdrawalBalance(balanceData.withdrawalBalance || 0);
         }
 
         // Fetch saved wallet addresses
@@ -74,10 +76,10 @@ export default function WithdrawalRequestPage() {
 
     if (!formData.amount || parseFloat(formData.amount) <= 0) {
       newErrors.amount = "Please enter a valid amount";
-    } else if (parseFloat(formData.amount) > userBalance) {
-      newErrors.amount = "Insufficient balance";
-    } else if (parseFloat(formData.amount) < 10) {
-      newErrors.amount = "Minimum withdrawal amount is $10";
+    } else if (parseFloat(formData.amount) > withdrawalBalance) {
+      newErrors.amount = "Insufficient withdrawal balance";
+    } else if (parseFloat(formData.amount) < 5) {
+      newErrors.amount = "Minimum withdrawal amount is $5";
     }
 
     if (!formData.walletAddress.trim()) {
@@ -168,15 +170,31 @@ export default function WithdrawalRequestPage() {
 
           {/* Balance Card */}
           <div className="card-enhanced rounded-xl p-6 mb-6" style={{backgroundColor: 'rgba(0, 0, 0, 0.1)', backdropFilter: 'blur(10px)', borderColor: 'var(--default-border)'}}>
-            <div className="flex items-center justify-between">
-              <div>
-                <h3 className="text-white font-semibold mb-1">Available Balance</h3>
-                <p className="text-2xl font-bold text-green-400">${userBalance.toFixed(2)}</p>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {/* Total Balance */}
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="text-white font-semibold mb-1">Total Balance</h3>
+                  <p className="text-2xl font-bold text-green-400">${userBalance.toFixed(2)}</p>
+                </div>
+                <div className="w-12 h-12 rounded-full flex items-center justify-center" style={{backgroundColor: 'rgba(34, 197, 94, 0.2)'}}>
+                  <svg className="w-6 h-6 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                </div>
               </div>
-              <div className="w-12 h-12 rounded-full flex items-center justify-center" style={{backgroundColor: 'rgba(34, 197, 94, 0.2)'}}>
-                <svg className="w-6 h-6 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
+
+              {/* Withdrawal Balance (Sponsor Commissions) */}
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="text-white font-semibold mb-1">Withdrawal Balance</h3>
+                  <p className="text-2xl font-bold" style={{color: 'rgb(var(--primary-rgb))'}}>${withdrawalBalance.toFixed(2)}</p>
+                </div>
+                <div className="w-12 h-12 rounded-full flex items-center justify-center" style={{backgroundColor: 'rgba(0, 255, 190, 0.15)'}}>
+                  <svg className="w-6 h-6" style={{color: 'var(--primary-color)'}} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1M16 11a4 4 0 10-8 0 4 4 0 008 0zm6-5h-3m-4 0H5m0 0H2m3 0v3m0-3V3" />
+                  </svg>
+                </div>
               </div>
             </div>
           </div>
@@ -208,7 +226,7 @@ export default function WithdrawalRequestPage() {
                     type="number"
                     step="0.01"
                     min="10"
-                    max={userBalance}
+                  max={withdrawalBalance}
                     required
                     value={formData.amount}
                     onChange={handleChange}
@@ -363,7 +381,7 @@ export default function WithdrawalRequestPage() {
               {/* Info */}
               <div className="text-center">
                 <p className="text-sm" style={{color: 'rgba(255, 255, 255, 0.6)'}}>
-                  Minimum withdrawal: $10 | Processing time: 24-48 hours
+                  Minimum withdrawal: $5 | Processing time: 24-48 hours | Only 1 withdrawal per day
                 </p>
               </div>
             </form>

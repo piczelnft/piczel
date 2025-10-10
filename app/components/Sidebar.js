@@ -137,15 +137,15 @@ export default function Sidebar({ isOpen, onClose }) {
         { name: 'Wallet Address', icon: 'credit-card', href: '/profile/wallet' }
       ]
     },
-    { 
-      name: 'Import Fund', 
-      icon: 'bank',
-      hasDropdown: true,
-      dropdownItems: [
-        { name: 'Import Fund', icon: 'dollar-sign', href: '/import-fund' },
-        { name: 'Import Fund History', icon: 'scroll', href: '/import-fund/history' }
-      ]
-    },
+    // { 
+    //   name: 'Import Fund', 
+    //   icon: 'bank',
+    //   hasDropdown: true,
+    //   dropdownItems: [
+    //     { name: 'Import Fund', icon: 'dollar-sign', href: '/import-fund' },
+    //     { name: 'Import Fund History', icon: 'scroll', href: '/import-fund/history' }
+    //   ]
+    // },
     // { 
     //   name: 'Staking Section', 
     //   icon: 'coins',
@@ -165,15 +165,15 @@ export default function Sidebar({ isOpen, onClose }) {
     //     { name: 'Community Rewards', icon: 'users', href: '/income/community' }
     //   ]
     // },
-    { 
-      name: 'Wallet Section', 
-      icon: 'wallet',
-      hasDropdown: true,
-      dropdownItems: [
-        { name: 'Main Wallet', icon: 'wallet', href: '/wallet/main' },
-        { name: 'Wallet History', icon: 'scroll', href: '/wallet/history' },
-      ]
-    },
+    // { 
+    //   name: 'Wallet Section', 
+    //   icon: 'wallet',
+    //   hasDropdown: true,
+    //   dropdownItems: [
+    //     { name: 'Main Wallet', icon: 'wallet', href: '/wallet/main' },
+    //     { name: 'Wallet History', icon: 'scroll', href: '/wallet/history' },
+    //   ]
+    // },
     { 
       name: 'Withdrawal Section', 
       icon: 'arrow-up',

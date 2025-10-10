@@ -21,7 +21,7 @@ const rajdhani = Rajdhani({
 });
 
 export const metadata = {
-  title: "PICZEL - Crypto Trading Platform",
+  title: "PICZEL - NFT's Platform",
   description:
     "Professional cryptocurrency trading and investment platform",
 };

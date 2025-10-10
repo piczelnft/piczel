@@ -255,7 +255,7 @@ export default function AdminDashboard() {
       </div>
 
       {/* Coin Statistics */}
-      <div className="mb-8">
+      {/* <div className="mb-8">
         <h2 className="text-xl font-semibold text-gray-900 mb-6">Coin Statistics</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
@@ -310,7 +310,7 @@ export default function AdminDashboard() {
             </div>
           </div>
         </div>
-      </div>
+      </div> */}
 
       {/* Income Statistics */}
       <div className="mb-8">
@@ -367,7 +367,7 @@ export default function AdminDashboard() {
       </div>
 
       {/* Additional Income & Withdrawal Details */}
-      <div className="mb-8">
+      {/* <div className="mb-8">
         <h2 className="text-xl font-semibold text-gray-900 mb-6">Additional Statistics</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
@@ -418,7 +418,7 @@ export default function AdminDashboard() {
             </div>
           </div>
         </div>
-      </div>
+      </div> */}
 
       
       

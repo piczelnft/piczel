@@ -7,7 +7,7 @@ import AdminSidebar from './AdminSidebar';
 import { SidebarProvider, useSidebar } from '../contexts/SidebarContext';
 
 function AdminLayoutContent({ children }) {
-  const { isCollapsed } = useSidebar();
+  const { isCollapsed, isMobileOpen } = useSidebar();
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -18,7 +18,14 @@ function AdminLayoutContent({ children }) {
       <AdminSidebar />
       
       {/* Page Content */}
-      <main className={`${isCollapsed ? 'ml-16' : 'ml-64'} transition-all duration-300 p-6 pt-24`}>
+      <main className={`transition-all duration-300 p-6 pt-24 md:${isCollapsed ? 'ml-16' : 'ml-64'} ml-0`}
+        onClick={() => {
+          // close sidebar if clicking on content while mobile sidebar open
+          if (isMobileOpen) {
+            // cannot access setter here; rely on backdrop to close
+          }
+        }}
+      >
         <div className="max-w-7xl mx-auto">
           {children}
         </div>

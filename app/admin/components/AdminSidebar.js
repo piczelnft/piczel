@@ -14,9 +14,20 @@ const navigation = [
   },
   {
     name: "Member Management",
-    href: "/admin/members",
     icon: "👥",
-    current: false,
+    hasDropdown: true,
+    subItems: [
+      {
+        name: "All Members",
+        href: "/admin/members",
+        icon: "👥",
+      },
+      {
+        name: "NFT Counter",
+        href: "/admin/nft-counter",
+        icon: "🧮",
+      },
+    ],
   },
   {
     name: "Create User",
@@ -63,8 +74,9 @@ const navigation = [
 
 export default function AdminSidebar() {
   const pathname = usePathname();
-  const { isCollapsed, setIsCollapsed } = useSidebar();
+  const { isCollapsed, setIsCollapsed, isMobileOpen, setIsMobileOpen } = useSidebar();
   const [paymentDropdownOpen, setPaymentDropdownOpen] = useState(false);
+  const [memberDropdownOpen, setMemberDropdownOpen] = useState(false);
 
   // Check if current path is a payment-related page
   const isPaymentPage =
@@ -72,43 +84,54 @@ export default function AdminSidebar() {
     pathname.startsWith("/admin/new-withdrawal-") ||
     pathname.startsWith("/admin/cancelled-");
 
-  // Auto-open dropdown if on payment page
+  const isMemberPage =
+    pathname === "/admin/members" || pathname.startsWith("/admin/nft-counter");
+
+  // Auto-open dropdowns if on respective pages
   React.useEffect(() => {
-    if (isPaymentPage && !isCollapsed) {
-      setPaymentDropdownOpen(true);
+    if (!isCollapsed) {
+      if (isPaymentPage) setPaymentDropdownOpen(true);
+      if (isMemberPage) setMemberDropdownOpen(true);
     }
-  }, [isPaymentPage, isCollapsed]);
+  }, [isPaymentPage, isMemberPage, isCollapsed]);
 
   // Close dropdown when sidebar is collapsed
   React.useEffect(() => {
     if (isCollapsed) {
       setPaymentDropdownOpen(false);
+      setMemberDropdownOpen(false);
     }
   }, [isCollapsed]);
 
   return (
-    <div
-      className={`bg-gray-800 transition-all duration-300 ${
-        isCollapsed ? "w-16" : "w-64"
-      } flex flex-col fixed left-0 top-16 bottom-0`}
-    >
-      {/* Sidebar Header */}
-      <div className="flex items-center justify-between p-4 border-b border-gray-700">
-        {!isCollapsed && (
-          <div className="flex items-center space-x-2">
-            <div className="w-8 h-8 bg-gradient-to-br from-purple-600 to-indigo-600 rounded-lg flex items-center justify-center">
-              <span className="text-white font-bold text-sm">👑</span>
+    <>
+      {/* Mobile backdrop */}
+      <div
+        className={`fixed inset-0 bg-black/40 z-40 md:hidden transition-opacity ${isMobileOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}`}
+        onClick={() => setIsMobileOpen(false)}
+      />
+      <div
+        className={`bg-gray-800 transition-all duration-300 ${
+          isCollapsed ? "w-16" : "w-64"
+        } flex flex-col fixed left-0 top-16 bottom-0 z-50 md:z-30 md:translate-x-0 ${isMobileOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}`}
+      >
+        {/* Sidebar Header */}
+        <div className="flex items-center justify-between p-4 border-b border-gray-700">
+          {!isCollapsed && (
+            <div className="flex items-center space-x-2">
+              <div className="w-8 h-8 bg-gradient-to-br from-purple-600 to-indigo-600 rounded-lg flex items-center justify-center">
+                <span className="text-white font-bold text-sm">👑</span>
+              </div>
+              <span className="text-white font-semibold">Admin Panel</span>
             </div>
-            <span className="text-white font-semibold">Admin Panel</span>
-          </div>
-        )}
-        <button
-          onClick={() => setIsCollapsed(!isCollapsed)}
-          className="p-1 rounded-md text-gray-400 hover:text-white hover:bg-gray-700 transition-colors"
-        >
-          <span className="text-lg">{isCollapsed ? "▶️" : "◀️"}</span>
-        </button>
-      </div>
+          )}
+          <button
+            onClick={() => setIsCollapsed(!isCollapsed)}
+            className="p-1 rounded-md text-gray-400 hover:text-white hover:bg-gray-700 transition-colors"
+          >
+            <span className="text-lg">{isCollapsed ? "▶️" : "◀️"}</span>
+          </button>
+        </div>
 
       {/* Navigation */}
       <nav className="flex-1 px-2 py-4 space-y-1">
@@ -123,9 +146,14 @@ export default function AdminSidebar() {
               <div key={item.name} className="relative">
                 {/* Dropdown Trigger */}
                 <button
-                  onClick={() =>
-                    !isCollapsed && setPaymentDropdownOpen(!paymentDropdownOpen)
-                  }
+                  onClick={() => {
+                    if (isCollapsed) return;
+                    if (item.name === "Payment Management") {
+                      setPaymentDropdownOpen(!paymentDropdownOpen);
+                    } else if (item.name === "Member Management") {
+                      setMemberDropdownOpen(!memberDropdownOpen);
+                    }
+                  }}
                   className={`w-full group flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors duration-200 ${
                     isAnySubItemActive
                       ? "bg-purple-600 text-white"
@@ -136,19 +164,54 @@ export default function AdminSidebar() {
                   {!isCollapsed && (
                     <>
                       <span className="flex-1 text-left">{item.name}</span>
-                      <span
-                        className={`ml-auto transition-transform duration-200 ${
-                          paymentDropdownOpen ? "rotate-180" : "rotate-0"
-                        }`}
-                      >
-                        ▼
-                      </span>
+                      {item.name === "Payment Management" && (
+                        <span
+                          className={`ml-auto transition-transform duration-200 ${
+                            paymentDropdownOpen ? "rotate-180" : "rotate-0"
+                          }`}
+                        >
+                          ▼
+                        </span>
+                      )}
+                      {item.name === "Member Management" && (
+                        <span
+                          className={`ml-auto transition-transform duration-200 ${
+                            memberDropdownOpen ? "rotate-180" : "rotate-0"
+                          }`}
+                        >
+                          ▼
+                        </span>
+                      )}
                     </>
                   )}
                 </button>
 
                 {/* Dropdown Menu */}
-                {!isCollapsed && paymentDropdownOpen && (
+                {!isCollapsed && item.name === "Payment Management" && paymentDropdownOpen && (
+                  <div className="ml-4 mt-1 space-y-1">
+                    {item.subItems?.map((subItem) => {
+                      const isSubItemActive = pathname === subItem.href;
+                      return (
+                        <Link
+                          key={subItem.name}
+                          href={subItem.href}
+                          className={`group flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors duration-200 ${
+                            isSubItemActive
+                              ? "bg-purple-600 text-white"
+                              : "text-gray-300 hover:bg-gray-700 hover:text-white"
+                          }`}
+                        >
+                          <span className="mr-3 text-lg">{subItem.icon}</span>
+                          <span className="flex-1">{subItem.name}</span>
+                          {isSubItemActive && (
+                            <span className="ml-auto w-2 h-2 bg-white rounded-full"></span>
+                          )}
+                        </Link>
+                      );
+                    })}
+                  </div>
+                )}
+                {!isCollapsed && item.name === "Member Management" && memberDropdownOpen && (
                   <div className="ml-4 mt-1 space-y-1">
                     {item.subItems?.map((subItem) => {
                       const isSubItemActive = pathname === subItem.href;
@@ -199,14 +262,15 @@ export default function AdminSidebar() {
       </nav>
 
       {/* Sidebar Footer */}
-      <div className="p-4 border-t border-gray-700">
-        {!isCollapsed && (
-          <div className="text-xs text-gray-400 text-center">
-            <p>PICZEL Admin Panel</p>
-            <p>v1.0.0</p>
-          </div>
-        )}
+        <div className="p-4 border-t border-gray-700">
+          {!isCollapsed && (
+            <div className="text-xs text-gray-400 text-center">
+              <p>PICZEL Admin Panel</p>
+              <p>v1.0.0</p>
+            </div>
+          )}
+        </div>
       </div>
-    </div>
+    </>
   );
 }

@@ -1,6 +1,7 @@
-'use client';
+"use client";
 
 import Link from 'next/link';
+import Image from 'next/image';
 import { useAuth } from '@/contexts/AuthContext';
 import { useEffect, useState, useCallback } from 'react';
 import { useAuthGuard } from '../lib/auth-utils';
@@ -11,10 +12,17 @@ export default function Home() {
   const [dashboardData, setDashboardData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [nftPurchases, setNftPurchases] = useState([]);
 
   const fetchDashboardData = useCallback(async () => {
     try {
       setLoading(true);
+      setError(null);
+      
+      if (!token) {
+        throw new Error('No authentication token found');
+      }
+
       const response = await fetch('/api/dashboard', {
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -22,7 +30,8 @@ export default function Home() {
       });
 
       if (!response.ok) {
-        throw new Error('Failed to fetch dashboard data');
+        const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
+        throw new Error(errorData.error || `HTTP ${response.status}: Failed to fetch dashboard data`);
       }
 
       const data = await response.json();
@@ -40,6 +49,136 @@ export default function Home() {
       fetchDashboardData();
     }
   }, [isAuthenticated, token, fetchDashboardData]);
+
+  // ===== NFT Series (A1..J1) sequential daily gating =====
+  const NFT_SERIES = [
+    'A1','B1','C1','D1','E1','F1','G1','H1','I1','J1'
+  ];
+
+  // Map each NFT code to its image path under public/nfts
+  const NFT_IMAGES = {
+    A1: '/nft/1.jpg',
+    B1: '/nft/2.jpg',
+    C1: '/nft/3.jpg',
+    D1: '/nft/4.jpg',
+    E1: '/nft/5.jpg',
+    F1: '/nft/6.jpg',
+    G1: '/nft/7.jpg',
+    H1: '/nft/8.jpg',
+    I1: '/nft/9.jpg',
+    J1: '/nft/10.jpg',
+  };
+
+  const fetchNftPurchases = useCallback(async () => {
+    if (!token) return;
+    try {
+      const res = await fetch('/api/nft/purchases', {
+        headers: { 'Authorization': `Bearer ${token}` },
+      });
+      if (!res.ok) return;
+      const data = await res.json();
+      const list = Array.isArray(data.purchases) ? data.purchases : [];
+      setNftPurchases(list.map(p => ({ code: p.code, purchasedAt: p.purchasedAt })));
+    } catch {}
+  }, [token]);
+
+  useEffect(() => {
+    if (!isAuthenticated || !token) return;
+    fetchNftPurchases();
+  }, [isAuthenticated, token, fetchNftPurchases]);
+
+  const getLastPurchasedIndex = () => {
+    if (!nftPurchases.length) return -1;
+    const last = nftPurchases[nftPurchases.length - 1];
+    return NFT_SERIES.findIndex(c => c === last.code);
+  };
+
+  const isOneDayPassedSinceLast = () => {
+    if (!nftPurchases.length) return true;
+    const last = nftPurchases[nftPurchases.length - 1];
+    const lastTime = new Date(last.purchasedAt).getTime();
+    const now = Date.now();
+    const diffMs = now - lastTime;
+    return diffMs >= 24 * 60 * 60 * 1000; // 24 hours
+  };
+
+  const getNftStatus = (code) => {
+    // owned
+    if (nftPurchases.some(p => p.code === code)) {
+      return { owned: true, available: false, locked: false };
+    }
+    const lastIdx = getLastPurchasedIndex();
+    const targetIdx = NFT_SERIES.findIndex(c => c === code);
+    // next in sequence?
+    if (targetIdx === lastIdx + 1) {
+      // A1 case when lastIdx==-1 also handled here
+      return {
+        owned: false,
+        available: isOneDayPassedSinceLast() || lastIdx === -1,
+        locked: !(isOneDayPassedSinceLast() || lastIdx === -1)
+      };
+    }
+    // future ones locked
+    if (targetIdx > lastIdx + 1) {
+      return { owned: false, available: false, locked: true };
+    }
+    // default locked
+    return { owned: false, available: false, locked: true };
+  };
+
+  const handleBuyNft = async (code) => {
+    const status = getNftStatus(code);
+    if (!status.available) return;
+    try {
+      const message = `Buy ${code}? Next NFT unlocks tomorrow.`;
+      if (!confirm(message)) return;
+
+      if (!token) {
+        alert('Please log in to make a purchase.');
+        return;
+      }
+      const res = await fetch('/api/nft/purchases', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ code, series: code.charAt(0), purchasedAt: new Date().toISOString() }),
+      });
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({ error: 'Purchase failed' }));
+        throw new Error(data.error || 'Purchase failed');
+      }
+      const data = await res.json();
+      const next = [...nftPurchases, { code, purchasedAt: new Date().toISOString() }];
+      setNftPurchases(next);
+      
+      // Display success message with commission details (use server-calculated reward)
+      const received = (data.userReward ?? 0).toFixed(2);
+      const displayBalance = data.user?.wallet?.balance || data.user?.walletBalance || 0;
+      let successMessage = `🎉 Purchase Successful!\n\nNFT: ${code}\nYou received: $${received}\nYour Balance: $${Number(displayBalance).toFixed(2)}`;
+      
+      if (data.commissions && data.commissions.length > 0) {
+        successMessage += `\n\n🎉 COMMISSIONS DISTRIBUTED:\n`;
+        successMessage += `Total Paid: $${data.totalCommissionsPaid}\n`;
+        successMessage += `Recipients: ${data.commissions.length} sponsors\n\n`;
+
+        data.commissions.forEach((commission) => {
+          successMessage += `Level ${commission.level}: ${commission.sponsorName} (${commission.sponsorId})\n`;
+          successMessage += `  💰 ${commission.commissionRate} = $${commission.commissionAmount}\n`;
+        });
+      }
+      
+      alert(successMessage + `\n\nNext NFT will unlock tomorrow.`);
+      
+      // Refresh dashboard data to update wallet balance display
+      setTimeout(() => {
+        fetchDashboardData();
+      }, 2000);
+    } catch (e) {
+      alert(e.message || 'Purchase failed');
+    }
+  };
 
   // Show loading while checking authentication
   if (isLoading) {
@@ -170,16 +309,30 @@ export default function Home() {
           <div className="flex justify-between items-center">
             <div></div>
             <div className="flex items-center space-x-4">
-              <button 
-                onClick={fetchDashboardData}
-                className="btn-enhanced px-4 py-2 text-white hover-bounce text-sm flex items-center space-x-2"
-                disabled={loading}
-              >
-                <span className={`text-sm ${loading ? 'animate-spin' : ''}`}>
-                  {loading ? '⟳' : '↻'}
-                </span>
-                <span>Refresh Data</span>
-              </button>
+            <button 
+              onClick={fetchDashboardData}
+              className="btn-enhanced px-4 py-2 text-white hover-bounce text-sm flex items-center space-x-2"
+              disabled={loading}
+            >
+              <span className={`text-sm ${loading ? 'animate-spin' : ''}`}>
+                {loading ? '⟳' : '↻'}
+              </span>
+              <span>Refresh Data</span>
+            </button>
+            <button 
+              onClick={async () => {
+                console.log('Debug Info:', {
+                  token: token ? 'Present' : 'Missing',
+                  isAuthenticated,
+                  user: user?.memberId || 'No user',
+                  timestamp: new Date().toISOString()
+                });
+                alert(`Debug Info:\nToken: ${token ? 'Present' : 'Missing'}\nAuthenticated: ${isAuthenticated}\nUser: ${user?.memberId || 'No user'}`);
+              }}
+              className="btn-enhanced px-4 py-2 text-white hover-bounce text-sm"
+            >
+              Debug
+            </button>
               {dashboardData && (
                 <div className="text-xs text-green-400">
                   ✅ Live Data
@@ -275,219 +428,72 @@ export default function Home() {
           </div>
         </div>
 
-        {/* CAPPING 4X Section */}
-        {/* <div className="p-8 mb-8 shadow-2xl hover-lift-enhanced animate-fadeInUp rounded-2xl border" style={{animationDelay: '0.8s', backgroundColor: 'rgba(0, 0, 0, 0.1)', backdropFilter: 'blur(10px)', borderColor: 'var(--default-border)'}}>
-          <h2 className="text-4xl font-bold text-white mb-8 text-center gradient-text-enhanced animate-neonGlow">CAPPING 4X</h2>
-          <div className="grid grid-cols-3 gap-8">
-            <div className="text-center group">
-              <div className="text-3xl font-bold text-white mb-2 group-hover:scale-110 transition-transform duration-300">$ {data.capping.total.toLocaleString()}</div>
-              <div className="text-lg" style={{color: 'rgba(255, 255, 255, 0.8)'}}>Total</div>
-            </div>
-            <div className="text-center group">
-              <div className="text-3xl font-bold text-white mb-2 group-hover:scale-110 transition-transform duration-300">$ {typeof data.capping.used === 'number' ? data.capping.used.toLocaleString() : data.capping.used}</div>
-              <div className="text-lg" style={{color: 'rgba(255, 255, 255, 0.8)'}}>Used</div>
-            </div>
-            <div className="text-center group">
-              <div className="text-3xl font-bold text-white mb-2 group-hover:scale-110 transition-transform duration-300">$ {data.capping.balance.toLocaleString()}</div>
-              <div className="text-lg" style={{color: 'rgba(255, 255, 255, 0.8)'}}>Balance</div>
-            </div>
-          </div>
-        </div> */}
-
-        
-
-        {/* Income Graphs Section */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          {/* Total Income Graph */}
-          <div className="p-6 hover-lift-enhanced animate-fadeInUp rounded-2xl border glow-border-blue" style={{animationDelay: '0.9s', backgroundColor: 'rgba(0, 0, 0, 0.1)', backdropFilter: 'blur(10px)', borderColor: 'var(--default-border)'}}>
-            <h3 className="text-lg font-semibold text-white mb-4 gradient-text-neon">Total Income</h3>
-            <div className="relative h-24 mb-4 overflow-hidden">
-              <svg className="w-full h-full" viewBox="0 0 200 100" preserveAspectRatio="none">
-                <path
-                  d="M0,50 L20,30 L40,70 L60,20 L80,80 L100,40 L120,90 L140,10 L160,60 L180,35 L200,55"
-                  stroke="url(#primaryGradient)"
-                  strokeWidth="3"
-                  fill="none"
-                  className="animate-zigzag"
-                />
-                <defs>
-                  <linearGradient id="primaryGradient" x1="0%" y1="0%" x2="100%" y2="0%">
-                    <stop offset="0%" stopColor="var(--primary-color)" />
-                    <stop offset="50%" stopColor="var(--secondary-color)" />
-                    <stop offset="100%" stopColor="var(--primary-color)" />
-                  </linearGradient>
-                </defs>
-              </svg>
-            </div>
-            <div className="text-center">
-              <div className="text-xl font-bold mb-1 animate-neonGlow" style={{color: 'rgb(var(--default-text-color-rgb))'}}>${data.incomeStats.totalIncome}</div>
-              <div className="text-xs" style={{color: 'rgba(255, 255, 255, 0.6)'}}>Total Earnings</div>
-            </div>
-          </div>
-
-          {/* Affiliate Reward Graph */}
-          <div className="p-6 hover-lift-enhanced animate-fadeInUp rounded-2xl border glow-border-green" style={{animationDelay: '1.0s', backgroundColor: 'rgba(0, 0, 0, 0.1)', backdropFilter: 'blur(10px)', borderColor: 'var(--default-border)'}}>
-            <h3 className="text-lg font-semibold text-white mb-4 gradient-text-neon">Affiliate Reward</h3>
-            <div className="relative h-24 mb-4 overflow-hidden">
-              <svg className="w-full h-full" viewBox="0 0 200 100" preserveAspectRatio="none">
-                <path
-                  d="M0,60 L25,25 L50,75 L75,15 L100,85 L125,35 L150,65 L175,20 L200,70"
-                  stroke="url(#successGradient)"
-                  strokeWidth="3"
-                  fill="none"
-                  className="animate-zigzag"
-                />
-                <defs>
-                  <linearGradient id="successGradient" x1="0%" y1="0%" x2="100%" y2="0%">
-                    <stop offset="0%" stopColor="rgb(var(--success-rgb))" />
-                    <stop offset="50%" stopColor="rgb(var(--primary-rgb))" />
-                    <stop offset="100%" stopColor="rgb(var(--success-rgb))" />
-                  </linearGradient>
-                </defs>
-              </svg>
-            </div>
-            <div className="text-center">
-              <div className="text-xl font-bold mb-1 animate-neonGlow" style={{color: 'rgb(var(--success-rgb))'}}>${data.incomeStats.affiliateReward}</div>
-              <div className="text-xs" style={{color: 'rgba(255, 255, 255, 0.6)'}}>Referral Earnings</div>
-            </div>
-          </div>
-
-          {/* Monthly Staking Reward Graph */}
-          <div className="p-6 hover-lift-enhanced animate-fadeInUp rounded-2xl border glow-border-purple" style={{animationDelay: '1.1s', backgroundColor: 'rgba(0, 0, 0, 0.1)', backdropFilter: 'blur(10px)', borderColor: 'var(--default-border)'}}>
-            <h3 className="text-lg font-semibold text-white mb-4 gradient-text-neon">Monthly Staking Reward</h3>
-            <div className="relative h-24 mb-4 overflow-hidden">
-              <svg className="w-full h-full" viewBox="0 0 200 100" preserveAspectRatio="none">
-                <path
-                  d="M0,80 L30,20 L60,90 L90,10 L120,70 L150,30 L180,85 L200,40"
-                  stroke="url(#purpleGradient)"
-                  strokeWidth="3"
-                  fill="none"
-                  className="animate-zigzag"
-                />
-                <defs>
-                  <linearGradient id="purpleGradient" x1="0%" y1="0%" x2="100%" y2="0%">
-                    <stop offset="0%" stopColor="rgb(143, 0, 255)" />
-                    <stop offset="50%" stopColor="rgb(var(--secondary-rgb))" />
-                    <stop offset="100%" stopColor="rgb(143, 0, 255)" />
-                  </linearGradient>
-                </defs>
-              </svg>
-            </div>
-            <div className="text-center">
-              <div className="text-xl font-bold mb-1 animate-neonGlow" style={{color: 'rgb(143, 0, 255)'}}>${data.incomeStats.stakingReward}</div>
-              <div className="text-xs" style={{color: 'rgba(255, 255, 255, 0.6)'}}>Staking Returns</div>
-            </div>
-          </div>
-
-          {/* Community Reward Graph */}
-          <div className="p-6 hover-lift-enhanced animate-fadeInUp rounded-2xl border glow-border" style={{animationDelay: '1.2s', backgroundColor: 'rgba(0, 0, 0, 0.1)', backdropFilter: 'blur(10px)', borderColor: 'var(--default-border)'}}>
-            <h3 className="text-lg font-semibold text-white mb-4 gradient-text-neon">Community Reward</h3>
-            <div className="relative h-24 mb-4 overflow-hidden">
-              <svg className="w-full h-full" viewBox="0 0 200 100" preserveAspectRatio="none">
-                <path
-                  d="M0,50 L50,50 L100,50 L150,50 L200,50"
-                  stroke="url(#infoGradient)"
-                  strokeWidth="3"
-                  fill="none"
-                  className="animate-zigzag"
-                />
-                <defs>
-                  <linearGradient id="infoGradient" x1="0%" y1="0%" x2="100%" y2="0%">
-                    <stop offset="0%" stopColor="rgb(var(--info-rgb))" />
-                    <stop offset="50%" stopColor="rgb(var(--secondary-rgb))" />
-                    <stop offset="100%" stopColor="rgb(var(--info-rgb))" />
-                  </linearGradient>
-                </defs>
-              </svg>
-            </div>
-            <div className="text-center">
-              <div className="text-xl font-bold mb-1 animate-neonGlow" style={{color: 'rgb(var(--info-rgb))'}}>${data.incomeStats.communityReward}</div>
-              <div className="text-xs" style={{color: 'rgba(255, 255, 255, 0.6)'}}>Community Earnings</div>
-            </div>
-          </div>
-        </div>
-
-        {/* Club Statistics Section */}
-        {/* <div className="p-6 mb-8 hover-lift-enhanced animate-fadeInUp rounded-2xl border" style={{animationDelay: '1.3s', backgroundColor: 'rgba(0, 0, 0, 0.1)', backdropFilter: 'blur(10px)', borderColor: 'var(--default-border)'}}>
-          <h3 className="text-lg font-semibold text-white mb-4 gradient-text-neon">Club Statistics</h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="space-y-4">
-              <div className="flex justify-between group">
-                <span style={{color: 'rgba(255, 255, 255, 0.8)'}}>Club A Team:</span>
-                <span className="font-medium group-hover:scale-110 transition-transform duration-300" style={{color: 'rgb(var(--info-rgb))'}}>{data.clubStats.clubATeam}</span>
-              </div>
-              <div className="flex justify-between group">
-                <span style={{color: 'rgba(255, 255, 255, 0.8)'}}>Club B Team:</span>
-                <span className="font-medium group-hover:scale-110 transition-transform duration-300" style={{color: 'rgb(143, 0, 255)'}}>{data.clubStats.clubBTeam}</span>
-              </div>
-            </div>
-            <div className="space-y-4">
-              <div className="flex justify-between group">
-                <span style={{color: 'rgba(255, 255, 255, 0.8)'}}>Total Club A Business:</span>
-                <span className="font-medium group-hover:scale-110 transition-transform duration-300" style={{color: 'rgb(var(--success-rgb))'}}>${data.clubStats.clubABusiness.toLocaleString()}</span>
-              </div>
-              <div className="flex justify-between group">
-                <span style={{color: 'rgba(255, 255, 255, 0.8)'}}>Total Club B Business:</span>
-                <span className="font-medium" style={{color: 'rgb(var(--default-text-color-rgb))'}}>${data.clubStats.clubBBusiness.toLocaleString()}</span>
-              </div>
-            </div>
-          </div>
-        </div> */}
-
-        {/* Transaction History */}
-        {/* <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
-          <div className="p-6 hover-lift-enhanced animate-fadeInUp rounded-2xl border" style={{animationDelay: '1.4s', backgroundColor: 'rgba(0, 0, 0, 0.1)', backdropFilter: 'blur(10px)', borderColor: 'var(--default-border)'}}>
-            <h3 className="text-lg font-semibold text-white mb-4 gradient-text-neon">Withdrawals</h3>
-            <div className="space-y-3">
-              <div className="flex justify-between group">
-                <span style={{color: 'rgba(255, 255, 255, 0.8)'}}>Total Withdrawal:</span>
-                <span className="font-medium group-hover:scale-110 transition-transform duration-300" style={{color: 'rgb(var(--danger-rgb))'}}>{data.withdrawals.total}</span>
-              </div>
-              <div className="flex justify-between group">
-                <span style={{color: 'rgba(255, 255, 255, 0.8)'}}>Today&apos;s Withdrawal:</span>
-                <span className="font-medium" style={{color: 'rgb(var(--default-text-color-rgb))'}}>{data.withdrawals.today}</span>
-              </div>
-            </div>
-          </div>
-
-          <div className="p-6 hover-lift-enhanced animate-fadeInUp rounded-2xl border" style={{animationDelay: '1.5s', backgroundColor: 'rgba(0, 0, 0, 0.1)', backdropFilter: 'blur(10px)', borderColor: 'var(--default-border)'}}>
-            <h3 className="text-lg font-semibold text-white mb-4 gradient-text-neon">Deposits & Investment</h3>
-            <div className="space-y-3">
-              <div className="flex justify-between group">
-                <span style={{color: 'rgba(255, 255, 255, 0.8)'}}>Total Deposit:</span>
-                <span className="font-medium group-hover:scale-110 transition-transform duration-300" style={{color: 'rgb(var(--success-rgb))'}}>${data.deposits.total}</span>
-              </div>
-              <div className="flex justify-between group">
-                <span style={{color: 'rgba(255, 255, 255, 0.8)'}}>Total Investment:</span>
-                <span className="font-medium group-hover:scale-110 transition-transform duration-300" style={{color: 'rgb(var(--info-rgb))'}}>{data.deposits.investment}</span>
-              </div>
-              <div className="flex justify-between group">
-                <span style={{color: 'rgba(255, 255, 255, 0.8)'}}>Current Matching:</span>
-                <span className="font-medium" style={{color: 'rgb(var(--default-text-color-rgb))'}}>${data.deposits.matching}</span>
-              </div>
-            </div>
-          </div>
-        </div> */}
-
-        {/* Referral Links */}
-        <div className="p-6 hover-lift-enhanced animate-fadeInUp rounded-2xl border" style={{animationDelay: '1.6s', backgroundColor: 'rgba(0, 0, 0, 0.1)', backdropFilter: 'blur(10px)', borderColor: 'var(--default-border)'}}>
-          <h3 className="text-lg font-semibold text-white mb-4 gradient-text-neon">Referral Links</h3>
-          <div className="space-y-4">
-            <div>
-              <div className="text-sm mb-2" style={{color: 'rgba(255, 255, 255, 0.8)'}}>Club A Referral Code:</div>
-              <div className="flex items-center space-x-2">
-                <input 
-                  type="text" 
-                  value={data.referralLinks.clubA} 
-                  readOnly 
-                  className="flex-1 px-3 py-2 rounded-lg text-sm focus:border-opacity-50 transition-colors duration-300"
-                  style={{backgroundColor: 'rgba(255, 255, 255, 0.1)', color: 'rgb(var(--default-text-color-rgb))', border: '1px solid var(--default-border)'}}
-                />
-                <button className="btn-enhanced px-4 py-2 text-white hover-bounce text-sm">
-                  Copy
-                </button>
-              </div>
-            </div>
+        {/* NFT Purchase Section (A1..J1) */}
+        <div className="mt-10">
+          <h2 className="text-xl font-semibold mb-4 text-white">Daily NFT Series</h2>
+          <p className="text-sm mb-6" style={{color:'rgba(255,255,255,0.7)'}}>
+            Buy NFTs in order from A1 to J1. After buying one, the next NFT becomes available the following day.
+          </p>
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6">
+            {NFT_SERIES.map((code) => {
+              const status = getNftStatus(code);
+              const owned = status.owned;
+              const available = status.available;
+              const locked = status.locked;
+              return (
+                <div key={code} className="p-4 rounded-2xl border hover-lift-enhanced animate-fadeInUp" style={{backgroundColor:'rgba(0,0,0,0.1)', backdropFilter:'blur(10px)', borderColor:'var(--default-border)'}}>
+                  <div className="w-full aspect-square relative mb-3 overflow-hidden rounded-xl">
+                    <Image src={NFT_IMAGES[code] || '/logo.png'} alt={`${code} NFT`} fill sizes="200px" className="object-contain" />
+                  </div>
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="text-white font-semibold">{code}</div>
+                    {owned && (
+                      <span className="text-xs px-2 py-1 rounded" style={{background:'rgba(34,197,94,0.15)', color:'rgb(34,197,94)', border:'1px solid rgba(34,197,94,0.3)'}}>Owned</span>
+                    )}
+                    {!owned && locked && (
+                      <span className="text-xs px-2 py-1 rounded" style={{background:'rgba(148,163,184,0.15)', color:'rgb(148,163,184)', border:'1px solid rgba(148,163,184,0.3)'}}>Locked</span>
+                    )}
+                    {!owned && available && (
+                      <span className="text-xs px-2 py-1 rounded" style={{background:'rgba(59,130,246,0.15)', color:'rgb(59,130,246)', border:'1px solid rgba(59,130,246,0.3)'}}>Available</span>
+                    )}
+                  </div>
+                  
+                  {/* Buy Button */}
+                  <button
+                    onClick={() => handleBuyNft(code)}
+                    disabled={!available}
+                    className="w-full py-2 rounded-lg text-sm font-medium text-white transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed mb-2"
+                    style={{
+                      backgroundColor: available ? 'rgba(29, 68, 67, 0.8)' : 'rgba(255,255,255,0.1)',
+                      border: '1px solid var(--default-border)'
+                    }}
+                  >
+                    {owned ? `Purchased ${code}` : available ? `Buy ${code}` : `Buy ${code}`}
+                  </button>
+                  
+                  {/* View Series Button */}
+                  <Link href={`/nft/${code}`} className="block">
+                    <div className="w-full py-2 rounded-lg text-sm font-medium text-white transition-all duration-200 text-center hover:bg-opacity-80" style={{
+                      backgroundColor: 'rgba(59,130,246,0.6)',
+                      border: '1px solid rgba(59,130,246,0.3)'
+                    }}>
+                      View {code} Series
+                    </div>
+                  </Link>
+                  
+                  {!available && !owned && (
+                    <p className="mt-2 text-xs text-center" style={{color:'rgba(255,255,255,0.6)'}}>
+                      Buy previous NFT first and wait 1 day.
+                    </p>
+                  )}
+                  {owned && (
+                    <p className="mt-2 text-xs text-center" style={{color:'rgba(34,197,94,0.8)'}}>
+                      Click &quot;View Series&quot; to see A2-A100 NFTs
+                    </p>
+                  )}
+                </div>
+              );
+            })}
           </div>
         </div>
       </div>

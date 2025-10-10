@@ -244,61 +244,6 @@ export default function Navbar() {
 
             {/* Right side - Authentication */}
             <div className="flex items-center space-x-4">
-              {/* Connect Wallet Button - Always visible */}
-                  {walletState === WALLET_STATES.CONNECTED ? (
-                    <div className="flex items-center space-x-2">
-                      <div className="flex items-center space-x-2 glass-card rounded-lg px-3 py-2 hover-lift-enhanced transition-all duration-300">
-                        <div className="w-6 h-6 rounded-full flex items-center justify-center animate-cardFloat" style={{background: 'linear-gradient(135deg, var(--primary-color), var(--secondary-color))'}}>
-                          <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
-                          </svg>
-                        </div>
-                        <div className="text-sm">
-                          <div className="text-white font-medium gradient-text-neon">
-                            {formatAddress(walletAddress)}
-                          </div>
-                          <div className="text-xs" style={{color: 'rgba(255, 255, 255, 0.7)'}}>
-                            BNB: {tokenBalance}
-                          </div>
-                        </div>
-                      </div>
-                      <button
-                        onClick={disconnectWallet}
-                        className="px-3 py-2 text-xs font-medium text-white transition-all duration-300 hover-lift-enhanced rounded-lg"
-                        style={{color: 'rgba(255, 255, 255, 0.6)', backgroundColor: 'rgba(255, 255, 255, 0.1)'}}
-                      >
-                        Disconnect
-                      </button>
-                    </div>
-              ) : (
-                <button
-                  onClick={connectWallet}
-                  disabled={walletState === WALLET_STATES.CONNECTING}
-                  className="flex items-center space-x-2 px-4 py-2 text-sm font-medium text-white transition-all duration-300 hover-lift-enhanced hover-glow rounded-lg"
-                  style={{
-                    backgroundColor: walletState === WALLET_STATES.CONNECTING 
-                      ? 'rgba(255, 255, 255, 0.2)' 
-                      : 'rgba(29, 68, 67, 0.8)',
-                    border: '1px solid var(--default-border)',
-                    opacity: walletState === WALLET_STATES.CONNECTING ? 0.7 : 1
-                  }}
-                >
-                  {walletState === WALLET_STATES.CONNECTING ? (
-                    <>
-                      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                      <span>Connecting...</span>
-                    </>
-                  ) : (
-                    <>
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
-                      </svg>
-                      <span>Connect Wallet</span>
-                    </>
-                  )}
-                </button>
-              )}
-
               {isAuthenticated ? (
                 <div className="relative" ref={userMenuRef}>
                   <button
