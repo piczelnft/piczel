@@ -183,6 +183,16 @@ export default function Sidebar({ isOpen, onClose }) {
         { name: 'Withdrawal History', icon: 'scroll', href: '/withdrawal/history' },
       ]
     },
+    {
+      name: 'Buy NFT',
+      icon: 'shopping-bag',
+      hasDropdown: true,
+      dropdownItems: [
+        { name: 'Buy NFT', icon: 'shopping-bag', href: '/nft-buy' },
+        { name: 'NFT Buy History', icon: 'scroll', href: '/nft-history' },
+      ]
+    },    
+    
     { 
       name: 'Team Management', 
       icon: 'users',
