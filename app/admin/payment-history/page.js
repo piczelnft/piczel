@@ -48,7 +48,7 @@ export default function PaymentHistory() {
       const data = await response.json();
       setPaymentHistory(data.payments || []);
       setPagination(data.pagination || {});
-      setError(null); // Clear any previous errors
+      setError(null); 
     } catch (err) {
       console.error('Error fetching payment history:', err);
       setError(err.message);
@@ -87,7 +87,6 @@ export default function PaymentHistory() {
     const maxVisiblePages = 5;
     let startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2));
     let endPage = Math.min(pagination.totalPages, startPage + maxVisiblePages - 1);
-
     if (endPage - startPage + 1 < maxVisiblePages) {
       startPage = Math.max(1, endPage - maxVisiblePages + 1);
     }
@@ -109,11 +108,11 @@ export default function PaymentHistory() {
     }
 
     return (
-      <div className="flex items-center justify-between px-6 py-4 bg-white border-t border-gray-200">
-        <div className="flex items-center text-sm text-gray-700">
+      <div className="flex flex-col sm:flex-row items-center justify-between px-6 py-4 bg-white border-t border-gray-200 space-y-2 sm:space-y-0">
+        <div className="text-sm text-gray-700">
           Showing {pagination.startIndex} to {pagination.endIndex} of {pagination.totalCount} entries
         </div>
-        <div className="flex items-center space-x-2">
+        <div className="flex flex-wrap items-center gap-2">
           <button
             onClick={() => setCurrentPage(currentPage - 1)}
             disabled={!pagination.hasPrevPage}
@@ -155,26 +154,24 @@ export default function PaymentHistory() {
         <p className="mt-2 text-gray-600">All Processed Withdrawal Requests (Completed & Rejected)</p>
       </div>
 
-      {/* Main Content */}
-      <div className="bg-white rounded-lg shadow-sm border border-gray-200">
-        {/* Search and Filter */}
-        <div className="p-6 border-b border-gray-200">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-4 sm:space-y-0">
-            <div className="flex items-center space-x-4">
-              <div className="relative">
-                <input
-                  type="text"
-                  placeholder="Search by request ID, member ID..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                />
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <span className="text-gray-400">🔍</span>
-                </div>
-              </div>
+      {/* Search & Filter */}
+      <div className="bg-white rounded-lg shadow-sm border border-gray-200 mb-6">
+        <div className="p-6 flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-4 sm:space-y-0">
+          <div className="relative w-full sm:w-1/3">
+            <input
+              type="text"
+              placeholder="Search by request ID, member ID..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+            />
+            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <span className="text-gray-400">🔍</span>
             </div>
-            <div className="flex items-center space-x-4">
+          </div>
+
+          <div className="flex flex-wrap items-center gap-4">
+            <div className="flex items-center gap-2">
               <label className="text-sm text-gray-700">Status:</label>
               <select
                 value={statusFilter}
@@ -185,6 +182,9 @@ export default function PaymentHistory() {
                 <option value="completed">Completed</option>
                 <option value="rejected">Rejected</option>
               </select>
+            </div>
+
+            <div className="flex items-center gap-2">
               <label className="text-sm text-gray-700">Date:</label>
               <select
                 value={dateFilter}
@@ -197,6 +197,9 @@ export default function PaymentHistory() {
                 <option value="month">This Month</option>
                 <option value="year">This Year</option>
               </select>
+            </div>
+
+            <div className="flex items-center gap-2">
               <label className="text-sm text-gray-700">Show:</label>
               <select
                 value={limit}
@@ -211,9 +214,12 @@ export default function PaymentHistory() {
             </div>
           </div>
         </div>
+      </div>
 
-        {/* Table */}
-        <div className="overflow-x-auto">
+      {/* Table / Cards */}
+      <div className="space-y-4">
+        {/* For large screens: table */}
+        <div className="hidden lg:block bg-white rounded-lg shadow-sm border border-gray-200 overflow-x-auto">
           <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-50">
               <tr>
@@ -231,46 +237,21 @@ export default function PaymentHistory() {
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
-              {paymentHistory.length === 0 ? (
-                <tr>
-                  <td colSpan="11" className="px-6 py-12 text-center text-gray-500">
-                    No withdrawal history available
-                  </td>
-                </tr>
-              ) : (
-                paymentHistory.map((payment, index) => (
+              {paymentHistory.map((payment, index) => (
                 <tr key={payment.requestId} className="hover:bg-gray-50">
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    {(currentPage - 1) * limit + index + 1}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    {formatDate(payment.requestDate)}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                    {payment.requestId}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    {payment.memberId}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    {payment.memberName || 'N/A'}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    {formatCurrency(payment.gross)}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    {formatCurrency(payment.charges)}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-gray-900">
-                    {formatCurrency(payment.net)}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    {formatDate(payment.paymentDate)}
-                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{(currentPage-1)*limit + index + 1}</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{formatDate(payment.requestDate)}</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{payment.requestId}</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{payment.memberId}</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{payment.memberName || 'N/A'}</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{formatCurrency(payment.gross)}</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{formatCurrency(payment.charges)}</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-gray-900">{formatCurrency(payment.net)}</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{formatDate(payment.paymentDate)}</td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                     {payment.transactionHash ? (
                       <code className="text-xs bg-gray-100 px-2 py-1 rounded">
-                        {payment.transactionHash.slice(0, 8)}...{payment.transactionHash.slice(-8)}
+                        {payment.transactionHash.slice(0,8)}...{payment.transactionHash.slice(-8)}
                       </code>
                     ) : (
                       <span className="text-gray-400">N/A</span>
@@ -278,52 +259,80 @@ export default function PaymentHistory() {
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                      payment.status === 'completed' ? 'bg-green-100 text-green-800' :
-                      payment.status === 'rejected' ? 'bg-red-100 text-red-800' :
+                      payment.status==='completed' ? 'bg-green-100 text-green-800' :
+                      payment.status==='rejected' ? 'bg-red-100 text-red-800' :
                       'bg-gray-100 text-gray-800'
                     }`}>
-                      {payment.status === 'completed' ? 'Paid' : 
-                       payment.status === 'rejected' ? 'Rejected' : 
-                       payment.status?.charAt(0).toUpperCase() + payment.status?.slice(1) || 'Unknown'}
+                      {payment.status==='completed' ? 'Paid' :
+                       payment.status==='rejected' ? 'Rejected' :
+                       payment.status?.charAt(0).toUpperCase()+payment.status?.slice(1) || 'Unknown'}
                     </span>
                   </td>
                 </tr>
-                ))
-              )}
+              ))}
             </tbody>
           </table>
         </div>
 
-        {/* Pagination */}
-        {pagination.totalCount > 0 && renderPagination()}
+        {/* For small screens: card view */}
+        <div className="lg:hidden flex flex-col gap-4">
+          {paymentHistory.map((payment, index) => (
+            <div key={payment.requestId} className="bg-white p-4 rounded-lg shadow border border-gray-200 space-y-2">
+              <div className="flex justify-between items-center">
+                <span className="text-sm font-semibold">#{(currentPage-1)*limit + index + 1}</span>
+                <span className={`px-2 py-1 text-xs font-semibold rounded-full ${
+                  payment.status==='completed' ? 'bg-green-100 text-green-800' :
+                  payment.status==='rejected' ? 'bg-red-100 text-red-800' :
+                  'bg-gray-100 text-gray-800'
+                }`}>
+                  {payment.status==='completed' ? 'Paid' :
+                   payment.status==='rejected' ? 'Rejected' :
+                   payment.status?.charAt(0).toUpperCase()+payment.status?.slice(1) || 'Unknown'}
+                </span>
+              </div>
+              <div className="text-sm text-gray-700"><strong>Request ID:</strong> {payment.requestId}</div>
+              <div className="text-sm text-gray-700"><strong>Member ID:</strong> {payment.memberId}</div>
+              <div className="text-sm text-gray-700"><strong>Name:</strong> {payment.memberName || 'N/A'}</div>
+              <div className="text-sm text-gray-700"><strong>Gross:</strong> {formatCurrency(payment.gross)}</div>
+              <div className="text-sm text-gray-700"><strong>Charges:</strong> {formatCurrency(payment.charges)}</div>
+              <div className="text-sm text-gray-700"><strong>Net:</strong> {formatCurrency(payment.net)}</div>
+              <div className="text-sm text-gray-700"><strong>Request Date:</strong> {formatDate(payment.requestDate)}</div>
+              <div className="text-sm text-gray-700"><strong>Payment Date:</strong> {formatDate(payment.paymentDate)}</div>
+              <div className="text-sm text-gray-700"><strong>Transaction:</strong> {payment.transactionHash ? payment.transactionHash.slice(0, 10)+'...' : 'N/A'}</div>
+            </div>
+          ))}
+        </div>
+      </div>
 
-        {/* Error State */}
-        {error && (
-          <div className="p-6">
-            <div className="bg-red-50 border border-red-200 rounded-md p-4">
-              <div className="flex">
-                <div className="flex-shrink-0">
-                  <span className="text-red-400">❌</span>
+      {/* Pagination */}
+      {pagination.totalCount > 0 && renderPagination()}
+
+      {/* Error State */}
+      {error && (
+        <div className="p-6">
+          <div className="bg-red-50 border border-red-200 rounded-md p-4">
+            <div className="flex">
+              <div className="flex-shrink-0">
+                <span className="text-red-400">❌</span>
+              </div>
+              <div className="ml-3">
+                <h3 className="text-sm font-medium text-red-800">Error loading withdrawal history</h3>
+                <div className="mt-2 text-sm text-red-700">
+                  <p>{error}</p>
                 </div>
-                <div className="ml-3">
-                  <h3 className="text-sm font-medium text-red-800">Error loading withdrawal history</h3>
-                  <div className="mt-2 text-sm text-red-700">
-                    <p>{error}</p>
-                  </div>
-                  <div className="mt-4">
-                    <button
-                      onClick={fetchPaymentHistory}
-                      className="bg-red-100 px-3 py-2 rounded-md text-sm font-medium text-red-800 hover:bg-red-200"
-                    >
-                      Try again
-                    </button>
-                  </div>
+                <div className="mt-4">
+                  <button
+                    onClick={fetchPaymentHistory}
+                    className="bg-red-100 px-3 py-2 rounded-md text-sm font-medium text-red-800 hover:bg-red-200"
+                  >
+                    Try again
+                  </button>
                 </div>
               </div>
             </div>
           </div>
-        )}
-      </div>
+        </div>
+      )}
     </AdminLayout>
   );
 }
