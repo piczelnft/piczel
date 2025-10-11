@@ -133,14 +133,14 @@ const TeamMembersPage = () => {
   }
 
   return (
-    <div className="min-h-screen flex p-8" style={{background: 'linear-gradient(to bottom right, var(--default-body-bg-color) 0%, var(--theme-bg-gradient) 25%, var(--default-body-bg-color) 100%)', fontFamily: 'var(--default-font-family)'}}>
+    <div className="min-h-screen flex p-4 sm:p-8 pt-20 lg:pt-8" style={{background: 'linear-gradient(to bottom right, var(--default-body-bg-color) 0%, var(--theme-bg-gradient) 25%, var(--default-body-bg-color) 100%)', fontFamily: 'var(--default-font-family)'}}>
 
       {/* Main Content */}
       <div className="flex-1">
         <div className="max-w-7xl mx-auto">
-        <div className="text-center mb-12">
-          <h1 className="text-4xl font-bold text-white mb-2 gradient-text-enhanced animate-fadeInUp">My Directs</h1>
-          <p className="text-lg animate-fadeInUp" style={{color: 'rgba(255, 255, 255, 0.7)', animationDelay: '0.2s'}}>Check your Genealogy</p>
+        <div className="text-center mb-8 sm:mb-12">
+          <h1 className="text-2xl sm:text-4xl font-bold text-white mb-2 gradient-text-enhanced animate-fadeInUp">My Directs</h1>
+          <p className="text-base sm:text-lg animate-fadeInUp" style={{color: 'rgba(255, 255, 255, 0.7)', animationDelay: '0.2s'}}>Check your Genealogy</p>
           <div className="mt-4">
             <button 
               onClick={fetchMembersData}
@@ -155,17 +155,17 @@ const TeamMembersPage = () => {
           </div>
         </div>
 
-        <div className="card-enhanced rounded-2xl p-8 shadow-lg animate-fadeInUp" style={{animationDelay: '0.4s'}}>
-          <h2 className="text-2xl font-semibold text-white mb-8 text-center">My Directs</h2>
+        <div className="card-enhanced rounded-2xl p-4 sm:p-8 shadow-lg animate-fadeInUp" style={{animationDelay: '0.4s'}}>
+          <h2 className="text-xl sm:text-2xl font-semibold text-white mb-6 sm:mb-8 text-center">My Directs</h2>
           
           {/* Controls */}
-          <div className="flex flex-col sm:flex-row justify-between items-center mb-6 gap-4">
-            <div className="flex items-center gap-4">
-              <label className="text-sm font-medium" style={{color: 'rgba(255, 255, 255, 0.8)'}}>Show</label>
+          <div className="flex flex-col sm:flex-row justify-between items-center mb-4 sm:mb-6 gap-3 sm:gap-4">
+            <div className="flex items-center gap-2 sm:gap-4">
+              <label className="text-xs sm:text-sm font-medium" style={{color: 'rgba(255, 255, 255, 0.8)'}}>Show</label>
               <select
                 value={entriesPerPage}
                 onChange={handleEntriesChange}
-                className="px-3 py-2 text-white rounded-lg text-sm focus:outline-none transition-colors"
+                className="px-2 sm:px-3 py-2 text-white rounded-lg text-xs sm:text-sm focus:outline-none transition-colors"
                 style={{
                   backgroundColor: 'rgba(29, 68, 67, 0.8)',
                   border: '1px solid var(--default-border)'
@@ -176,17 +176,17 @@ const TeamMembersPage = () => {
                 <option value={50}>50</option>
                 <option value={100}>100</option>
               </select>
-              <span className="text-sm" style={{color: 'rgba(255, 255, 255, 0.8)'}}>entries</span>
+              <span className="text-xs sm:text-sm" style={{color: 'rgba(255, 255, 255, 0.8)'}}>entries</span>
             </div>
             
             <div className="flex items-center gap-2">
-              <label className="text-sm font-medium" style={{color: 'rgba(255, 255, 255, 0.8)'}}>Search:</label>
+              <label className="text-xs sm:text-sm font-medium" style={{color: 'rgba(255, 255, 255, 0.8)'}}>Search:</label>
               <input
                 type="text"
                 value={searchTerm}
                 onChange={handleSearch}
                 placeholder="Search..."
-                className="px-3 py-2 text-white rounded-lg text-sm focus:outline-none transition-colors placeholder-gray-400 w-48"
+                className="px-2 sm:px-3 py-2 text-white rounded-lg text-xs sm:text-sm focus:outline-none transition-colors placeholder-gray-400 w-32 sm:w-48"
                 style={{
                   backgroundColor: 'rgba(29, 68, 67, 0.8)',
                   border: '1px solid var(--default-border)'
@@ -197,25 +197,25 @@ const TeamMembersPage = () => {
 
           {/* Table */}
           <div className="overflow-x-auto">
-            <table className="w-full text-sm text-left">
+            <table className="w-full text-xs sm:text-sm text-left">
               <thead>
                 <tr style={{background: 'linear-gradient(to right, rgba(29, 68, 67, 0.8), rgba(29, 68, 67, 0.8))', borderBottom: '1px solid var(--default-border)'}}>
-                  <th className="px-6 py-4 text-white font-semibold">S.No</th>
-                  <th className="px-6 py-4 text-white font-semibold">Image</th>
-                  <th className="px-6 py-4 text-white font-semibold">Joining Date</th>
-                  <th className="px-6 py-4 text-white font-semibold">Member ID</th>
-                  <th className="px-6 py-4 text-white font-semibold">Name</th>
-                  <th className="px-6 py-4 text-white font-semibold">Email ID</th>
-                  <th className="px-6 py-4 text-white font-semibold">Downline</th>
-                  <th className="px-6 py-4 text-white font-semibold">Package</th>
-                  <th className="px-6 py-4 text-white font-semibold">Sponsor ID</th>
-                  <th className="px-6 py-4 text-white font-semibold">Status</th>
+                  <th className="px-2 sm:px-6 py-3 sm:py-4 text-white font-semibold">S.No</th>
+                  <th className="px-2 sm:px-6 py-3 sm:py-4 text-white font-semibold hidden sm:table-cell">Image</th>
+                  <th className="px-2 sm:px-6 py-3 sm:py-4 text-white font-semibold">Joining Date</th>
+                  <th className="px-2 sm:px-6 py-3 sm:py-4 text-white font-semibold">Member ID</th>
+                  <th className="px-2 sm:px-6 py-3 sm:py-4 text-white font-semibold">Name</th>
+                  <th className="px-2 sm:px-6 py-3 sm:py-4 text-white font-semibold hidden md:table-cell">Email ID</th>
+                  <th className="px-2 sm:px-6 py-3 sm:py-4 text-white font-semibold hidden lg:table-cell">Downline</th>
+                  <th className="px-2 sm:px-6 py-3 sm:py-4 text-white font-semibold hidden lg:table-cell">Package</th>
+                  <th className="px-2 sm:px-6 py-3 sm:py-4 text-white font-semibold hidden lg:table-cell">Sponsor ID</th>
+                  <th className="px-2 sm:px-6 py-3 sm:py-4 text-white font-semibold">Status</th>
                 </tr>
               </thead>
               <tbody>
                 {membersData.length === 0 && !loading ? (
                   <tr>
-                    <td colSpan="10" className="px-6 py-8 text-center text-white">
+                    <td colSpan="10" className="px-4 sm:px-6 py-6 sm:py-8 text-center text-white text-sm">
                       No team members found
                     </td>
                   </tr>
@@ -225,27 +225,27 @@ const TeamMembersPage = () => {
                       borderBottom: '1px solid var(--default-border)',
                       backgroundColor: 'rgba(29, 68, 67, 0.1)'
                     }}>
-                      <td className="px-6 py-4" style={{color: 'rgba(255, 255, 255, 0.8)'}}>{pagination.startIndex + index}</td>
-                      <td className="px-6 py-4">
-                        <div className="w-10 h-10 rounded-full flex items-center justify-center" style={{
+                      <td className="px-2 sm:px-6 py-3 sm:py-4 text-xs sm:text-sm" style={{color: 'rgba(255, 255, 255, 0.8)'}}>{pagination.startIndex + index}</td>
+                      <td className="px-2 sm:px-6 py-3 sm:py-4 hidden sm:table-cell">
+                        <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center" style={{
                           background: 'linear-gradient(135deg, var(--primary-color), var(--secondary-color))'
                         }}>
-                          <span className="text-white text-sm font-medium">
+                          <span className="text-white text-xs sm:text-sm font-medium">
                             {item.name.charAt(0)}
                           </span>
                         </div>
                       </td>
-                      <td className="px-6 py-4" style={{color: 'rgba(255, 255, 255, 0.8)'}}>{item.joiningDate}</td>
-                      <td className="px-6 py-4 font-medium" style={{color: 'var(--primary-color)'}}>{item.memberId}</td>
-                      <td className="px-6 py-4 text-white font-medium">{item.name}</td>
-                      <td className="px-6 py-4 font-medium max-w-xs truncate" style={{color: 'rgb(var(--info-rgb))'}} title={item.email}>
+                      <td className="px-2 sm:px-6 py-3 sm:py-4 text-xs sm:text-sm" style={{color: 'rgba(255, 255, 255, 0.8)'}}>{item.joiningDate}</td>
+                      <td className="px-2 sm:px-6 py-3 sm:py-4 font-medium text-xs sm:text-sm" style={{color: 'var(--primary-color)'}}>{item.memberId}</td>
+                      <td className="px-2 sm:px-6 py-3 sm:py-4 text-white font-medium text-xs sm:text-sm">{item.name}</td>
+                      <td className="px-2 sm:px-6 py-3 sm:py-4 font-medium max-w-xs truncate text-xs sm:text-sm hidden md:table-cell" style={{color: 'rgb(var(--info-rgb))'}} title={item.email}>
                         {item.email}
                       </td>
-                      <td className="px-6 py-4 font-medium" style={{color: 'var(--secondary-color)'}}>{item.downline}</td>
-                      <td className="px-6 py-4 font-medium" style={{color: 'rgb(var(--success-rgb))'}}>{item.package}</td>
-                      <td className="px-6 py-4 font-medium" style={{color: 'rgb(var(--warning-rgb))'}}>{item.sponsorId}</td>
-                      <td className="px-6 py-4">
-                        <span className="px-3 py-1 rounded-full text-xs font-medium" style={getStatusColor(item.status)}>
+                      <td className="px-2 sm:px-6 py-3 sm:py-4 font-medium text-xs sm:text-sm hidden lg:table-cell" style={{color: 'var(--secondary-color)'}}>{item.downline}</td>
+                      <td className="px-2 sm:px-6 py-3 sm:py-4 font-medium text-xs sm:text-sm hidden lg:table-cell" style={{color: 'rgb(var(--success-rgb))'}}>{item.package}</td>
+                      <td className="px-2 sm:px-6 py-3 sm:py-4 font-medium text-xs sm:text-sm hidden lg:table-cell" style={{color: 'rgb(var(--warning-rgb))'}}>{item.sponsorId}</td>
+                      <td className="px-2 sm:px-6 py-3 sm:py-4">
+                        <span className="px-2 sm:px-3 py-1 rounded-full text-xs font-medium" style={getStatusColor(item.status)}>
                           {item.status}
                         </span>
                       </td>
@@ -257,36 +257,36 @@ const TeamMembersPage = () => {
           </div>
 
           {/* Pagination Info */}
-          <div className="mt-6 flex flex-col sm:flex-row justify-between items-center gap-4">
-            <div className="text-sm" style={{color: 'rgba(255, 255, 255, 0.8)'}}>
+          <div className="mt-4 sm:mt-6 flex flex-col sm:flex-row justify-between items-center gap-3 sm:gap-4">
+            <div className="text-xs sm:text-sm text-center sm:text-left" style={{color: 'rgba(255, 255, 255, 0.8)'}}>
               Showing {pagination.startIndex} to {pagination.endIndex} of {pagination.totalMembers} entries
             </div>
             
             {/* Pagination Controls */}
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1 sm:gap-2">
               <button
                 onClick={() => handlePageChange(currentPage - 1)}
                 disabled={!pagination.hasPrevPage || loading}
-                className="px-3 py-2 text-white rounded-lg text-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                className="px-2 sm:px-3 py-2 text-white rounded-lg text-xs sm:text-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 style={{
                   backgroundColor: 'rgba(29, 68, 67, 0.8)',
                   border: '1px solid var(--default-border)'
                 }}
               >
-                Previous
+                Prev
               </button>
               
               {/* Page Numbers */}
               <div className="flex items-center gap-1">
-                {Array.from({ length: Math.min(7, pagination.totalPages) }, (_, i) => {
-                  const page = Math.max(1, currentPage - 3) + i;
+                {Array.from({ length: Math.min(5, pagination.totalPages) }, (_, i) => {
+                  const page = Math.max(1, currentPage - 2) + i;
                   if (page > pagination.totalPages) return null;
                   return (
                     <button
                       key={page}
                       onClick={() => handlePageChange(page)}
                       disabled={loading}
-                      className={`px-3 py-2 rounded-lg text-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
+                      className={`px-2 sm:px-3 py-2 rounded-lg text-xs sm:text-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
                         currentPage === page
                           ? 'text-white btn-enhanced'
                           : 'text-white'
@@ -305,7 +305,7 @@ const TeamMembersPage = () => {
               <button
                 onClick={() => handlePageChange(currentPage + 1)}
                 disabled={!pagination.hasNextPage || loading}
-                className="px-3 py-2 text-white rounded-lg text-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                className="px-2 sm:px-3 py-2 text-white rounded-lg text-xs sm:text-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 style={{
                   backgroundColor: 'rgba(29, 68, 67, 0.8)',
                   border: '1px solid var(--default-border)'

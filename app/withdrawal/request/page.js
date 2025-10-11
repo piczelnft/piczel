@@ -155,30 +155,30 @@ export default function WithdrawalRequestPage() {
   };
 
   return (
-    <div className="min-h-screen" style={{background: 'linear-gradient(to bottom right, var(--default-body-bg-color) 0%, var(--theme-bg-gradient) 25%, var(--default-body-bg-color) 100%)', fontFamily: 'var(--default-font-family)'}}>
-      <div className="container mx-auto px-4 py-8">
+    <div className="min-h-screen pt-20 lg:pt-8" style={{background: 'linear-gradient(to bottom right, var(--default-body-bg-color) 0%, var(--theme-bg-gradient) 25%, var(--default-body-bg-color) 100%)', fontFamily: 'var(--default-font-family)'}}>
+      <div className="container mx-auto px-4 py-4 sm:py-8">
         <div className="max-w-2xl mx-auto">
           {/* Header */}
-          <div className="text-center mb-8">
-            <h1 className="text-3xl font-bold text-white gradient-text-enhanced mb-2">
+          <div className="text-center mb-6 sm:mb-8">
+            <h1 className="text-2xl sm:text-3xl font-bold text-white gradient-text-enhanced mb-2">
               Request Withdrawal
             </h1>
-            <p className="text-white/70">
+            <p className="text-white/70 text-sm sm:text-base">
               Withdraw your funds to your preferred wallet address
             </p>
           </div>
 
           {/* Balance Card */}
-          <div className="card-enhanced rounded-xl p-6 mb-6" style={{backgroundColor: 'rgba(0, 0, 0, 0.1)', backdropFilter: 'blur(10px)', borderColor: 'var(--default-border)'}}>
+          <div className="card-enhanced rounded-xl p-4 sm:p-6 mb-4 sm:mb-6" style={{backgroundColor: 'rgba(0, 0, 0, 0.1)', backdropFilter: 'blur(10px)', borderColor: 'var(--default-border)'}}>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {/* Total Balance */}
               <div className="flex items-center justify-between">
                 <div>
-                  <h3 className="text-white font-semibold mb-1">Total Balance</h3>
-                  <p className="text-2xl font-bold text-green-400">${userBalance.toFixed(2)}</p>
+                  <h3 className="text-white font-semibold mb-1 text-sm sm:text-base">Total Balance</h3>
+                  <p className="text-xl sm:text-2xl font-bold text-green-400">${userBalance.toFixed(2)}</p>
                 </div>
-                <div className="w-12 h-12 rounded-full flex items-center justify-center" style={{backgroundColor: 'rgba(34, 197, 94, 0.2)'}}>
-                  <svg className="w-6 h-6 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full flex items-center justify-center" style={{backgroundColor: 'rgba(34, 197, 94, 0.2)'}}>
+                  <svg className="w-5 h-5 sm:w-6 sm:h-6 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
                 </div>
@@ -187,11 +187,11 @@ export default function WithdrawalRequestPage() {
               {/* Withdrawal Balance (Sponsor Commissions) */}
               <div className="flex items-center justify-between">
                 <div>
-                  <h3 className="text-white font-semibold mb-1">Withdrawal Balance</h3>
-                  <p className="text-2xl font-bold" style={{color: 'rgb(var(--primary-rgb))'}}>${withdrawalBalance.toFixed(2)}</p>
+                  <h3 className="text-white font-semibold mb-1 text-sm sm:text-base">Withdrawal Balance</h3>
+                  <p className="text-xl sm:text-2xl font-bold" style={{color: 'rgb(var(--primary-rgb))'}}>${withdrawalBalance.toFixed(2)}</p>
                 </div>
-                <div className="w-12 h-12 rounded-full flex items-center justify-center" style={{backgroundColor: 'rgba(0, 255, 190, 0.15)'}}>
-                  <svg className="w-6 h-6" style={{color: 'var(--primary-color)'}} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full flex items-center justify-center" style={{backgroundColor: 'rgba(0, 255, 190, 0.15)'}}>
+                  <svg className="w-5 h-5 sm:w-6 sm:h-6" style={{color: 'var(--primary-color)'}} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1M16 11a4 4 0 10-8 0 4 4 0 008 0zm6-5h-3m-4 0H5m0 0H2m3 0v3m0-3V3" />
                   </svg>
                 </div>
@@ -200,8 +200,8 @@ export default function WithdrawalRequestPage() {
           </div>
 
           {/* Withdrawal Form */}
-          <div className="card-enhanced rounded-xl shadow-2xl p-8">
-            <form className="space-y-6" onSubmit={handleSubmit}>
+          <div className="card-enhanced rounded-xl shadow-2xl p-4 sm:p-8">
+            <form className="space-y-4 sm:space-y-6" onSubmit={handleSubmit}>
               {errors.general && (
                 <div className="px-4 py-3 rounded-lg animate-fadeInUp" style={{backgroundColor: 'rgba(255, 74, 74, 0.2)', border: '1px solid rgba(255, 74, 74, 0.3)', color: 'rgb(var(--danger-rgb))'}}>
                   {errors.general}
@@ -230,7 +230,7 @@ export default function WithdrawalRequestPage() {
                     required
                     value={formData.amount}
                     onChange={handleChange}
-                    className="w-full px-4 py-3 pl-8 rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:border-transparent"
+                    className="w-full px-3 sm:px-4 py-2 sm:py-3 pl-6 sm:pl-8 rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:border-transparent text-sm sm:text-base"
                     style={{
                       backgroundColor: 'rgba(29, 68, 67, 0.8)',
                       border: '1px solid var(--default-border)',
@@ -245,11 +245,11 @@ export default function WithdrawalRequestPage() {
                 </div>
                 
                 {/* Quick Amount Buttons */}
-                <div className="flex gap-2 mt-2">
+                <div className="flex gap-1 sm:gap-2 mt-2 flex-wrap">
                   <button
                     type="button"
                     onClick={() => handleQuickAmount(25)}
-                    className="px-3 py-1 text-xs rounded-full transition-colors duration-200"
+                    className="px-2 sm:px-3 py-1 text-xs rounded-full transition-colors duration-200"
                     style={{backgroundColor: 'rgba(0, 255, 136, 0.1)', color: 'var(--primary-color)', border: '1px solid rgba(0, 255, 136, 0.3)'}}
                   >
                     25%
@@ -257,7 +257,7 @@ export default function WithdrawalRequestPage() {
                   <button
                     type="button"
                     onClick={() => handleQuickAmount(50)}
-                    className="px-3 py-1 text-xs rounded-full transition-colors duration-200"
+                    className="px-2 sm:px-3 py-1 text-xs rounded-full transition-colors duration-200"
                     style={{backgroundColor: 'rgba(0, 255, 136, 0.1)', color: 'var(--primary-color)', border: '1px solid rgba(0, 255, 136, 0.3)'}}
                   >
                     50%
@@ -265,7 +265,7 @@ export default function WithdrawalRequestPage() {
                   <button
                     type="button"
                     onClick={() => handleQuickAmount(75)}
-                    className="px-3 py-1 text-xs rounded-full transition-colors duration-200"
+                    className="px-2 sm:px-3 py-1 text-xs rounded-full transition-colors duration-200"
                     style={{backgroundColor: 'rgba(0, 255, 136, 0.1)', color: 'var(--primary-color)', border: '1px solid rgba(0, 255, 136, 0.3)'}}
                   >
                     75%
@@ -273,7 +273,7 @@ export default function WithdrawalRequestPage() {
                   <button
                     type="button"
                     onClick={() => handleQuickAmount(100)}
-                    className="px-3 py-1 text-xs rounded-full transition-colors duration-200"
+                    className="px-2 sm:px-3 py-1 text-xs rounded-full transition-colors duration-200"
                     style={{backgroundColor: 'rgba(0, 255, 136, 0.1)', color: 'var(--primary-color)', border: '1px solid rgba(0, 255, 136, 0.3)'}}
                   >
                     Max
@@ -295,7 +295,7 @@ export default function WithdrawalRequestPage() {
                   name="paymentMethod"
                   value={formData.paymentMethod}
                   onChange={handleChange}
-                  className="w-full px-4 py-3 rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:border-transparent"
+                  className="w-full px-3 sm:px-4 py-2 sm:py-3 rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:border-transparent text-sm sm:text-base"
                   style={{
                     backgroundColor: 'rgba(29, 68, 67, 0.8)',
                     border: '1px solid var(--default-border)',
@@ -324,7 +324,7 @@ export default function WithdrawalRequestPage() {
                   required
                   value={formData.walletAddress}
                   onChange={handleChange}
-                  className="w-full px-4 py-3 rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:border-transparent"
+                  className="w-full px-3 sm:px-4 py-2 sm:py-3 rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:border-transparent text-sm sm:text-base"
                   style={{
                     backgroundColor: 'rgba(29, 68, 67, 0.8)',
                     border: '1px solid var(--default-border)',
@@ -349,7 +349,7 @@ export default function WithdrawalRequestPage() {
                   rows="2"
                   value={formData.notes}
                   onChange={handleChange}
-                  className="w-full px-4 py-3 rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:border-transparent"
+                  className="w-full px-3 sm:px-4 py-2 sm:py-3 rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:border-transparent text-sm sm:text-base"
                   style={{
                     backgroundColor: 'rgba(29, 68, 67, 0.8)',
                     border: '1px solid var(--default-border)',
@@ -365,7 +365,7 @@ export default function WithdrawalRequestPage() {
                 <button
                   type="submit"
                   disabled={isLoading || userBalance < 10}
-                  className="btn-enhanced w-full flex justify-center py-3 px-4 rounded-lg text-sm font-medium text-white transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="btn-enhanced w-full flex justify-center py-2 sm:py-3 px-4 rounded-lg text-sm font-medium text-white transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {isLoading ? (
                     <div className="flex items-center">
@@ -380,7 +380,7 @@ export default function WithdrawalRequestPage() {
 
               {/* Info */}
               <div className="text-center">
-                <p className="text-sm" style={{color: 'rgba(255, 255, 255, 0.6)'}}>
+                <p className="text-xs sm:text-sm" style={{color: 'rgba(255, 255, 255, 0.6)'}}>
                   Minimum withdrawal: $5 | Processing time: 24-48 hours | Only 1 withdrawal per day
                 </p>
               </div>

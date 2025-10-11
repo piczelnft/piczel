@@ -117,9 +117,21 @@ export async function POST(request) {
     console.log(`Updated wallet.balance: $${updatedUser?.wallet?.balance}`);
     console.log(`Updated walletBalance: $${updatedUser?.walletBalance}`);
 
-    // Distribute commissions (up to 10 levels)
+    // Distribute commissions (up to 10 levels) and update member volumes
     const commissions = [];
     let currentUserForUpline = user;
+    
+    // Update buyer's direct members volume (their own purchase)
+    await User.findOneAndUpdate(
+      { _id: userId },
+      {
+        $inc: { 
+          directMembersVolume: nftReward,
+          totalMembersVolume: nftReward
+        }
+      }
+    );
+
     for (let level = 1; level <= 10; level++) {
       const rate = COMMISSION_RATES[level - 1];
       if (!rate) break;
@@ -133,9 +145,15 @@ export async function POST(request) {
       const sponsorCurrentBalance = sponsorUser.wallet?.balance || sponsorUser.walletBalance || 0;
       const sponsorNewBalance = sponsorCurrentBalance + commissionAmount;
 
-      const incomeUpdate = level === 1 
-        ? { sponsorIncome: (sponsorUser.sponsorIncome || 0) + commissionAmount }
-        : { levelIncome: (sponsorUser.levelIncome || 0) + commissionAmount };
+      // Update sponsor's volume tracking
+      const volumeUpdate = level === 1 
+        ? { 
+            sponsoredMembersVolume: (sponsorUser.sponsoredMembersVolume || 0) + nftReward,
+            totalMembersVolume: (sponsorUser.totalMembersVolume || 0) + nftReward
+          }
+        : { 
+            totalMembersVolume: (sponsorUser.totalMembersVolume || 0) + nftReward
+          };
 
       await User.findOneAndUpdate(
         { _id: sponsorUser._id },
@@ -144,9 +162,18 @@ export async function POST(request) {
             "wallet.balance": sponsorNewBalance,
             "walletBalance": sponsorNewBalance,
           },
-          $inc: level === 1 
-            ? { sponsorIncome: commissionAmount }
-            : { levelIncome: commissionAmount }
+          $inc: {
+            ...(level === 1 
+              ? { 
+                  sponsorIncome: commissionAmount,
+                  sponsoredMembersVolume: nftReward,
+                  totalMembersVolume: nftReward
+                }
+              : { 
+                  levelIncome: commissionAmount,
+                  totalMembersVolume: nftReward
+                })
+          }
         }
       );
 
@@ -156,6 +183,7 @@ export async function POST(request) {
         sponsorName: sponsorUser.name,
         commissionRate: `${(rate * 100).toFixed(2)}%`,
         commissionAmount: commissionAmount.toFixed(2),
+        volumeAdded: nftReward.toFixed(2),
       });
 
       // Move up the tree

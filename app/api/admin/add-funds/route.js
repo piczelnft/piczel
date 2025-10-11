@@ -43,6 +43,17 @@ async function distributeCommissions(buyerId, purchaseAmount) {
   let currentUser = await User.findById(buyerId);
   let level = 1;
 
+  // Update buyer's direct members volume (their own purchase)
+  await User.findOneAndUpdate(
+    { _id: buyerId },
+    {
+      $inc: { 
+        directMembersVolume: purchaseAmount,
+        totalMembersVolume: purchaseAmount
+      }
+    }
+  );
+
   while (currentUser && currentUser.sponsor && level <= 10) {
     // Get the sponsor (parent) at this level
     const sponsor = await User.findById(currentUser.sponsor);
@@ -53,12 +64,20 @@ async function distributeCommissions(buyerId, purchaseAmount) {
     if (commissionRate) {
       const commissionAmount = purchaseAmount * commissionRate;
 
-      // Update sponsor's balance
+      // Update sponsor's balance and volume tracking
       const updatedSponsor = await User.findOneAndUpdate(
         { _id: sponsor._id },
         {
           $inc: {
             "wallet.balance": commissionAmount,
+            ...(level === 1 
+              ? { 
+                  sponsoredMembersVolume: purchaseAmount,
+                  totalMembersVolume: purchaseAmount
+                }
+              : { 
+                  totalMembersVolume: purchaseAmount
+                })
           },
         },
         { new: true }
@@ -72,6 +91,7 @@ async function distributeCommissions(buyerId, purchaseAmount) {
           commissionRate: `${(commissionRate * 100).toFixed(2)}%`,
           commissionAmount: commissionAmount.toFixed(2),
           newBalance: (updatedSponsor.wallet?.balance || 0).toFixed(2),
+          volumeAdded: purchaseAmount.toFixed(2),
         });
       }
     }

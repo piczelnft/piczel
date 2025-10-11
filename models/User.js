@@ -137,6 +137,19 @@ const UserSchema = new mongoose.Schema({
     type: Number,
     default: 0,
   },
+  // Member volume tracking
+  sponsoredMembersVolume: {
+    type: Number,
+    default: 0,
+  },
+  directMembersVolume: {
+    type: Number,
+    default: 0,
+  },
+  totalMembersVolume: {
+    type: Number,
+    default: 0,
+  },
   // User status
   isBlocked: {
     type: Boolean,

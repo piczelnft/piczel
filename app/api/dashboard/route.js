@@ -130,12 +130,20 @@ export async function GET() {
             clubA: `http://piczelite.com/member/register/DGT123456/ClubA`,
             clubB: `http://piczelite.com/member/register/DGT123456/ClubB`
           },
-          incomeStats: {
-            totalIncome: "5528.13",
-            affiliateReward: "4925.13",
-            stakingReward: "603.00",
-            communityReward: "0.00"
-          }
+        incomeStats: {
+          totalIncome: "5528.13",
+          affiliateReward: "4925.13",
+          stakingReward: "603.00",
+          communityReward: "0.00"
+        },
+        totalNftPurchases: 5,
+        totalSponsorsIncome: "1250.50",
+        totalWithdrawalAmount: "750.25",
+        memberVolumes: {
+          sponsoredMembersVolume: "2500.00",
+          directMembersVolume: "1500.00",
+          totalMembersVolume: "4000.00"
+        }
         };
         
         return NextResponse.json(
@@ -231,6 +239,14 @@ export async function GET() {
           affiliateReward: incomeStats.affiliateReward,
           stakingReward: incomeStats.stakingReward,
           communityReward: incomeStats.communityReward
+        },
+        totalNftPurchases: await calculateTotalNftPurchases(userId),
+        totalSponsorsIncome: await calculateTotalSponsorsIncome(userId),
+        totalWithdrawalAmount: await calculateTotalWithdrawalAmount(userId),
+        memberVolumes: {
+          sponsoredMembersVolume: user.sponsoredMembersVolume || 0,
+          directMembersVolume: user.directMembersVolume || 0,
+          totalMembersVolume: user.totalMembersVolume || 0
         }
       };
 
@@ -370,5 +386,44 @@ async function calculateIncomeStats(userId) {
       stakingReward: "603.00",
       communityReward: "0.00"
     };
+  }
+}
+
+// Helper function to calculate total NFT purchases
+async function calculateTotalNftPurchases(userId) {
+  try {
+    // Import NftPurchase model
+    const NftPurchase = (await import("@/models/NftPurchase")).default;
+    const count = await NftPurchase.countDocuments({ userId });
+    return count;
+  } catch (error) {
+    console.error("Error calculating total NFT purchases:", error);
+    return 0;
+  }
+}
+
+// Helper function to calculate total sponsors income
+async function calculateTotalSponsorsIncome(userId) {
+  try {
+    const user = await User.findById(userId).select("sponsorIncome");
+    const totalSponsorsIncome = user?.sponsorIncome || 0;
+    return totalSponsorsIncome.toFixed(2);
+  } catch (error) {
+    console.error("Error calculating total sponsors income:", error);
+    return "0.00";
+  }
+}
+
+// Helper function to calculate total withdrawal amount
+async function calculateTotalWithdrawalAmount(userId) {
+  try {
+    // Import Withdrawal model
+    const Withdrawal = (await import("@/models/Withdrawal")).default;
+    const withdrawals = await Withdrawal.find({ userId, status: 'completed' });
+    const total = withdrawals.reduce((sum, withdrawal) => sum + withdrawal.amount, 0);
+    return total.toFixed(2);
+  } catch (error) {
+    console.error("Error calculating total withdrawal amount:", error);
+    return "0.00";
   }
 }
