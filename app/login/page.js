@@ -105,11 +105,6 @@ function LoginForm() {
     setMessage("");
     setErrors({});
 
-    if (!walletConnected) {
-      setErrors({ general: "Please connect your wallet before signing in." });
-      return;
-    }
-
     const validationErrors = validateForm();
     if (Object.keys(validationErrors).length > 0) {
       setErrors(validationErrors);
@@ -327,7 +322,7 @@ function LoginForm() {
             className="card-enhanced rounded-xl shadow-2xl p-8 animate-fadeInUp"
             style={{ animationDelay: "0.4s" }}
           >
-            {/* Wallet Connect Required */}
+            {/* Wallet Connect Optional */}
             <div className="mb-6">
               {!walletConnected ? (
                 <button
@@ -339,7 +334,7 @@ function LoginForm() {
                   <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
                   </svg>
-                  Connect Wallet (required)
+                  Connect Wallet (optional)
                 </button>
               ) : (
                 <div className="flex items-center justify-between px-4 py-3 rounded-lg" style={{ backgroundColor: "rgba(0,0,0,0.1)", border: "1px solid var(--default-border)" }}>
@@ -351,11 +346,9 @@ function LoginForm() {
                   </div>
                 </div>
               )}
-              {!walletConnected && (
-                <p className="mt-2 text-xs" style={{ color: "rgb(var(--danger-rgb))" }}>
-                  You must connect your wallet before signing in.
-                </p>
-              )}
+              <p className="mt-2 text-xs" style={{ color: "rgba(255,255,255,0.6)" }}>
+                Wallet connection is optional. You can sign in without connecting a wallet.
+              </p>
             </div>
 
             <form className="space-y-6" onSubmit={handleSubmit}>
@@ -527,7 +520,7 @@ function LoginForm() {
               <div>
                 <button
                   type="submit"
-                  disabled={isLoading || !walletConnected}
+                  disabled={isLoading}
                   className="btn-enhanced w-full flex justify-center py-3 px-4 rounded-lg text-sm font-medium text-white transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {isLoading ? (
