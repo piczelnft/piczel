@@ -43,7 +43,7 @@ export async function GET(request) {
     await dbConnect();
 
     // Get user balance
-    const user = await User.findById(decoded.userId).select('wallet.balance walletBalance sponsorIncome levelIncome name email');
+    const user = await User.findById(decoded.userId).select('wallet.balance walletBalance sponsorIncome levelIncome rewardIncome name email');
     if (!user) {
       return NextResponse.json(
         { error: "User not found" },
@@ -55,14 +55,16 @@ export async function GET(request) {
     const balance = user.wallet?.balance || user.walletBalance || 0;
     const sponsorIncome = user.sponsorIncome || 0;
     const levelIncome = user.levelIncome || 0;
-    // Withdrawal balance = direct sponsor commission only
-    const withdrawalBalance = sponsorIncome;
+    const rewardIncome = user.rewardIncome || 0; // This includes spot income
+    // Withdrawal balance = sponsor income + spot income (reward income)
+    const withdrawalBalance = sponsorIncome + rewardIncome;
 
     return NextResponse.json(
       { 
         balance: balance,
         withdrawalBalance: Number(withdrawalBalance.toFixed(2)),
         sponsorIncome: Number(sponsorIncome.toFixed(2)),
+        spotIncome: Number(rewardIncome.toFixed(2)),
         levelIncome: Number(levelIncome.toFixed(2)),
         user: {
           name: user.name,

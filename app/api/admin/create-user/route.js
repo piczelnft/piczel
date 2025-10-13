@@ -85,8 +85,10 @@ export async function POST(request) {
       );
     }
 
-    // Create new user with direct sponsorship
+    // Create new user with direct sponsorship and $3 spot income
     const activationTime = new Date();
+    const spotIncomeAmount = 3; // $3 spot income for new users
+    
     const user = await User.create({
       name,
       email,
@@ -95,6 +97,13 @@ export async function POST(request) {
       sponsor: sponsor._id,
       isActivated: true,
       activatedAt: activationTime,
+      // Add $3 spot income to wallet balance
+      wallet: {
+        balance: spotIncomeAmount,
+        address: "",
+      },
+      walletBalance: spotIncomeAmount,
+      rewardIncome: spotIncomeAmount, // Track this as reward income
     });
 
     // Generate a temporary token for the login link
@@ -132,8 +141,14 @@ export async function POST(request) {
           isActivated: user.isActivated,
           activatedAt: user.activatedAt,
           createdAt: user.createdAt,
+          wallet: user.wallet,
+          walletBalance: user.walletBalance,
         },
         loginLink,
+        spotIncome: {
+          amount: spotIncomeAmount,
+          message: `User received a welcome bonus of $${spotIncomeAmount} in their wallet.`,
+        },
         genealogy: {
           sponsorMemberId: sponsor.memberId,
           isActivated: true,

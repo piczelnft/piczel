@@ -133,8 +133,6 @@ export default function Sidebar({ isOpen, onClose }) {
       hasDropdown: true,
       dropdownItems: [
         { name: 'User Summary', icon: 'file-text', href: '/profile/summary' },
-        { name: 'Change Password', icon: 'lock', href: '/profile/password' },
-        { name: 'Wallet Address', icon: 'credit-card', href: '/profile/wallet' }
       ]
     },
     // { 

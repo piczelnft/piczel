@@ -69,7 +69,7 @@ export async function POST(request) {
     await dbConnect();
 
     // Get user information (include incomes for withdrawal balance)
-    const user = await User.findById(decoded.userId).select('name email memberId wallet.balance walletBalance sponsorIncome levelIncome');
+    const user = await User.findById(decoded.userId).select('name email memberId wallet.balance walletBalance sponsorIncome levelIncome rewardIncome');
     if (!user) {
       return NextResponse.json(
         { error: "User not found" },
@@ -80,7 +80,8 @@ export async function POST(request) {
     // Compute balances
     const currentBalance = user.wallet?.balance || user.walletBalance || 0;
     const sponsorIncome = user.sponsorIncome || 0;
-    const withdrawalBalance = sponsorIncome; // Only sponsor income is withdrawable
+    const rewardIncome = user.rewardIncome || 0;
+    const withdrawalBalance = sponsorIncome + rewardIncome; // Sponsor income + spot income is withdrawable
 
     // Check minimum withdrawal amount ($5)
     if (amount < 5) {
@@ -90,7 +91,7 @@ export async function POST(request) {
       );
     }
 
-    // Check if user has sufficient withdrawal balance (sponsor income)
+    // Check if user has sufficient withdrawal balance (sponsor income + spot income)
     if (withdrawalBalance < amount) {
       return NextResponse.json(
         { error: "Insufficient withdrawal balance" },
@@ -130,18 +131,30 @@ export async function POST(request) {
     // Save withdrawal to database
     const withdrawal = await Withdrawal.create(withdrawalData);
 
-    // Update user balances (deduct from wallet and sponsorIncome)
-    // Keep wallet and walletBalance consistent; decrease sponsorIncome since only sponsor income is withdrawable
-    await User.findByIdAndUpdate(
-      decoded.userId,
-      { 
-        $inc: { 
-          'wallet.balance': -parseFloat(amount),
-          'walletBalance': -parseFloat(amount),
-          'sponsorIncome': -parseFloat(amount)
-        } 
+    // Update user balances (deduct from wallet, sponsorIncome, and rewardIncome)
+    // Keep wallet and walletBalance consistent; decrease both sponsorIncome and rewardIncome
+    // First deduct from rewardIncome (spot income), then from sponsorIncome if needed
+    const deductionAmount = parseFloat(amount);
+    const updateFields = {
+      $inc: { 
+        'wallet.balance': -deductionAmount,
+        'walletBalance': -deductionAmount
       }
-    );
+    };
+    
+    // Deduct from rewardIncome first (spot income), then sponsorIncome
+    if (rewardIncome >= deductionAmount) {
+      updateFields.$inc.rewardIncome = -deductionAmount;
+    } else if (rewardIncome > 0) {
+      // Deduct remaining amount from sponsorIncome
+      updateFields.$inc.rewardIncome = -rewardIncome;
+      updateFields.$inc.sponsorIncome = -(deductionAmount - rewardIncome);
+    } else {
+      // No rewardIncome, deduct from sponsorIncome
+      updateFields.$inc.sponsorIncome = -deductionAmount;
+    }
+    
+    await User.findByIdAndUpdate(decoded.userId, updateFields);
 
     return NextResponse.json(
       { 

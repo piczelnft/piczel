@@ -132,12 +132,19 @@ export default function SignupPage() {
       );
 
       if (result.success) {
-        setMessage(
-          "Account created successfully! You've been added to the genealogy tree. Redirecting..."
-        );
+        let successMessage = "Account created successfully! You've been added to the genealogy tree.";
+        
+        // Show spot income notification if available
+        if (result.spotIncome) {
+          successMessage += ` ${result.spotIncome.message}`;
+        }
+        
+        successMessage += " Redirecting...";
+        
+        setMessage(successMessage);
         setTimeout(() => {
           router.push("/");
-        }, 2000);
+        }, 3000); // Increased timeout to allow users to read the spot income message
       } else {
         setErrors({ general: result.error || "Something went wrong" });
       }
