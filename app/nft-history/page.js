@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import Image from 'next/image';
 import { useAuth } from '../../contexts/AuthContext';
 
 export default function NftHistory() {
@@ -58,12 +57,6 @@ export default function NftHistory() {
     });
   };
 
-  const getNftImage = (series) => {
-    // Map series to image number (1-10)
-    const seriesNumber = series.replace('Series ', '');
-    const imageNumber = parseInt(seriesNumber) || 1;
-    return `/nft/${Math.min(Math.max(imageNumber, 1), 10)}.jpg`;
-  };
 
   if (!isAuthenticated) {
     return (
@@ -129,17 +122,6 @@ export default function NftHistory() {
             {purchases.map((purchase) => (
               <div key={purchase._id} className="bg-white/10 backdrop-blur-sm rounded-lg p-6 border border-white/20 hover:bg-white/15 transition-all duration-300">
                 <div className="mb-4">
-                  <div className="relative w-full h-48 rounded-lg mb-3 overflow-hidden">
-                    <Image 
-                      src={getNftImage(purchase.series)} 
-                      alt={`NFT ${purchase.series} - ${purchase.code}`}
-                      fill
-                      className="object-cover"
-                      onError={(e) => {
-                        e.target.src = '/nft/1.jpg'; // Fallback image
-                      }}
-                    />
-                  </div>
                   <h3 className="text-xl font-bold text-white mb-1">{purchase.series}</h3>
                   <p className="text-gray-300 text-sm mb-2">Code: {purchase.code}</p>
                 </div>
