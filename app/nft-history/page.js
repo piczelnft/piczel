@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import Image from 'next/image';
 import { useAuth } from '../../contexts/AuthContext';
 
 export default function NftHistory() {
@@ -115,7 +116,7 @@ export default function NftHistory() {
           <div className="text-center py-12">
             <div className="text-8xl mb-4">📦</div>
             <h2 className="text-2xl font-bold text-white mb-4">No NFT Purchases Found</h2>
-            <p className="text-gray-300 mb-6">You haven't purchased any NFTs yet.</p>
+            <p className="text-gray-300 mb-6">You haven&apos;t purchased any NFTs yet.</p>
             <a 
               href="/nft-buy" 
               className="btn-enhanced px-6 py-3 text-white hover-bounce inline-block"
@@ -128,14 +129,17 @@ export default function NftHistory() {
             {purchases.map((purchase) => (
               <div key={purchase._id} className="bg-white/10 backdrop-blur-sm rounded-lg p-6 border border-white/20 hover:bg-white/15 transition-all duration-300">
                 <div className="mb-4">
-                  <img 
-                    src={getNftImage(purchase.series)} 
-                    alt={`NFT ${purchase.series} - ${purchase.code}`}
-                    className="w-full h-48 object-cover rounded-lg mb-3"
-                    onError={(e) => {
-                      e.target.src = '/nft/1.jpg'; // Fallback image
-                    }}
-                  />
+                  <div className="relative w-full h-48 rounded-lg mb-3 overflow-hidden">
+                    <Image 
+                      src={getNftImage(purchase.series)} 
+                      alt={`NFT ${purchase.series} - ${purchase.code}`}
+                      fill
+                      className="object-cover"
+                      onError={(e) => {
+                        e.target.src = '/nft/1.jpg'; // Fallback image
+                      }}
+                    />
+                  </div>
                   <h3 className="text-xl font-bold text-white mb-1">{purchase.series}</h3>
                   <p className="text-gray-300 text-sm mb-2">Code: {purchase.code}</p>
                 </div>
