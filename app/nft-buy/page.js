@@ -100,7 +100,7 @@ export default function NFTBuyPage() {
     const lastTime = new Date(last.purchasedAt).getTime();
     const now = Date.now();
     const diffMs = now - lastTime;
-    return diffMs >= 24 * 60 * 60 * 1000; // 24 hours
+    return diffMs >= 5 * 60 * 1000; // 5 minutes
   };
 
   const getNftStatus = (code) => {
@@ -131,7 +131,7 @@ export default function NFTBuyPage() {
     const status = getNftStatus(code);
     if (!status.available) return;
     try {
-      const message = `Buy ${code}? Next NFT unlocks tomorrow.`;
+      const message = `Buy ${code}? Next NFT unlocks in 5 minutes.`;
       if (!confirm(message)) return;
 
       if (!token) {
@@ -170,7 +170,7 @@ export default function NFTBuyPage() {
         });
       }
       
-      alert(successMessage + `\n\nNext NFT will unlock tomorrow.`);
+      alert(successMessage + `\n\nNext NFT will unlock in 5 minutes.`);
       
       // Refresh dashboard data to update wallet balance display
       setTimeout(() => {
@@ -260,7 +260,7 @@ export default function NFTBuyPage() {
                 NFT Collection
               </h1>
               <p className="text-gray-300 mt-2 text-sm sm:text-base">
-                Buy NFTs in order from A1 to J1. After buying one, the next NFT becomes available the following day.
+                Buy NFTs in order from A1 to J1. After buying one, the next NFT becomes available in 5 minutes.
               </p>
             </div>
             
@@ -319,7 +319,7 @@ export default function NFTBuyPage() {
                 
                 {!available && !owned && (
                   <p className="mt-1 sm:mt-2 text-xs text-center" style={{color:'rgba(255,255,255,0.6)'}}>
-                    Buy previous NFT first and wait 1 day.
+                    Buy previous NFT first and wait 5 minutes.
                   </p>
                 )}
                 {owned && (

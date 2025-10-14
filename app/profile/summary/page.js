@@ -230,20 +230,7 @@ export default function ProfileSummary() {
 
                 {isEditing && (
                   <div className="mt-4">
-                    <label className="block text-sm font-medium text-gray-300 mb-2">
-                      Profile Image
-                    </label>
-                    <input
-                      type="file"
-                      accept="image/*"
-                      onChange={handleImageUpload}
-                      className="block w-full text-sm text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-medium file:text-white file:cursor-pointer cursor-pointer"
-                      style={{
-                        fileBackgroundColor: 'var(--primary-color)',
-                        fileHoverBackgroundColor: 'var(--secondary-color)'
-                      }}
-                    />
-                    <p className="text-xs text-gray-500 mt-1">No file chosen</p>
+                    
                   </div>
                 )}
               </div>

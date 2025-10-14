@@ -333,27 +333,7 @@ export default function Navbar() {
                           </svg>
                           Profile
                         </Link>
-                        <Link
-                          href="/wallet"
-                          className="flex items-center px-4 py-2 text-sm transition-all duration-300 group hover-lift-enhanced"
-                          style={{color: 'rgba(255, 255, 255, 0.8)'}}
-                          onClick={() => setUserMenuOpen(false)}
-                        >
-                          <svg
-                            className="w-4 h-4 mr-3 group-hover:scale-110 transition-transform duration-300"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth={2}
-                              d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"
-                            />
-                          </svg>
-                          Wallet
-                        </Link>
+                        
                         <Link
                           href="/profile/summary"
                           className="flex items-center px-4 py-2 text-sm transition-all duration-300 group hover-lift-enhanced"
