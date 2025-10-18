@@ -155,8 +155,12 @@ export default function Home() {
       communityReward: "0.00"
     },
     totalNftPurchases: 5,
+    totalNftPurchaseAmount: "400.00", // 5 NFTs × $80 = $400
     totalSponsorsIncome: "1250.50",
-    totalWithdrawalAmount: "750.25"
+    totalWithdrawalAmount: "750.25",
+    totalSpotIncome: "850.75",
+    directMembersNftVolume: "160.00", // 2 NFTs × $80 = $160 (example)
+    totalMembersNftVolume: "400.00", // 5 NFTs × $80 = $400 (example)
   };
   return (
     <div className="relative overflow-hidden">
@@ -241,15 +245,6 @@ export default function Home() {
             </div>
           </div>
 
-          {/* Rank */}
-          <div className="p-6 hover-lift-enhanced animate-fadeInUp glow-border-yellow rounded-2xl border" style={{animationDelay: '0.3s', backgroundColor: 'rgba(0, 0, 0, 0.1)', backdropFilter: 'blur(10px)', borderColor: 'var(--default-border)'}}>
-            <div className="text-center relative">
-              <div className="absolute -top-2 -right-2 w-3 h-3 rounded-full animate-pulse" style={{backgroundColor: 'rgb(var(--warning-rgb))'}}></div>
-              <div className="text-sm mb-2 font-medium" style={{color: 'rgba(255, 255, 255, 0.7)'}}>Rank</div>
-              <div className="font-bold text-lg animate-neonGlow" style={{color: 'rgb(var(--warning-rgb))'}}>{data.rank}</div>
-            </div>
-          </div>
-
           {/* Total Team */}
           <div className="p-6 hover-lift-enhanced animate-fadeInUp glow-border-blue rounded-2xl border" style={{animationDelay: '0.4s', backgroundColor: 'rgba(0, 0, 0, 0.1)', backdropFilter: 'blur(10px)', borderColor: 'var(--default-border)'}}>
             <div className="text-center relative">
@@ -286,11 +281,20 @@ export default function Home() {
             </div>
           </div>
 
+          {/* Total NFT Purchase Amount */}
+          <div className="p-6 hover-lift-enhanced animate-fadeInUp glow-border-indigo rounded-2xl border" style={{animationDelay: '0.75s', backgroundColor: 'rgba(0, 0, 0, 0.1)', backdropFilter: 'blur(10px)', borderColor: 'var(--default-border)'}}>
+            <div className="text-center relative">
+              <div className="absolute -top-2 -right-2 w-3 h-3 rounded-full animate-pulse" style={{backgroundColor: 'rgb(99, 102, 241)'}}></div>
+              <div className="text-sm mb-2 font-medium" style={{color: 'rgba(255, 255, 255, 0.7)'}}>Total purchased amount</div>
+              <div className="font-bold text-lg animate-neonGlow" style={{color: 'rgb(99, 102, 241)'}}>${data.totalNftPurchaseAmount || 0}</div>
+            </div>
+          </div>
+
           {/* Total Sponsors Income */}
           <div className="p-6 hover-lift-enhanced animate-fadeInUp glow-border-emerald rounded-2xl border" style={{animationDelay: '0.8s', backgroundColor: 'rgba(0, 0, 0, 0.1)', backdropFilter: 'blur(10px)', borderColor: 'var(--default-border)'}}>
             <div className="text-center relative">
               <div className="absolute -top-2 -right-2 w-3 h-3 rounded-full animate-pulse" style={{backgroundColor: 'rgb(16, 185, 129)'}}></div>
-              <div className="text-sm mb-2 font-medium" style={{color: 'rgba(255, 255, 255, 0.7)'}}>Total Sponsors Income</div>
+              <div className="text-sm mb-2 font-medium" style={{color: 'rgba(255, 255, 255, 0.7)'}}>Total Level Income</div>
               <div className="font-bold text-lg animate-neonGlow" style={{color: 'rgb(16, 185, 129)'}}>${data.totalSponsorsIncome || 0}</div>
             </div>
           </div>
@@ -304,12 +308,21 @@ export default function Home() {
             </div>
           </div>
 
+          {/* Total Spot Income */}
+          <div className="p-6 hover-lift-enhanced animate-fadeInUp glow-border-violet rounded-2xl border" style={{animationDelay: '1.0s', backgroundColor: 'rgba(0, 0, 0, 0.1)', backdropFilter: 'blur(10px)', borderColor: 'var(--default-border)'}}>
+            <div className="text-center relative">
+              <div className="absolute -top-2 -right-2 w-3 h-3 rounded-full animate-pulse" style={{backgroundColor: 'rgb(139, 69, 19)'}}></div>
+              <div className="text-sm mb-2 font-medium" style={{color: 'rgba(255, 255, 255, 0.7)'}}>Total Spot Income</div>
+              <div className="font-bold text-lg animate-neonGlow" style={{color: 'rgb(139, 69, 19)'}}>${data.totalSpotIncome || 0}</div>
+            </div>
+          </div>
+
           {/* Direct Members Volume */}
           <div className="p-6 hover-lift-enhanced animate-fadeInUp glow-border-teal rounded-2xl border" style={{animationDelay: '1.1s', backgroundColor: 'rgba(0, 0, 0, 0.1)', backdropFilter: 'blur(10px)', borderColor: 'var(--default-border)'}}>
             <div className="text-center relative">
               <div className="absolute -top-2 -right-2 w-3 h-3 rounded-full animate-pulse" style={{backgroundColor: 'rgb(20, 184, 166)'}}></div>
-              <div className="text-sm mb-2 font-medium" style={{color: 'rgba(255, 255, 255, 0.7)'}}>Direct Members Volume</div>
-              <div className="font-bold text-lg animate-neonGlow" style={{color: 'rgb(20, 184, 166)'}}>${data.memberVolumes?.directMembersVolume || 0}</div>
+              <div className="text-sm mb-2 font-medium" style={{color: 'rgba(255, 255, 255, 0.7)'}}>Direct Members NFT Volume</div>
+              <div className="font-bold text-lg animate-neonGlow" style={{color: 'rgb(20, 184, 166)'}}>${data.directMembersNftVolume || data.memberVolumes?.directMembersVolume || 0}</div>
             </div>
           </div>
 
@@ -317,8 +330,8 @@ export default function Home() {
           <div className="p-6 hover-lift-enhanced animate-fadeInUp glow-border-rose rounded-2xl border" style={{animationDelay: '1.2s', backgroundColor: 'rgba(0, 0, 0, 0.1)', backdropFilter: 'blur(10px)', borderColor: 'var(--default-border)'}}>
             <div className="text-center relative">
               <div className="absolute -top-2 -right-2 w-3 h-3 rounded-full animate-pulse" style={{backgroundColor: 'rgb(244, 63, 94)'}}></div>
-              <div className="text-sm mb-2 font-medium" style={{color: 'rgba(255, 255, 255, 0.7)'}}>Total Members Volume</div>
-              <div className="font-bold text-lg animate-neonGlow" style={{color: 'rgb(244, 63, 94)'}}>${data.memberVolumes?.totalMembersVolume || 0}</div>
+              <div className="text-sm mb-2 font-medium" style={{color: 'rgba(255, 255, 255, 0.7)'}}>Total Members NFT Volume</div>
+              <div className="font-bold text-lg animate-neonGlow" style={{color: 'rgb(244, 63, 94)'}}>${data.totalMembersNftVolume || data.memberVolumes?.totalMembersVolume || 0}</div>
             </div>
           </div>
 
@@ -349,6 +362,70 @@ export default function Home() {
 </button>
 
             </Link>
+          </div>
+        </div>
+
+        {/* Referral Links Section */}
+        <div className="mt-10">
+          <h2 className="text-xl font-semibold mb-4 text-white">Referral Link</h2>
+          <p className="text-sm mb-6" style={{color:'rgba(255,255,255,0.7)'}}>
+            Share your referral link to invite new members. When they sign up using your link, you&apos;ll be their sponsor.
+          </p>
+          
+          <div className="max-w-2xl mx-auto">
+            {/* Single Referral Link */}
+            <div className="p-6 rounded-2xl border hover-lift-enhanced" style={{backgroundColor: 'rgba(0,0,0,0.1)', backdropFilter: 'blur(10px)', borderColor: 'var(--default-border)'}}>
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-semibold text-white">Your Referral Link</h3>
+                <span className="px-3 py-1 rounded-full text-xs font-medium" style={{backgroundColor: 'rgba(34,197,94,0.15)', color: 'rgb(34,197,94)', border: '1px solid rgba(34,197,94,0.3)'}}>
+                  Active
+                </span>
+              </div>
+              
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium mb-2" style={{color: 'rgba(255,255,255,0.7)'}}>
+                    Referral Link:
+                  </label>
+                  <div className="flex items-center space-x-2">
+                    <input
+                      type="text"
+                      value={`https://www.piczelnft.com/signup?sponsor=${data.memberId}`}
+                      readOnly
+                      className="flex-1 px-3 py-2 rounded-lg text-sm bg-gray-800 border text-white"
+                      style={{borderColor: 'var(--default-border)'}}
+                    />
+                    <button
+                      onClick={() => {
+                        const link = `https://www.piczelnft.com/signup?sponsor=${data.memberId}`;
+                        navigator.clipboard.writeText(link);
+                        alert('Referral link copied to clipboard!');
+                      }}
+                      className="px-4 py-2 rounded-lg text-sm font-medium text-white transition-all duration-200 hover:scale-105"
+                      style={{backgroundColor: 'rgba(59,130,246,0.8)', border: '1px solid rgba(59,130,246,0.3)'}}
+                    >
+                      Copy
+                    </button>
+                  </div>
+                </div>
+                
+                <div className="flex items-center justify-between text-sm">
+                  <span style={{color: 'rgba(255,255,255,0.6)'}}>Your Member ID:</span>
+                  <span className="font-semibold text-white">{data.memberId}</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Referral Instructions */}
+            <div className="mt-6 p-4 rounded-xl border" style={{backgroundColor: 'rgba(59,130,246,0.1)', borderColor: 'rgba(59,130,246,0.3)'}}>
+              <h4 className="text-sm font-semibold text-white mb-2">How to use your referral link:</h4>
+              <ul className="text-sm space-y-1" style={{color: 'rgba(255,255,255,0.8)'}}>
+                <li>• Copy your referral link and share it with potential new members</li>
+                <li>• When someone clicks your link and signs up, you become their sponsor</li>
+                <li>• You&apos;ll earn commissions from their NFT purchases and activities</li>
+                <li>• The sponsor ID will be automatically filled in the signup form</li>
+              </ul>
+            </div>
           </div>
         </div>
       </div>

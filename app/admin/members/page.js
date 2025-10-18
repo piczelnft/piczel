@@ -1,10 +1,12 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
+import { useRouter } from "next/navigation";
 import Image from "next/image";
 import AdminLayout from "../components/AdminLayout";
 
 export default function MemberManagement() {
+  const router = useRouter();
   const [members, setMembers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -110,6 +112,16 @@ export default function MemberManagement() {
       setError(err.message);
       alert(`Error deleting member: ${err.message}`);
     }
+  };
+
+  const handleRowClick = (memberId, event) => {
+    // Prevent navigation if clicking on the delete button
+    if (event.target.closest('button')) {
+      return;
+    }
+    
+    // Navigate to member detail page
+    router.push(`/admin/members/${memberId}`);
   };
 
   const formatCurrency = (amount) => {
@@ -243,7 +255,7 @@ export default function MemberManagement() {
               <h2 className="text-xl font-semibold text-gray-900">
                 Member Details
               </h2>
-              <p className="text-sm text-gray-600">Members Details</p>
+              <p className="text-sm text-gray-600">Click on any row to view member details</p>
             </div>
             <div className="flex items-center space-x-4">
               <select
@@ -318,7 +330,11 @@ export default function MemberManagement() {
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
               {members.map((member) => (
-                <tr key={member.memberId} className="hover:bg-gray-50">
+                <tr 
+                  key={member.memberId} 
+                  className="hover:bg-gray-50 cursor-pointer transition-colors"
+                  onClick={(e) => handleRowClick(member.memberId, e)}
+                >
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                     {member.sNo}
                   </td>
@@ -365,8 +381,11 @@ export default function MemberManagement() {
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                     <button
-                      onClick={() => handleDeleteMember(member.memberId)}
-                      className="text-red-600 hover:text-red-900"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleDeleteMember(member.memberId);
+                      }}
+                      className="text-red-600 hover:text-red-900 transition-colors"
                     >
                       Delete
                     </button>

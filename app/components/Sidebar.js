@@ -2,10 +2,12 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import { useAuth } from '@/contexts/AuthContext';
 
 export default function Sidebar({ isOpen, onClose }) {
   const [activeItem, setActiveItem] = useState('Dashboard');
   const [expandedItems, setExpandedItems] = useState({});
+  const { logout } = useAuth();
 
   // Function to render SVG icons
   const renderIcon = (iconName, className = "w-5 h-5") => {
@@ -116,6 +118,16 @@ export default function Sidebar({ isOpen, onClose }) {
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 13l-5 5m0 0l-5-5m5 5V6" />
         </svg>
       ),
+      'shopping-bag': (
+  <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      strokeWidth={2}
+      d="M16 11V7a4 4 0 10-8 0v4M5 8h14a2 2 0 012 2v10a2 2 0 01-2 2H5a2 2 0 01-2-2V10a2 2 0 012-2z"
+    />
+  </svg>
+),
       'clock': (
         <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -126,13 +138,14 @@ export default function Sidebar({ isOpen, onClose }) {
   };
 
   const menuItems = [
-    { name: 'Dashboard', icon: 'home', href: '/' },
+    { name: 'Dashboard Section', icon: 'home', href: '/' },
     { 
       name: 'Profile', 
       icon: 'user',
       hasDropdown: true,
       dropdownItems: [
         { name: 'User Summary', icon: 'file-text', href: '/profile/summary' },
+        { name: 'Profile Settings', icon: 'file-text', href: '/profile' },
       ]
     },
     // { 
@@ -209,13 +222,16 @@ export default function Sidebar({ isOpen, onClose }) {
         { name: 'Create New Ticket', icon: 'ticket', href: '/support/create' },
       ]
     },
-    // { name: 'Logout', icon: 'log-out', isLogout: true }
+     { name: 'Logout', icon: 'log-out', isLogout: true }
   ];
 
   const handleItemClick = (itemName, hasDropdown = false, isLogout = false) => {
     if (isLogout) {
-      // Handle logout logic here
+      // Handle logout logic with confirmation
       console.log('Logout clicked');
+      if (window.confirm('Are you sure you want to logout?')) {
+        logout(); // Use the logout function from AuthContext
+      }
       return;
     }
     
@@ -267,9 +283,12 @@ export default function Sidebar({ isOpen, onClose }) {
                       ? 'glass-card border shadow-lg glow-border'
                       : 'hover:glass-card hover:border hover-glow'
                   }`}
-                  style={{borderColor: 'var(--default-border)'}}
+                  style={{
+                    borderColor: 'var(--default-border)',
+                    backgroundColor: activeItem === item.name ? 'rgba(239, 68, 68, 0.1)' : 'transparent'
+                  }}
                 >
-                  <div className={`text-white transition-transform duration-300 group-hover:scale-110 ${
+                  <div className={`text-red-400 transition-transform duration-300 group-hover:scale-110 ${
                     activeItem === item.name ? 'animate-pulse' : ''
                   }`}>
                     {renderIcon(item.icon, "w-5 h-5")}
@@ -277,9 +296,9 @@ export default function Sidebar({ isOpen, onClose }) {
                   {item.name !== 'Dashboard' && (
                     <span className={`font-medium transition-colors duration-300 ${
                       activeItem === item.name 
-                        ? 'text-white gradient-text-neon' 
-                        : 'text-white group-hover:text-white'
-                    }`} style={{color: activeItem === item.name ? 'var(--primary-color)' : 'rgba(255, 255, 255, 0.8)'}}>
+                        ? 'text-red-400 gradient-text-neon' 
+                        : 'text-red-400 group-hover:text-red-300'
+                    }`}>
                       {item.name}
                     </span>
                   )}

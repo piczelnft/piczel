@@ -66,9 +66,9 @@ export async function POST(request) {
       );
     }
 
-    // Create new user with direct sponsorship and $3 spot income
+    // Create new user with direct sponsorship
     const activationTime = new Date();
-    const spotIncomeAmount = 3; // $3 spot income for new users
+    const spotIncomeAmount = 3; // $3 spot income for sponsor when new user signs up
     
     const user = await User.create({
       name,
@@ -78,13 +78,22 @@ export async function POST(request) {
       sponsor: sponsor._id,
       isActivated: true,
       activatedAt: activationTime,
-      // Add $3 spot income to wallet balance
+      // New user starts with $0 balance
       wallet: {
-        balance: spotIncomeAmount,
+        balance: 0,
         address: "",
       },
-      walletBalance: spotIncomeAmount,
-      rewardIncome: spotIncomeAmount, // Track this as reward income
+      walletBalance: 0,
+      rewardIncome: 0,
+    });
+
+    // Give $3 spot income to the sponsor
+    await User.findByIdAndUpdate(sponsor._id, {
+      $inc: {
+        'wallet.balance': spotIncomeAmount,
+        'walletBalance': spotIncomeAmount,
+        'rewardIncome': spotIncomeAmount
+      }
     });
 
     // Generate JWT token
@@ -102,7 +111,7 @@ export async function POST(request) {
         token,
         spotIncome: {
           amount: spotIncomeAmount,
-          message: `Congratulations! You received a welcome bonus of $${spotIncomeAmount} in your wallet.`,
+          message: `Welcome! Your sponsor (${sponsor.memberId}) received $${spotIncomeAmount} as spot income for your registration.`,
         },
         genealogy: {
           sponsorMemberId: sponsor.memberId,

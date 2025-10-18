@@ -109,6 +109,82 @@ export default function ProfilePage() {
               </div>
             </div>
 
+            {/* ----------------- REFERRAL LINK SECTION ----------------- */}
+            <div className="mt-10 mb-10">
+              <div className="max-w-2xl mx-auto">
+                {/* Single Referral Link */}
+                <div
+                  className="p-6 rounded-2xl border hover-lift-enhanced"
+                  style={{
+                    backgroundColor: "rgba(0,0,0,0.1)",
+                    backdropFilter: "blur(10px)",
+                    borderColor: "var(--default-border)",
+                  }}
+                >
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className="text-lg font-semibold text-white">
+                      Your Referral Link
+                    </h3>
+                    <span
+                      className="px-3 py-1 rounded-full text-xs font-medium"
+                      style={{
+                        backgroundColor: "rgba(34,197,94,0.15)",
+                        color: "rgb(34,197,94)",
+                        border: "1px solid rgba(34,197,94,0.3)",
+                      }}
+                    >
+                      Active
+                    </span>
+                  </div>
+
+                  <div className="space-y-4">
+                    <div>
+                      <label
+                        className="block text-sm font-medium mb-2"
+                        style={{ color: "rgba(255,255,255,0.7)" }}
+                      >
+                        Referral Link:
+                      </label>
+                      <div className="flex items-center space-x-2">
+                        <input
+                          type="text"
+                          value={`https://www.piczelnft.com/signup?sponsor=${user?.memberId || "PIC123456"}`}
+                          readOnly
+                          className="flex-1 px-3 py-2 rounded-lg text-sm bg-gray-800 border text-white"
+                          style={{ borderColor: "var(--default-border)" }}
+                        />
+                        <button
+                          onClick={() => {
+                            const link = `https://www.piczelnft.com/signup?sponsor=${user?.memberId || "PIC123456"}`;
+                            navigator.clipboard.writeText(link);
+                            alert("Referral link copied to clipboard!");
+                          }}
+                          className="px-4 py-2 rounded-lg text-sm font-medium text-white transition-all duration-200 hover:scale-105"
+                          style={{
+                            backgroundColor: "rgba(59,130,246,0.8)",
+                            border: "1px solid rgba(59,130,246,0.3)",
+                          }}
+                        >
+                          Copy
+                        </button>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center justify-between text-sm">
+                      <span style={{ color: "rgba(255,255,255,0.6)" }}>
+                        Your Member ID:
+                      </span>
+                      <span className="font-semibold text-white">
+                        {user?.memberId || "PIC123456"}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            
+
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8">
               {/* Personal Information */}
               <div className="space-y-4 sm:space-y-6">
@@ -259,7 +335,7 @@ export default function ProfilePage() {
                   Account Summary
                 </h2>
 
-                <div className="rounded-lg p-4 sm:p-6" style={{background: 'linear-gradient(to bottom right, rgba(0, 255, 190, 0.2), rgba(0, 227, 210, 0.2))', border: '1px solid rgba(0, 255, 190, 0.3)'}}>
+                {/* <div className="rounded-lg p-4 sm:p-6" style={{background: 'linear-gradient(to bottom right, rgba(0, 255, 190, 0.2), rgba(0, 227, 210, 0.2))', border: '1px solid rgba(0, 255, 190, 0.3)'}}>
                   <h3 className="text-base sm:text-lg font-medium text-white mb-3 sm:mb-4">
                     Wallet Balance
                   </h3>
@@ -269,7 +345,7 @@ export default function ProfilePage() {
                   <p className="text-gray-300 text-xs sm:text-sm mt-2">
                     Available Balance
                   </p>
-                </div>
+                </div> */}
 
                 <div className="rounded-lg p-4 sm:p-6" style={{background: 'linear-gradient(to bottom right, rgba(29, 68, 67, 0.2), rgba(0, 227, 210, 0.2))', border: '1px solid rgba(255, 255, 255, 0.1)'}}>
                   <h3 className="text-base sm:text-lg font-medium text-white mb-3 sm:mb-4">

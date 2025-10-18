@@ -80,7 +80,12 @@ export async function GET() {
           referralLinks: {
             clubA: `http://piczelite.com/member/register/DGT123456/ClubA`,
             clubB: `http://piczelite.com/member/register/DGT123456/ClubB`
-          }
+          },
+          totalNftPurchases: 5,
+          totalNftPurchaseAmount: "400.00", // 5 NFTs × $80 = $400
+          totalSpotIncome: "850.75",
+          directMembersNftVolume: "160.00", // 2 NFTs × $80 = $160 (example)
+          totalMembersNftVolume: "400.00", // 5 NFTs × $80 = $400 (example)
         };
         
         return NextResponse.json(
@@ -137,12 +142,16 @@ export async function GET() {
           communityReward: "0.00"
         },
         totalNftPurchases: 5,
+        totalNftPurchaseAmount: "400.00", // 5 NFTs × $80 = $400
         totalSponsorsIncome: "1250.50",
         totalWithdrawalAmount: "750.25",
+        totalSpotIncome: "850.75",
+        directMembersNftVolume: "160.00", // 2 NFTs × $80 = $160 (example)
+        totalMembersNftVolume: "400.00", // 5 NFTs × $80 = $400 (example)
         memberVolumes: {
           sponsoredMembersVolume: "2500.00",
-          directMembersVolume: "1500.00",
-          totalMembersVolume: "4000.00"
+          directMembersVolume: "1250.50",
+          totalMembersVolume: "3850.25"
         }
         };
         
@@ -177,8 +186,10 @@ export async function GET() {
       });
 
       // Calculate wallet balance (convert to number for consistency)
-      // Use same logic as wallet balance API for consistency
-      const walletBalance = user.wallet?.balance || user.walletBalance || 0;
+      // Total balance = sponsor income + spot income (reward income)
+      const sponsorIncome = user.sponsorIncome || 0;
+      const rewardIncome = user.rewardIncome || 0; // This includes spot income
+      const walletBalance = sponsorIncome + rewardIncome;
 
       // Get club statistics (Club A and Club B teams) with error handling
       let clubAStats = { count: 0, business: 0 };
@@ -241,12 +252,16 @@ export async function GET() {
           communityReward: incomeStats.communityReward
         },
         totalNftPurchases: await calculateTotalNftPurchases(userId),
+        totalNftPurchaseAmount: await calculateTotalNftPurchaseAmount(userId),
         totalSponsorsIncome: await calculateTotalSponsorsIncome(userId),
         totalWithdrawalAmount: await calculateTotalWithdrawalAmount(userId),
+        totalSpotIncome: (user.rewardIncome || 0).toFixed(2),
+        directMembersNftVolume: await calculateDirectMembersNftVolume(userId),
+        totalMembersNftVolume: await calculateTotalMembersNftVolume(userId),
         memberVolumes: {
           sponsoredMembersVolume: user.sponsoredMembersVolume || 0,
-          directMembersVolume: user.directMembersVolume || 0,
-          totalMembersVolume: user.totalMembersVolume || 0
+          directMembersVolume: await calculateDirectMembersNftVolume(userId),
+          totalMembersVolume: await calculateTotalMembersNftVolume(userId)
         }
       };
 
@@ -402,6 +417,25 @@ async function calculateTotalNftPurchases(userId) {
   }
 }
 
+// Helper function to calculate total NFT purchase amount
+async function calculateTotalNftPurchaseAmount(userId) {
+  try {
+    // Import NftPurchase model
+    const NftPurchase = (await import("@/models/NftPurchase")).default;
+    const purchases = await NftPurchase.find({ userId }).select('price');
+    
+    // Each NFT purchase: $100 investment, $80 net after 20% commission
+    // This shows the net amount received after sponsor commissions
+    const netAmountPerNft = 80; // $100 - $20 commission = $80
+    const totalAmount = purchases.length * netAmountPerNft;
+    
+    return totalAmount.toFixed(2);
+  } catch (error) {
+    console.error("Error calculating total NFT purchase amount:", error);
+    return "0.00";
+  }
+}
+
 // Helper function to calculate total sponsors income
 async function calculateTotalSponsorsIncome(userId) {
   try {
@@ -424,6 +458,79 @@ async function calculateTotalWithdrawalAmount(userId) {
     return total.toFixed(2);
   } catch (error) {
     console.error("Error calculating total withdrawal amount:", error);
+    return "0.00";
+  }
+}
+
+// Helper function to calculate direct members NFT volume
+async function calculateDirectMembersNftVolume(userId) {
+  try {
+    // Import NftPurchase model
+    const NftPurchase = (await import("@/models/NftPurchase")).default;
+    
+    // Get direct members (users with this user as sponsor)
+    const directMembers = await User.find({ sponsor: userId }).select("_id");
+    const directMemberIds = directMembers.map(member => member._id);
+    
+    console.log(`Direct members found: ${directMemberIds.length} for user ${userId}`);
+    
+    // If no direct members, return 0
+    if (directMemberIds.length === 0) {
+      console.log("No direct members found, returning 0.00");
+      return "0.00";
+    }
+    
+    // Calculate total NFT purchase amount from direct members
+    // Each NFT purchase represents $80 net amount (after 20% commission)
+    const directMembersPurchases = await NftPurchase.find({ 
+      userId: { $in: directMemberIds } 
+    });
+    
+    console.log(`NFT purchases found for direct members: ${directMembersPurchases.length}`);
+    
+    // Calculate total amount: number of purchases × $80 per NFT
+    const totalVolume = directMembersPurchases.length * 80;
+    
+    console.log(`Total direct members NFT volume: ${totalVolume}`);
+    return totalVolume.toFixed(2);
+  } catch (error) {
+    console.error("Error calculating direct members NFT volume:", error);
+    return "0.00";
+  }
+}
+
+// Helper function to calculate total members NFT volume (all team members, excluding user)
+async function calculateTotalMembersNftVolume(userId) {
+  try {
+    // Import NftPurchase model
+    const NftPurchase = (await import("@/models/NftPurchase")).default;
+    
+    // Get all descendant IDs (all team members, not including user themselves)
+    const allDescendants = await getDescendantIds(userId);
+    
+    console.log(`Total descendants found: ${allDescendants.length} for user ${userId}`);
+    
+    // If no team members, return 0
+    if (allDescendants.length === 0) {
+      console.log("No descendants found, returning 0.00");
+      return "0.00";
+    }
+    
+    // Calculate total NFT purchase amount from all team members
+    // Each NFT purchase represents $80 net amount (after 20% commission)
+    const allMembersPurchases = await NftPurchase.find({ 
+      userId: { $in: allDescendants } 
+    });
+    
+    console.log(`NFT purchases found for all members: ${allMembersPurchases.length}`);
+    
+    // Calculate total amount: number of purchases × $80 per NFT
+    const totalVolume = allMembersPurchases.length * 80;
+    
+    console.log(`Total members NFT volume: ${totalVolume}`);
+    return totalVolume.toFixed(2);
+  } catch (error) {
+    console.error("Error calculating total members NFT volume:", error);
     return "0.00";
   }
 }

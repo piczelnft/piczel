@@ -1,22 +1,55 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 
 const WalletMainPage = () => {
-  const { user } = useAuth();
+  const { user, token } = useAuth();
+  const [walletData, setWalletData] = useState({
+    balance: 0,
+    withdrawalBalance: 0,
+    sponsorIncome: 0,
+    spotIncome: 0,
+    totalIncome: 0,
+    totalWithdrawal: 0,
+    todaysWithdrawal: 0,
+  });
   const [withdrawalForm, setWithdrawalForm] = useState({
     usdtAmount: "",
     usdgAmount: "",
     transactionPassword: "",
   });
 
-  const walletData = {
-    balance: `$${(user?.wallet?.balance || 0).toFixed(2)}`,
-    totalIncome: "$0.00", // This would need to be calculated from transaction history
-    totalWithdrawal: "$0.00", // This would need to be calculated from withdrawal history
-    todaysWithdrawal: "$0.00", // This would need to be calculated from today's withdrawals
-  };
+  // Fetch wallet data
+  useEffect(() => {
+    const fetchWalletData = async () => {
+      if (!token) return;
+
+      try {
+        const balanceResponse = await fetch('/api/wallet/balance', {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+          },
+        });
+        
+        if (balanceResponse.ok) {
+          const balanceData = await balanceResponse.json();
+          setWalletData(prev => ({
+            ...prev,
+            balance: balanceData.balance || 0,
+            withdrawalBalance: balanceData.withdrawalBalance || 0,
+            sponsorIncome: balanceData.sponsorIncome || 0,
+            spotIncome: balanceData.spotIncome || 0,
+            totalIncome: (balanceData.sponsorIncome || 0) + (balanceData.spotIncome || 0),
+          }));
+        }
+      } catch (error) {
+        console.error('Error fetching wallet data:', error);
+      }
+    };
+
+    fetchWalletData();
+  }, [token]);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -78,7 +111,7 @@ const WalletMainPage = () => {
                   PICZEL Wallet Balance
                 </div>
                 <div className="text-white font-bold text-2xl">
-                  {walletData.balance}
+                  ${walletData.balance.toFixed(2)}
                 </div>
               </div>
             </div>
@@ -103,7 +136,7 @@ const WalletMainPage = () => {
                   className="font-bold text-2xl"
                   style={{ color: "rgb(var(--success-rgb))" }}
                 >
-                  {walletData.totalIncome}
+                  ${walletData.totalIncome.toFixed(2)}
                 </div>
               </div>
             </div>
@@ -128,7 +161,7 @@ const WalletMainPage = () => {
                   className="font-bold text-2xl"
                   style={{ color: "rgb(var(--danger-rgb))" }}
                 >
-                  {walletData.totalWithdrawal}
+                  ${walletData.totalWithdrawal.toFixed(2)}
                 </div>
               </div>
             </div>
@@ -153,7 +186,7 @@ const WalletMainPage = () => {
                   className="font-bold text-2xl"
                   style={{ color: "rgb(var(--warning-rgb))" }}
                 >
-                  {walletData.todaysWithdrawal}
+                  ${walletData.todaysWithdrawal.toFixed(2)}
                 </div>
               </div>
             </div>

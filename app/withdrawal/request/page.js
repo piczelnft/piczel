@@ -8,6 +8,7 @@ export default function WithdrawalRequestPage() {
     amount: "",
     walletAddress: "",
     paymentMethod: "crypto",
+    withdrawalType: "spot", // "spot" or "level"
     notes: ""
   });
   const [errors, setErrors] = useState({});
@@ -19,6 +20,11 @@ export default function WithdrawalRequestPage() {
   const [spotIncome, setSpotIncome] = useState(0);
   const [walletAddresses, setWalletAddresses] = useState([]);
   const { token, user } = useAuth();
+
+  // Calculate available balance based on withdrawal type
+  const getAvailableBalance = () => {
+    return formData.withdrawalType === "spot" ? spotIncome : sponsorIncome;
+  };
 
   // Fetch user balance and wallet addresses
   useEffect(() => {
@@ -77,11 +83,12 @@ export default function WithdrawalRequestPage() {
 
   const validateForm = () => {
     const newErrors = {};
+    const availableBalance = getAvailableBalance();
 
     if (!formData.amount || parseFloat(formData.amount) <= 0) {
       newErrors.amount = "Please enter a valid amount";
-    } else if (parseFloat(formData.amount) > withdrawalBalance) {
-      newErrors.amount = "Insufficient withdrawal balance";
+    } else if (parseFloat(formData.amount) > availableBalance) {
+      newErrors.amount = `Insufficient ${formData.withdrawalType === "spot" ? "spot income" : "level income"} balance`;
     } else if (parseFloat(formData.amount) < 5) {
       newErrors.amount = "Minimum withdrawal amount is $5";
     }
@@ -94,6 +101,10 @@ export default function WithdrawalRequestPage() {
 
     if (!formData.paymentMethod) {
       newErrors.paymentMethod = "Payment method is required";
+    }
+
+    if (!formData.withdrawalType) {
+      newErrors.withdrawalType = "Please select withdrawal type";
     }
 
     return newErrors;
@@ -123,6 +134,7 @@ export default function WithdrawalRequestPage() {
           amount: parseFloat(formData.amount),
           walletAddress: formData.walletAddress,
           paymentMethod: formData.paymentMethod,
+          withdrawalType: formData.withdrawalType,
           notes: formData.notes
         }),
       });
@@ -134,10 +146,19 @@ export default function WithdrawalRequestPage() {
           amount: "",
           walletAddress: "",
           paymentMethod: "crypto",
+          withdrawalType: "spot",
           notes: ""
         });
-        // Update balance
-        setUserBalance(prev => prev - parseFloat(formData.amount));
+        // Update balances based on withdrawal type
+        const withdrawalAmount = parseFloat(formData.amount);
+        setUserBalance(prev => prev - withdrawalAmount);
+        setWithdrawalBalance(prev => prev - withdrawalAmount);
+        
+        if (formData.withdrawalType === "spot") {
+          setSpotIncome(prev => prev - withdrawalAmount);
+        } else {
+          setSponsorIncome(prev => prev - withdrawalAmount);
+        }
       } else {
         const errorData = await response.json();
         setErrors({ general: errorData.error || "Failed to submit withdrawal request" });
@@ -151,7 +172,8 @@ export default function WithdrawalRequestPage() {
   };
 
   const handleQuickAmount = (percentage) => {
-    const amount = (userBalance * percentage / 100).toFixed(2);
+    const availableBalance = getAvailableBalance();
+    const amount = (availableBalance * percentage / 100).toFixed(2);
     setFormData(prev => ({ ...prev, amount }));
     if (errors.amount) {
       setErrors(prev => ({ ...prev, amount: "" }));
@@ -261,8 +283,8 @@ export default function WithdrawalRequestPage() {
                     name="amount"
                     type="number"
                     step="0.01"
-                    min="10"
-                  max={withdrawalBalance}
+                    min="5"
+                    max={getAvailableBalance()}
                     required
                     value={formData.amount}
                     onChange={handleChange}
@@ -273,7 +295,7 @@ export default function WithdrawalRequestPage() {
                       color: 'rgb(var(--default-text-color-rgb))',
                       focusRingColor: 'var(--primary-color)'
                     }}
-                    placeholder="Enter amount"
+                    placeholder={`Enter amount (max: $${getAvailableBalance().toFixed(2)})`}
                   />
                   <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                     <span className="text-gray-400 text-sm">$</span>
@@ -340,11 +362,74 @@ export default function WithdrawalRequestPage() {
                   }}
                 >
                   <option value="crypto">Cryptocurrency</option>
-                  <option value="bank">Bank Transfer</option>
-                  <option value="paypal">PayPal</option>
                 </select>
                 {errors.paymentMethod && (
                   <p className="mt-1 text-sm" style={{color: 'rgb(var(--danger-rgb))'}}>{errors.paymentMethod}</p>
+                )}
+              </div>
+
+              {/* Withdrawal Type */}
+              <div>
+                <label className="block text-sm font-medium mb-3" style={{color: 'rgba(255, 255, 255, 0.8)'}}>
+                  Withdrawal Type
+                </label>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  {/* Spot Income Option */}
+                  <div 
+                    className={`relative p-4 rounded-lg border-2 cursor-pointer transition-all duration-200 ${
+                      formData.withdrawalType === 'spot' 
+                        ? 'border-purple-400 bg-purple-400/10' 
+                        : 'border-gray-600 bg-gray-800/50 hover:border-gray-500'
+                    }`}
+                    onClick={() => setFormData(prev => ({ ...prev, withdrawalType: 'spot', amount: '' }))}
+                  >
+                    <div className="flex items-center space-x-3">
+                      <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center ${
+                        formData.withdrawalType === 'spot' 
+                          ? 'border-purple-400 bg-purple-400' 
+                          : 'border-gray-400'
+                      }`}>
+                        {formData.withdrawalType === 'spot' && (
+                          <div className="w-2 h-2 rounded-full bg-white"></div>
+                        )}
+                      </div>
+                      <div>
+                        <h3 className="text-white font-semibold text-sm">Spot Income</h3>
+                        <p className="text-purple-400 font-bold text-lg">${spotIncome.toFixed(2)}</p>
+                        <p className="text-gray-400 text-xs">Available for withdrawal</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Level Income Option */}
+                  <div 
+                    className={`relative p-4 rounded-lg border-2 cursor-pointer transition-all duration-200 ${
+                      formData.withdrawalType === 'level' 
+                        ? 'border-blue-400 bg-blue-400/10' 
+                        : 'border-gray-600 bg-gray-800/50 hover:border-gray-500'
+                    }`}
+                    onClick={() => setFormData(prev => ({ ...prev, withdrawalType: 'level', amount: '' }))}
+                  >
+                    <div className="flex items-center space-x-3">
+                      <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center ${
+                        formData.withdrawalType === 'level' 
+                          ? 'border-blue-400 bg-blue-400' 
+                          : 'border-gray-400'
+                      }`}>
+                        {formData.withdrawalType === 'level' && (
+                          <div className="w-2 h-2 rounded-full bg-white"></div>
+                        )}
+                      </div>
+                      <div>
+                        <h3 className="text-white font-semibold text-sm">Level Income</h3>
+                        <p className="text-blue-400 font-bold text-lg">${sponsorIncome.toFixed(2)}</p>
+                        <p className="text-gray-400 text-xs">Available for withdrawal</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                {errors.withdrawalType && (
+                  <p className="mt-2 text-sm" style={{color: 'rgb(var(--danger-rgb))'}}>{errors.withdrawalType}</p>
                 )}
               </div>
 
@@ -400,7 +485,7 @@ export default function WithdrawalRequestPage() {
               <div>
                 <button
                   type="submit"
-                  disabled={isLoading || userBalance < 10}
+                  disabled={isLoading || getAvailableBalance() < 5}
                   className="btn-enhanced w-full flex justify-center py-2 sm:py-3 px-4 rounded-lg text-sm font-medium text-white transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {isLoading ? (
@@ -418,6 +503,9 @@ export default function WithdrawalRequestPage() {
               <div className="text-center">
                 <p className="text-xs sm:text-sm" style={{color: 'rgba(255, 255, 255, 0.6)'}}>
                   Minimum withdrawal: $5 | Processing time: 24-48 hours | Only 1 withdrawal per day
+                </p>
+                <p className="text-xs mt-1" style={{color: 'rgba(255, 255, 255, 0.5)'}}>
+                  Select withdrawal type to withdraw from Spot Income or Level Income
                 </p>
               </div>
             </form>

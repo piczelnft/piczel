@@ -33,6 +33,11 @@ const WithdrawalSchema = new mongoose.Schema({
     required: true,
     enum: ['crypto', 'bank', 'paypal']
   },
+  withdrawalType: {
+    type: String,
+    required: true,
+    enum: ['spot', 'level']
+  },
   walletAddress: {
     type: String,
     required: true

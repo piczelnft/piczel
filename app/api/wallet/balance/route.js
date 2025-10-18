@@ -51,11 +51,11 @@ export async function GET(request) {
       );
     }
 
-    // Use wallet.balance as the primary balance, fallback to walletBalance
-    const balance = user.wallet?.balance || user.walletBalance || 0;
     const sponsorIncome = user.sponsorIncome || 0;
     const levelIncome = user.levelIncome || 0;
     const rewardIncome = user.rewardIncome || 0; // This includes spot income
+    // Total balance = sponsor income + spot income (reward income)
+    const balance = sponsorIncome + rewardIncome;
     // Withdrawal balance = sponsor income + spot income (reward income)
     const withdrawalBalance = sponsorIncome + rewardIncome;
 

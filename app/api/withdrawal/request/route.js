@@ -41,7 +41,7 @@ export async function POST(request) {
     }
 
     const requestBody = await request.json();
-    const { amount, walletAddress, paymentMethod, notes } = requestBody;
+    const { amount, walletAddress, paymentMethod, withdrawalType, notes } = requestBody;
 
     // Validate input
     if (!amount || amount <= 0) {
@@ -61,6 +61,13 @@ export async function POST(request) {
     if (!paymentMethod || !['crypto', 'bank', 'paypal'].includes(paymentMethod)) {
       return NextResponse.json(
         { error: "Valid payment method is required" },
+        { status: 400, headers: corsHeaders() }
+      );
+    }
+
+    if (!withdrawalType || !['spot', 'level'].includes(withdrawalType)) {
+      return NextResponse.json(
+        { error: "Valid withdrawal type is required (spot or level)" },
         { status: 400, headers: corsHeaders() }
       );
     }
@@ -91,10 +98,12 @@ export async function POST(request) {
       );
     }
 
-    // Check if user has sufficient withdrawal balance (sponsor income + spot income)
-    if (withdrawalBalance < amount) {
+    // Check if user has sufficient balance for the specific withdrawal type
+    const availableBalance = withdrawalType === 'spot' ? rewardIncome : sponsorIncome;
+    if (availableBalance < amount) {
+      const incomeType = withdrawalType === 'spot' ? 'spot income' : 'level income';
       return NextResponse.json(
-        { error: "Insufficient withdrawal balance" },
+        { error: `Insufficient ${incomeType} balance` },
         { status: 400, headers: corsHeaders() }
       );
     }
@@ -121,6 +130,7 @@ export async function POST(request) {
       memberId: user.memberId,
       amount: parseFloat(amount),
       paymentMethod: paymentMethod,
+      withdrawalType: withdrawalType,
       walletAddress: walletAddress.trim(),
       notes: notes || "",
       status: 'pending',
@@ -131,9 +141,7 @@ export async function POST(request) {
     // Save withdrawal to database
     const withdrawal = await Withdrawal.create(withdrawalData);
 
-    // Update user balances (deduct from wallet, sponsorIncome, and rewardIncome)
-    // Keep wallet and walletBalance consistent; decrease both sponsorIncome and rewardIncome
-    // First deduct from rewardIncome (spot income), then from sponsorIncome if needed
+    // Update user balances based on withdrawal type
     const deductionAmount = parseFloat(amount);
     const updateFields = {
       $inc: { 
@@ -142,15 +150,10 @@ export async function POST(request) {
       }
     };
     
-    // Deduct from rewardIncome first (spot income), then sponsorIncome
-    if (rewardIncome >= deductionAmount) {
+    // Deduct from the specific income type
+    if (withdrawalType === 'spot') {
       updateFields.$inc.rewardIncome = -deductionAmount;
-    } else if (rewardIncome > 0) {
-      // Deduct remaining amount from sponsorIncome
-      updateFields.$inc.rewardIncome = -rewardIncome;
-      updateFields.$inc.sponsorIncome = -(deductionAmount - rewardIncome);
     } else {
-      // No rewardIncome, deduct from sponsorIncome
       updateFields.$inc.sponsorIncome = -deductionAmount;
     }
     
