@@ -81,7 +81,7 @@ export default function SponsorChainDebug() {
               
               {sponsorChain.sponsorChain.length === 0 ? (
                 <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-                  <p className="text-yellow-800">No sponsors found in your chain. This means you won't receive any commission from NFT purchases.</p>
+                  <p className="text-yellow-800">No sponsors found in your chain. This means you won&apos;t receive any commission from NFT purchases.</p>
                 </div>
               ) : (
                 <div className="space-y-3">

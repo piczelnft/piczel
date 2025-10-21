@@ -166,7 +166,7 @@ export default function CommissionManagement() {
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
             <div className="text-center">
               <div className="text-2xl font-bold text-indigo-600">{statistics.todaysCommissions}</div>
-              <div className="text-sm text-gray-600">Today's Commissions</div>
+              <div className="text-sm text-gray-600">Today&apos;s Commissions</div>
             </div>
           </div>
         </div>
@@ -189,7 +189,7 @@ export default function CommissionManagement() {
             ) : (
               <>
                 <span>⚡</span>
-                <span>Process Today's Commissions</span>
+                <span>Process Today&apos;s Commissions</span>
               </>
             )}
           </button>

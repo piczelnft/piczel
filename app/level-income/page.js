@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
+import Image from "next/image";
 
 export default function LevelIncomePage() {
   const [levelIncomeData, setLevelIncomeData] = useState(null);
@@ -53,7 +54,7 @@ export default function LevelIncomePage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-blue-900 to-purple-900 flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-green-900 to-emerald-900 flex items-center justify-center">
         <div className="text-white text-xl">Loading level income data...</div>
       </div>
     );
@@ -61,14 +62,14 @@ export default function LevelIncomePage() {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-blue-900 to-purple-900 flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-green-900 to-emerald-900 flex items-center justify-center">
         <div className="text-red-400 text-xl">Error: {error}</div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-blue-900 to-purple-900">
+    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-green-900 to-emerald-900">
       <div className="container mx-auto px-4 py-8">
         {/* Header */}
         <div className="mb-8">
@@ -166,7 +167,7 @@ export default function LevelIncomePage() {
                   <tr key={referral.referral.memberId} className="hover:bg-white/5 transition-colors">
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center">
-                        <div className="flex-shrink-0 h-8 w-8 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full flex items-center justify-center">
+                        <div className="flex-shrink-0 h-8 w-8 bg-gradient-to-r from-green-500 to-emerald-500 rounded-full flex items-center justify-center">
                           <span className="text-white text-sm font-bold">
                             {index + 1}
                           </span>
@@ -182,10 +183,12 @@ export default function LevelIncomePage() {
                       <div className="flex items-center">
                         <div className="flex-shrink-0 h-10 w-10">
                           {referral.referral.avatar ? (
-                            <img
+                            <Image
                               className="h-10 w-10 rounded-full"
                               src={referral.referral.avatar}
                               alt={referral.referral.name}
+                              width={40}
+                              height={40}
                             />
                           ) : (
                             <div className="h-10 w-10 rounded-full bg-gradient-to-r from-gray-400 to-gray-600 flex items-center justify-center">
@@ -280,7 +283,7 @@ export default function LevelIncomePage() {
           <h3 className="text-lg font-semibold text-white mb-4">How Referral Income Works</h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
-              <h4 className="text-md font-medium text-blue-400 mb-2">Commission Structure</h4>
+              <h4 className="text-md font-medium text-emerald-400 mb-2">Commission Structure</h4>
               <ul className="text-sm text-gray-300 space-y-1">
                 <li>• Direct Referrals (Level 1): 10% commission</li>
                 <li>• When someone uses your sponsor ID</li>
