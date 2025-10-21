@@ -100,7 +100,16 @@ export async function GET() {
 
       // Get user data
       console.log("Fetching user data for userId:", userId);
-      const user = await User.findById(userId).select("-password");
+      const user = await User.findById(userId).select('memberId name email sponsorIncome levelIncome rewardIncome wallet.balance walletBalance isActivated package sponsoredMembersVolume');
+      
+      console.log("Dashboard API - Raw user data:", {
+        memberId: user?.memberId,
+        sponsorIncome: user?.sponsorIncome,
+        levelIncome: user?.levelIncome,
+        rewardIncome: user?.rewardIncome,
+        walletBalance: user?.wallet?.balance,
+        walletBalanceField: user?.walletBalance
+      });
       if (!user) {
         console.log("User not found, returning fallback data");
         // Return fallback data instead of error for development
@@ -257,7 +266,15 @@ export async function GET() {
         totalNftPurchases: await calculateTotalNftPurchases(userId),
         totalNftPurchaseAmount: await calculateTotalNftPurchaseAmount(userId),
         totalSponsorsIncome: await calculateTotalSponsorsIncome(userId),
-        totalLevelIncome: (user.levelIncome || 0).toFixed(2),
+        totalLevelIncome: (() => {
+          const levelIncomeValue = user.levelIncome || 0;
+          console.log(`Dashboard totalLevelIncome calculation:`, {
+            userLevelIncome: user.levelIncome,
+            levelIncomeValue,
+            finalValue: levelIncomeValue.toFixed(2)
+          });
+          return levelIncomeValue.toFixed(2);
+        })(),
         totalWithdrawalAmount: await calculateTotalWithdrawalAmount(userId),
         totalSpotIncome: (user.rewardIncome || 0).toFixed(2),
         directMembersNftVolume: await calculateDirectMembersNftVolume(userId),
@@ -268,6 +285,13 @@ export async function GET() {
           totalMembersVolume: await calculateTotalMembersNftVolume(userId)
         }
       };
+
+      console.log("Dashboard API - Final response data:", {
+        totalLevelIncome: dashboardData.totalLevelIncome,
+        totalSponsorsIncome: dashboardData.totalSponsorsIncome,
+        totalSpotIncome: dashboardData.totalSpotIncome,
+        wallet: dashboardData.wallet
+      });
 
       return NextResponse.json(
         dashboardData,

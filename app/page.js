@@ -157,6 +157,7 @@ export default function Home() {
     totalNftPurchases: 5,
     totalNftPurchaseAmount: "400.00", // 5 NFTs × $80 = $400
     totalSponsorsIncome: "1250.50",
+    totalLevelIncome: "0.00", // Added missing totalLevelIncome
     totalWithdrawalAmount: "750.25",
     totalSpotIncome: "850.75",
     directMembersNftVolume: "160.00", // 2 NFTs × $80 = $160 (example)
