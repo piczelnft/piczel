@@ -54,10 +54,10 @@ export async function GET(request) {
     const sponsorIncome = user.sponsorIncome || 0;
     const levelIncome = user.levelIncome || 0;
     const rewardIncome = user.rewardIncome || 0; // This includes spot income
-    // Total balance = sponsor income + spot income (reward income)
-    const balance = sponsorIncome + rewardIncome;
-    // Withdrawal balance = sponsor income + spot income (reward income)
-    const withdrawalBalance = sponsorIncome + rewardIncome;
+    // Total balance = sponsor income + level income + spot income (reward income)
+    const balance = sponsorIncome + levelIncome + rewardIncome;
+    // Withdrawal balance = sponsor income + level income + spot income (reward income)
+    const withdrawalBalance = sponsorIncome + levelIncome + rewardIncome;
 
     return NextResponse.json(
       { 

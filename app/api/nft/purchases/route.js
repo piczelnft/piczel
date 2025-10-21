@@ -4,6 +4,7 @@ import jwt from "jsonwebtoken";
 import dbConnect from "@/lib/mongodb";
 import User from "@/models/User";
 import NftPurchase from "@/models/NftPurchase";
+import DailyCommission from "@/models/DailyCommission";
 import { corsHeaders, handleCors } from "@/lib/cors";
 
 export async function OPTIONS(request) {
@@ -132,20 +133,99 @@ export async function POST(request) {
       }
     );
 
+    // Create daily commission records for sponsors (up to 10 levels)
+    console.log(`Starting commission distribution for user: ${user.memberId}`);
+    console.log(`Current user for upline: ${currentUserForUpline.memberId} (${currentUserForUpline.name})`);
+    
     for (let level = 1; level <= 10; level++) {
       const rate = COMMISSION_RATES[level - 1];
-      if (!rate) break;
+      if (!rate) {
+        console.log(`No rate for level ${level}, breaking`);
+        break;
+      }
+      
+      console.log(`Level ${level}: Looking for sponsor of ${currentUserForUpline.memberId}`);
       const sponsorIdAtLevel = currentUserForUpline?.sponsor;
-      if (!sponsorIdAtLevel) break;
+      if (!sponsorIdAtLevel) {
+        console.log(`No sponsor at level ${level} for ${currentUserForUpline.memberId}, breaking`);
+        break;
+      }
 
+      console.log(`Level ${level}: Found sponsor ID: ${sponsorIdAtLevel}`);
       const sponsorUser = await User.findById(sponsorIdAtLevel);
-      if (!sponsorUser) break;
+      if (!sponsorUser) {
+        console.log(`Sponsor user not found at level ${level} with ID ${sponsorIdAtLevel}, breaking`);
+        break;
+      }
 
-      const commissionAmount = nftReward * rate;
+      console.log(`Processing level ${level} sponsor: ${sponsorUser.memberId} (${sponsorUser.name})`);
+
+      const totalCommission = nftReward * rate;
+      const dailyAmount = totalCommission / 365; // Distribute over 365 days
+      const startDate = new Date();
+      const endDate = new Date();
+      endDate.setDate(endDate.getDate() + 365);
+
+      // Create daily commission record
+      const dailyCommission = new DailyCommission({
+        userId: userId,
+        memberId: user.memberId,
+        sponsorId: sponsorUser._id,
+        sponsorMemberId: sponsorUser.memberId,
+        level: level,
+        nftPurchaseId: doc._id,
+        totalCommission: totalCommission,
+        dailyAmount: dailyAmount,
+        totalDays: 365,
+        daysPaid: 0,
+        daysRemaining: 365,
+        totalPaid: 0,
+        remainingAmount: totalCommission,
+        status: 'active',
+        startDate: startDate,
+        endDate: endDate,
+        nextPaymentDate: startDate
+      });
+
+      await dailyCommission.save();
+      console.log(`Created daily commission for level ${level}: ${sponsorUser.memberId} - $${dailyAmount.toFixed(4)}/day for 365 days`);
+
+      // Immediate first-day payout so sponsors see today's amount right away
       const sponsorCurrentBalance = sponsorUser.wallet?.balance || sponsorUser.walletBalance || 0;
-      const sponsorNewBalance = sponsorCurrentBalance + commissionAmount;
+      const sponsorNewBalance = sponsorCurrentBalance + dailyAmount;
+      const incomeField = level > 1 ? 'levelIncome' : 'sponsorIncome';
+      console.log(`Updating ${incomeField} for ${sponsorUser.memberId} by $${dailyAmount.toFixed(4)}`);
 
-      // Update sponsor's volume tracking
+      await User.findOneAndUpdate(
+        { _id: sponsorUser._id },
+        {
+          $set: {
+            "wallet.balance": sponsorNewBalance,
+            "walletBalance": sponsorNewBalance
+          },
+          $inc: {
+            [incomeField]: dailyAmount
+          }
+        }
+      );
+
+      await DailyCommission.findOneAndUpdate(
+        { _id: dailyCommission._id },
+        {
+          $inc: {
+            daysPaid: 1,
+            daysRemaining: -1,
+            totalPaid: dailyAmount,
+            remainingAmount: -dailyAmount
+          },
+          $set: {
+            lastPaymentDate: startDate,
+            nextPaymentDate: new Date(Date.now() + 24 * 60 * 60 * 1000) // next day
+          }
+        }
+      );
+
+      // Update sponsor's volume tracking (but not remaining income yet)
       const volumeUpdate = level === 1 
         ? { 
             sponsoredMembersVolume: (sponsorUser.sponsoredMembersVolume || 0) + nftReward,
@@ -158,22 +238,7 @@ export async function POST(request) {
       await User.findOneAndUpdate(
         { _id: sponsorUser._id },
         {
-          $set: {
-            "wallet.balance": sponsorNewBalance,
-            "walletBalance": sponsorNewBalance,
-          },
-          $inc: {
-            ...(level === 1 
-              ? { 
-                  sponsorIncome: commissionAmount,
-                  sponsoredMembersVolume: nftReward,
-                  totalMembersVolume: nftReward
-                }
-              : { 
-                  levelIncome: commissionAmount,
-                  totalMembersVolume: nftReward
-                })
-          }
+          $inc: volumeUpdate
         }
       );
 
@@ -182,13 +247,18 @@ export async function POST(request) {
         sponsorId: sponsorUser.memberId,
         sponsorName: sponsorUser.name,
         commissionRate: `${(rate * 100).toFixed(2)}%`,
-        commissionAmount: commissionAmount.toFixed(2),
+        totalCommission: totalCommission.toFixed(2),
+        dailyAmount: dailyAmount.toFixed(2),
         volumeAdded: nftReward.toFixed(2),
+        paymentSchedule: '365 days'
       });
 
       // Move up the tree
+      console.log(`Moving up to next level. New currentUserForUpline: ${sponsorUser.memberId}`);
       currentUserForUpline = sponsorUser;
     }
+    
+    console.log(`Commission distribution completed. Processed ${commissions.length} levels.`);
 
     return NextResponse.json({ 
       purchase: doc,

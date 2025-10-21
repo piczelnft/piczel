@@ -290,12 +290,12 @@ export default function Home() {
             </div>
           </div>
 
-          {/* Total Sponsors Income */}
+          {/* Total Level Income */}
           <div className="p-6 hover-lift-enhanced animate-fadeInUp glow-border-emerald rounded-2xl border" style={{animationDelay: '0.8s', backgroundColor: 'rgba(0, 0, 0, 0.1)', backdropFilter: 'blur(10px)', borderColor: 'var(--default-border)'}}>
             <div className="text-center relative">
               <div className="absolute -top-2 -right-2 w-3 h-3 rounded-full animate-pulse" style={{backgroundColor: 'rgb(16, 185, 129)'}}></div>
               <div className="text-sm mb-2 font-medium" style={{color: 'rgba(255, 255, 255, 0.7)'}}>Total Level Income</div>
-              <div className="font-bold text-lg animate-neonGlow" style={{color: 'rgb(16, 185, 129)'}}>${data.totalSponsorsIncome || 0}</div>
+              <div className="font-bold text-lg animate-neonGlow" style={{color: 'rgb(16, 185, 129)'}}>${data.totalLevelIncome || 0}</div>
             </div>
           </div>
 

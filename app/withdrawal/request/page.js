@@ -16,14 +16,15 @@ export default function WithdrawalRequestPage() {
   const [message, setMessage] = useState("");
   const [userBalance, setUserBalance] = useState(0);
   const [withdrawalBalance, setWithdrawalBalance] = useState(0);
-  const [sponsorIncome, setSponsorIncome] = useState(0);
+  const [sponsorIncome, setSponsorIncome] = useState(0); // direct sponsor income (level 1)
+  const [levelIncome, setLevelIncome] = useState(0); // level (2-10) income
   const [spotIncome, setSpotIncome] = useState(0);
   const [walletAddresses, setWalletAddresses] = useState([]);
   const { token, user } = useAuth();
 
   // Calculate available balance based on withdrawal type
   const getAvailableBalance = () => {
-    return formData.withdrawalType === "spot" ? spotIncome : sponsorIncome;
+    return formData.withdrawalType === "spot" ? spotIncome : levelIncome;
   };
 
   // Fetch user balance and wallet addresses
@@ -44,6 +45,7 @@ export default function WithdrawalRequestPage() {
           setUserBalance(balanceData.balance || 0);
           setWithdrawalBalance(balanceData.withdrawalBalance || 0);
           setSponsorIncome(balanceData.sponsorIncome || 0);
+          setLevelIncome(balanceData.levelIncome || 0);
           setSpotIncome(balanceData.spotIncome || 0);
         }
 
@@ -421,8 +423,8 @@ export default function WithdrawalRequestPage() {
                         )}
                       </div>
                       <div>
-                        <h3 className="text-white font-semibold text-sm">Level Income</h3>
-                        <p className="text-blue-400 font-bold text-lg">${sponsorIncome.toFixed(2)}</p>
+                  <h3 className="text-white font-semibold text-sm">Level Income</h3>
+                  <p className="text-blue-400 font-bold text-lg">${levelIncome.toFixed(2)}</p>
                         <p className="text-gray-400 text-xs">Available for withdrawal</p>
                       </div>
                     </div>

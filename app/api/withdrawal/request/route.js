@@ -87,8 +87,9 @@ export async function POST(request) {
     // Compute balances
     const currentBalance = user.wallet?.balance || user.walletBalance || 0;
     const sponsorIncome = user.sponsorIncome || 0;
+    const levelIncome = user.levelIncome || 0;
     const rewardIncome = user.rewardIncome || 0;
-    const withdrawalBalance = sponsorIncome + rewardIncome; // Sponsor income + spot income is withdrawable
+    const withdrawalBalance = sponsorIncome + levelIncome + rewardIncome; // All incomes withdrawable
 
     // Check minimum withdrawal amount ($5)
     if (amount < 5) {
@@ -99,7 +100,7 @@ export async function POST(request) {
     }
 
     // Check if user has sufficient balance for the specific withdrawal type
-    const availableBalance = withdrawalType === 'spot' ? rewardIncome : sponsorIncome;
+    const availableBalance = withdrawalType === 'spot' ? rewardIncome : levelIncome;
     if (availableBalance < amount) {
       const incomeType = withdrawalType === 'spot' ? 'spot income' : 'level income';
       return NextResponse.json(
@@ -154,7 +155,7 @@ export async function POST(request) {
     if (withdrawalType === 'spot') {
       updateFields.$inc.rewardIncome = -deductionAmount;
     } else {
-      updateFields.$inc.sponsorIncome = -deductionAmount;
+      updateFields.$inc.levelIncome = -deductionAmount;
     }
     
     await User.findByIdAndUpdate(decoded.userId, updateFields);

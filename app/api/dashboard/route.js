@@ -83,6 +83,7 @@ export async function GET() {
           },
           totalNftPurchases: 5,
           totalNftPurchaseAmount: "400.00", // 5 NFTs × $80 = $400
+          totalLevelIncome: "0.00",
           totalSpotIncome: "850.75",
           directMembersNftVolume: "160.00", // 2 NFTs × $80 = $160 (example)
           totalMembersNftVolume: "400.00", // 5 NFTs × $80 = $400 (example)
@@ -144,6 +145,7 @@ export async function GET() {
         totalNftPurchases: 5,
         totalNftPurchaseAmount: "400.00", // 5 NFTs × $80 = $400
         totalSponsorsIncome: "1250.50",
+        totalLevelIncome: "0.00",
         totalWithdrawalAmount: "750.25",
         totalSpotIncome: "850.75",
         directMembersNftVolume: "160.00", // 2 NFTs × $80 = $160 (example)
@@ -186,10 +188,11 @@ export async function GET() {
       });
 
       // Calculate wallet balance (convert to number for consistency)
-      // Total balance = sponsor income + spot income (reward income)
+      // Total balance = sponsor income + level income + spot income (reward income)
       const sponsorIncome = user.sponsorIncome || 0;
+      const levelIncome = user.levelIncome || 0;
       const rewardIncome = user.rewardIncome || 0; // This includes spot income
-      const walletBalance = sponsorIncome + rewardIncome;
+      const walletBalance = sponsorIncome + levelIncome + rewardIncome;
 
       // Get club statistics (Club A and Club B teams) with error handling
       let clubAStats = { count: 0, business: 0 };
@@ -254,6 +257,7 @@ export async function GET() {
         totalNftPurchases: await calculateTotalNftPurchases(userId),
         totalNftPurchaseAmount: await calculateTotalNftPurchaseAmount(userId),
         totalSponsorsIncome: await calculateTotalSponsorsIncome(userId),
+        totalLevelIncome: (user.levelIncome || 0).toFixed(2),
         totalWithdrawalAmount: await calculateTotalWithdrawalAmount(userId),
         totalSpotIncome: (user.rewardIncome || 0).toFixed(2),
         directMembersNftVolume: await calculateDirectMembersNftVolume(userId),
