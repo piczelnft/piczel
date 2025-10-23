@@ -161,10 +161,10 @@ export async function POST(request) {
       console.log(`Processing level ${level} sponsor: ${sponsorUser.memberId} (${sponsorUser.name})`);
 
       const totalCommission = nftReward * rate;
-      const dailyAmount = totalCommission / 365; // Distribute over 365 days
+      const dailyAmount = totalCommission / 5; // Distribute over 5 minutes for demo
       const startDate = new Date();
       const endDate = new Date();
-      endDate.setDate(endDate.getDate() + 365);
+      endDate.setMinutes(endDate.getMinutes() + 5); // 5 minutes for demo
 
       // Create daily commission record
       const dailyCommission = new DailyCommission({
@@ -176,9 +176,9 @@ export async function POST(request) {
         nftPurchaseId: doc._id,
         totalCommission: totalCommission,
         dailyAmount: dailyAmount,
-        totalDays: 365,
+        totalDays: 5,
         daysPaid: 0,
-        daysRemaining: 365,
+        daysRemaining: 5,
         totalPaid: 0,
         remainingAmount: totalCommission,
         status: 'active',
@@ -188,7 +188,7 @@ export async function POST(request) {
       });
 
       await dailyCommission.save();
-      console.log(`Created daily commission for level ${level}: ${sponsorUser.memberId} - $${dailyAmount.toFixed(4)}/day for 365 days`);
+      console.log(`Created daily commission for level ${level}: ${sponsorUser.memberId} - $${dailyAmount.toFixed(4)}/5min for 5 minutes`);
 
       // Immediate first-day payout so sponsors see today's amount right away
       const sponsorCurrentBalance = sponsorUser.wallet?.balance || sponsorUser.walletBalance || 0;
@@ -220,7 +220,7 @@ export async function POST(request) {
           },
           $set: {
             lastPaymentDate: startDate,
-            nextPaymentDate: new Date(Date.now() + 24 * 60 * 60 * 1000) // next day
+            nextPaymentDate: new Date(Date.now() + 5 * 60 * 1000) // next 5 minutes for demo
           }
         }
       );
@@ -250,7 +250,7 @@ export async function POST(request) {
         totalCommission: totalCommission.toFixed(2),
         dailyAmount: dailyAmount.toFixed(2),
         volumeAdded: nftReward.toFixed(2),
-        paymentSchedule: '365 days'
+        paymentSchedule: '5 minutes (demo)'
       });
 
       // Move up the tree
