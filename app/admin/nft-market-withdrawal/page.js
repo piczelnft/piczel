@@ -188,28 +188,31 @@ export default function NFTMarketWithdrawal() {
     }
 
     const selectedUsersList = users.filter(user => selectedUsers.has(user._id));
-    const totalAmount = selectedUsersList.reduce((sum, user) => {
-      const holdingData = calculateHoldingWallet(user);
-      return sum + holdingData.totalHolding;
-    }, 0);
+    const allIndividualPayouts = [];
+    
+    selectedUsersList.forEach(user => {
+      const payoutData = calculateIndividualNftPayouts(user);
+      allIndividualPayouts.push(...payoutData.individualPayouts);
+    });
 
+    const totalAmount = allIndividualPayouts.reduce((sum, payout) => sum + payout.totalHolding, 0);
     const userNames = selectedUsersList.map(user => user.name || user.email || 'User').join(', ');
     
     const confirmed = window.confirm(
-      `Process batch payout for ${selectedUsers.size} users?\n\nUsers: ${userNames}\nTotal Amount: ${formatCurrency(totalAmount)}\n\nThis action will transfer the holding wallet amounts to all selected users.`
+      `Process batch payout for ${selectedUsers.size} users?\n\nUsers: ${userNames}\nTotal NFTs: ${allIndividualPayouts.length}\nTotal Amount: ${formatCurrency(totalAmount)}\n\nThis action will transfer the holding wallet amounts to all selected users.`
     );
 
     if (confirmed) {
       // TODO: Implement actual batch payout API call
-      alert(`Batch payout of ${formatCurrency(totalAmount)} processed for ${selectedUsers.size} users`);
+      alert(`Batch payout of ${formatCurrency(totalAmount)} processed for ${allIndividualPayouts.length} NFTs across ${selectedUsers.size} users`);
       setSelectedUsers(new Set());
       setSelectAll(false);
     }
   };
 
-  // Calculate holding wallet amount for each user (same logic as NFT-buy page)
-  const calculateHoldingWallet = (user) => {
-    console.log("Calculating for user:", user); // Debug log
+  // Calculate individual NFT payout data
+  const calculateIndividualNftPayouts = (user) => {
+    console.log("Calculating individual NFT payouts for user:", user); // Debug log
     
     // Check for NFT purchases in different possible formats
     let nftPurchases = [];
@@ -222,18 +225,37 @@ export default function NFTMarketWithdrawal() {
     }
 
     if (!nftPurchases || nftPurchases.length === 0) {
-      return { totalValue: 0, totalProfit: 0, totalHolding: 0, nftCount: 0 };
+      return { individualPayouts: [], totalValue: 0, totalProfit: 0, totalHolding: 0, nftCount: 0 };
     }
 
-    // Use the same calculation as NFT-buy page
-    const totalPurchased = nftPurchases.length * 100; // $100 per NFT
-    const profit = nftPurchases.length * 5; // $5 profit per NFT
-    const profitAfterTax = profit - (profit * 0.25); // 25% tax on profit
-    const totalHolding = totalPurchased + profitAfterTax;
+    // Calculate individual payout for each NFT
+    const individualPayouts = nftPurchases.map((nft, index) => {
+      const purchasePrice = 100; // $100 per NFT
+      const profit = 5; // $5 profit per NFT
+      const profitAfterTax = profit - (profit * 0.25); // 25% tax on profit
+      const totalHolding = purchasePrice + profitAfterTax;
+
+      return {
+        id: `${user._id}-${nft.code || nft.series || index}`,
+        nftCode: nft.code || nft.series || `NFT-${index + 1}`,
+        purchasePrice: purchasePrice,
+        profit: profit,
+        profitAfterTax: profitAfterTax,
+        totalHolding: totalHolding,
+        purchasedAt: nft.purchasedAt || new Date().toISOString(),
+        user: user
+      };
+    });
+
+    // Calculate totals
+    const totalValue = individualPayouts.reduce((sum, payout) => sum + payout.purchasePrice, 0);
+    const totalProfit = individualPayouts.reduce((sum, payout) => sum + payout.profitAfterTax, 0);
+    const totalHolding = individualPayouts.reduce((sum, payout) => sum + payout.totalHolding, 0);
 
     return {
-      totalValue: totalPurchased,
-      totalProfit: profitAfterTax,
+      individualPayouts: individualPayouts,
+      totalValue: totalValue,
+      totalProfit: totalProfit,
       totalHolding: totalHolding,
       nftCount: nftPurchases.length
     };
@@ -338,7 +360,10 @@ export default function NFTMarketWithdrawal() {
                   💰 Batch Payout ({formatCurrency(
                     users
                       .filter(user => selectedUsers.has(user._id))
-                      .reduce((sum, user) => sum + calculateHoldingWallet(user).totalHolding, 0)
+                      .reduce((sum, user) => {
+                        const payoutData = calculateIndividualNftPayouts(user);
+                        return sum + payoutData.totalHolding;
+                      }, 0)
                   )})
                 </button>
               </div>
@@ -365,16 +390,19 @@ export default function NFTMarketWithdrawal() {
                     User
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    NFT Count
+                    NFT Code
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Purchase Wallet
+                    Purchase Price
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Profit (After Tax)
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Holding Wallet
+                    Total Payout
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Purchased Date
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Actions
@@ -384,15 +412,15 @@ export default function NFTMarketWithdrawal() {
               <tbody className="bg-white divide-y divide-gray-200">
                 {users.length === 0 && !loading && (
                   <tr>
-                    <td colSpan={7} className="px-6 py-8 text-center text-gray-500">
-                      No users found
+                    <td colSpan={8} className="px-6 py-8 text-center text-gray-500">
+                      No NFT payouts found
                     </td>
                   </tr>
                 )}
-                {users.map((user, index) => {
-                  const holdingData = calculateHoldingWallet(user);
-                  return (
-                    <tr key={user._id || `user-${index}`} className="hover:bg-gray-50">
+                {users.map((user, userIndex) => {
+                  const payoutData = calculateIndividualNftPayouts(user);
+                  return payoutData.individualPayouts.map((payout, payoutIndex) => (
+                    <tr key={payout.id} className="hover:bg-gray-50">
                       <td className="px-6 py-4 whitespace-nowrap">
                         <input
                           type="checkbox"
@@ -420,49 +448,53 @@ export default function NFTMarketWithdrawal() {
                         </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm text-gray-900">{holdingData.nftCount}</div>
-                        <div className="text-xs text-gray-500">NFTs owned</div>
+                        <div className="text-sm font-medium text-gray-900">{payout.nftCode}</div>
+                        <div className="text-xs text-gray-500">NFT #{payoutIndex + 1}</div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="text-sm font-medium text-blue-600">
-                          {formatCurrency(holdingData.totalValue)}
+                          {formatCurrency(payout.purchasePrice)}
                         </div>
-                        <div className="text-xs text-gray-500">Total spent</div>
+                        <div className="text-xs text-gray-500">Purchase amount</div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="text-sm font-medium text-green-600">
-                          {formatCurrency(holdingData.totalProfit)}
+                          {formatCurrency(payout.profitAfterTax)}
                         </div>
                         <div className="text-xs text-gray-500">After 25% tax</div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="text-sm font-bold text-purple-600">
-                          {formatCurrency(holdingData.totalHolding)}
+                          {formatCurrency(payout.totalHolding)}
                         </div>
-                        <div className="text-xs text-gray-500">Total value</div>
+                        <div className="text-xs text-gray-500">Total payout</div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="text-sm text-gray-900">
+                          {new Date(payout.purchasedAt).toLocaleDateString()}
+                        </div>
+                        <div className="text-xs text-gray-500">
+                          {new Date(payout.purchasedAt).toLocaleTimeString()}
+                        </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                        {holdingData.totalHolding > 0 ? (
-                          <button
-                            className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded text-sm font-medium"
-                            onClick={() => {
-                              const confirmed = window.confirm(
-                                `Process payout of ${formatCurrency(holdingData.totalHolding)} to ${user.name || user.email || 'User'}?\n\nThis action will transfer the holding wallet amount to the user.`
-                              );
-                              if (confirmed) {
-                                // TODO: Implement actual payout API call
-                                alert(`Payout of ${formatCurrency(holdingData.totalHolding)} processed for ${user.name || user.email || 'User'}`);
-                              }
-                            }}
-                          >
-                            💰 Payout {formatCurrency(holdingData.totalHolding)}
-                          </button>
-                        ) : (
-                          <span className="text-gray-400 text-sm">No holding amount</span>
-                        )}
+                        <button
+                          className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded text-sm font-medium"
+                          onClick={() => {
+                            const confirmed = window.confirm(
+                              `Process payout of ${formatCurrency(payout.totalHolding)} for ${payout.nftCode} to ${user.name || user.email || 'User'}?\n\nThis action will transfer the holding wallet amount for this specific NFT to the user.`
+                            );
+                            if (confirmed) {
+                              // TODO: Implement actual payout API call
+                              alert(`Payout of ${formatCurrency(payout.totalHolding)} processed for ${payout.nftCode} to ${user.name || user.email || 'User'}`);
+                            }
+                          }}
+                        >
+                          💰 Payout {formatCurrency(payout.totalHolding)}
+                        </button>
                       </td>
                     </tr>
-                  );
+                  ));
                 })}
               </tbody>
             </table>
@@ -471,10 +503,10 @@ export default function NFTMarketWithdrawal() {
           {/* Mobile Grid */}
           <div className="md:hidden p-4">
             <div className="grid grid-cols-1 gap-4">
-              {users.map((user, index) => {
-                const holdingData = calculateHoldingWallet(user);
-                return (
-                  <div key={user._id || `user-${index}`} className="bg-gray-50 rounded-lg p-4 border">
+              {users.map((user, userIndex) => {
+                const payoutData = calculateIndividualNftPayouts(user);
+                return payoutData.individualPayouts.map((payout, payoutIndex) => (
+                  <div key={payout.id} className="bg-gray-50 rounded-lg p-4 border">
                     <div className="flex items-start justify-between mb-3">
                       <div className="flex items-center space-x-3">
                         <input
@@ -497,47 +529,49 @@ export default function NFTMarketWithdrawal() {
                       </div>
                     </div>
                     
+                    <div className="mb-3 p-3 bg-white rounded-lg border">
+                      <div className="flex justify-between items-center mb-2">
+                        <span className="text-sm font-medium text-gray-900">{payout.nftCode}</span>
+                        <span className="text-xs text-gray-500">NFT #{payoutIndex + 1}</span>
+                      </div>
+                      <div className="text-xs text-gray-500">
+                        Purchased: {new Date(payout.purchasedAt).toLocaleDateString()} at {new Date(payout.purchasedAt).toLocaleTimeString()}
+                      </div>
+                    </div>
+                    
                     <div className="space-y-2">
                       <div className="flex justify-between text-sm">
-                        <span className="text-gray-600">NFTs owned:</span>
-                        <span className="font-medium">{holdingData.nftCount}</span>
+                        <span className="text-gray-600">Purchase Price:</span>
+                        <span className="font-medium text-blue-600">{formatCurrency(payout.purchasePrice)}</span>
                       </div>
                       <div className="flex justify-between text-sm">
-                        <span className="text-gray-600">Total spent:</span>
-                        <span className="font-medium">{formatCurrency(holdingData.totalSpent)}</span>
-                      </div>
-                      <div className="flex justify-between text-sm">
-                        <span className="text-gray-600">After 25% tax:</span>
-                        <span className="font-medium">{formatCurrency(holdingData.profitAfterTax)}</span>
+                        <span className="text-gray-600">Profit (After Tax):</span>
+                        <span className="font-medium text-green-600">{formatCurrency(payout.profitAfterTax)}</span>
                       </div>
                       <div className="flex justify-between text-sm font-semibold">
-                        <span className="text-gray-900">Total value:</span>
-                        <span className="text-green-600">{formatCurrency(holdingData.totalHolding)}</span>
+                        <span className="text-gray-900">Total Payout:</span>
+                        <span className="text-purple-600">{formatCurrency(payout.totalHolding)}</span>
                       </div>
                     </div>
                     
                     <div className="mt-4 pt-3 border-t border-gray-200">
-                      {holdingData.totalHolding > 0 ? (
-                        <button
-                          className="w-full bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors"
-                          onClick={() => {
-                            const confirmed = window.confirm(
-                              `Process payout of ${formatCurrency(holdingData.totalHolding)} to ${user.name || user.email || 'User'}?\n\nThis action will transfer the holding wallet amount to the user.`
-                            );
-                            if (confirmed) {
-                              // TODO: Implement actual payout API call
-                              alert(`Payout of ${formatCurrency(holdingData.totalHolding)} processed for ${user.name || user.email || 'User'}`);
-                            }
-                          }}
-                        >
-                          💰 Payout {formatCurrency(holdingData.totalHolding)}
-                        </button>
-                      ) : (
-                        <span className="text-gray-400 text-sm">No holding amount</span>
-                      )}
+                      <button
+                        className="w-full bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors"
+                        onClick={() => {
+                          const confirmed = window.confirm(
+                            `Process payout of ${formatCurrency(payout.totalHolding)} for ${payout.nftCode} to ${user.name || user.email || 'User'}?\n\nThis action will transfer the holding wallet amount for this specific NFT to the user.`
+                          );
+                          if (confirmed) {
+                            // TODO: Implement actual payout API call
+                            alert(`Payout of ${formatCurrency(payout.totalHolding)} processed for ${payout.nftCode} to ${user.name || user.email || 'User'}`);
+                          }
+                        }}
+                      >
+                        💰 Payout {formatCurrency(payout.totalHolding)}
+                      </button>
                     </div>
                   </div>
-                );
+                ));
               })}
             </div>
           </div>
@@ -621,24 +655,33 @@ export default function NFTMarketWithdrawal() {
             <div className="text-2xl font-bold text-gray-900">{pagination.total || 0}</div>
           </div>
           <div className="bg-white p-4 rounded-lg shadow">
-            <div className="text-sm font-medium text-gray-500">Total NFTs</div>
+            <div className="text-sm font-medium text-gray-500">Total NFT Payouts</div>
             <div className="text-2xl font-bold text-blue-600">
-              {users.reduce((sum, user) => sum + calculateHoldingWallet(user).nftCount, 0)}
+              {users.reduce((sum, user) => {
+                const payoutData = calculateIndividualNftPayouts(user);
+                return sum + payoutData.nftCount;
+              }, 0)}
             </div>
           </div>
           <div className="bg-white p-4 rounded-lg shadow">
             <div className="text-sm font-medium text-gray-500">Total Purchase Value</div>
             <div className="text-2xl font-bold text-blue-600">
               {formatCurrency(
-                users.reduce((sum, user) => sum + calculateHoldingWallet(user).totalValue, 0)
+                users.reduce((sum, user) => {
+                  const payoutData = calculateIndividualNftPayouts(user);
+                  return sum + payoutData.totalValue;
+                }, 0)
               )}
             </div>
           </div>
           <div className="bg-white p-4 rounded-lg shadow">
-            <div className="text-sm font-medium text-gray-500">Total Holding Value</div>
+            <div className="text-sm font-medium text-gray-500">Total Payout Value</div>
             <div className="text-2xl font-bold text-purple-600">
               {formatCurrency(
-                users.reduce((sum, user) => sum + calculateHoldingWallet(user).totalHolding, 0)
+                users.reduce((sum, user) => {
+                  const payoutData = calculateIndividualNftPayouts(user);
+                  return sum + payoutData.totalHolding;
+                }, 0)
               )}
             </div>
           </div>
