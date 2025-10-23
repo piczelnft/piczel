@@ -54,11 +54,11 @@ export default function AdminNftCounterPage() {
   return (
     <AdminLayout>
       <div className="p-6">
-        <div className="flex items-center justify-between mb-4">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-4 space-y-4 sm:space-y-0">
           <h1 className="text-xl font-semibold text-gray-900">NFT Counter</h1>
           <button
             onClick={fetchData}
-            className="px-3 py-2 text-sm rounded-md border"
+            className="w-full sm:w-auto px-3 py-2 text-sm rounded-md border"
             style={{ borderColor: "var(--default-border)", color: "#111827", background: "rgba(255,255,255,0.6)" }}
             disabled={loading}
           >
@@ -109,8 +109,8 @@ export default function AdminNftCounterPage() {
           </button>
         </div>
 
-        {/* Table */}
-        <div className="rounded-lg border overflow-auto" style={{ borderColor: "var(--default-border)" }}>
+        {/* Desktop Table */}
+        <div className="hidden md:block rounded-lg border overflow-x-auto -mx-4 sm:mx-0" style={{ borderColor: "var(--default-border)" }}>
           <table className="min-w-full text-sm">
             <thead>
               <tr className="text-left" style={{ color: "#374151" }}>
@@ -140,6 +140,38 @@ export default function AdminNftCounterPage() {
               ))}
             </tbody>
           </table>
+        </div>
+
+        {/* Mobile Grid */}
+        <div className="md:hidden grid grid-cols-1 gap-4">
+          {items.map((item, index) => (
+            <div key={item._id || index} className="bg-white rounded-lg shadow p-4 border" style={{ borderColor: "var(--default-border)" }}>
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-lg font-medium text-gray-900">
+                    {item.nftCode || item.code || 'NFT'}
+                  </h3>
+                  <span className="text-sm text-gray-500">
+                    {item.series || 'Series'}
+                  </span>
+                </div>
+                <div className="space-y-2">
+                  <p className="text-sm text-gray-600">
+                    <span className="font-medium">Purchased:</span> {new Date(item.purchasedAt || item.createdAt).toLocaleDateString()}
+                  </p>
+                  <p className="text-sm text-gray-600">
+                    <span className="font-medium">Member ID:</span> {item.memberId || 'N/A'}
+                  </p>
+                  <p className="text-sm text-gray-600">
+                    <span className="font-medium">User:</span> {item.userName || item.name || 'Unknown'}
+                  </p>
+                  <p className="text-sm text-gray-600">
+                    <span className="font-medium">Email:</span> {item.userEmail || item.email || 'No email'}
+                  </p>
+                </div>
+              </div>
+            </div>
+          ))}
         </div>
 
         {/* Pagination */}

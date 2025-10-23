@@ -268,6 +268,52 @@ export default function NFTBuyPage() {
         </div>
       </div>
 
+      {/* Wallet Cards */}
+      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-6 sm:mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
+          {/* Purchase Wallet */}
+          <div className="p-4 sm:p-6 rounded-xl sm:rounded-2xl border hover-lift-enhanced" style={{backgroundColor:'rgba(0,0,0,0.1)', backdropFilter:'blur(10px)', borderColor:'var(--default-border)'}}>
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="text-lg sm:text-xl font-bold text-white">Purchase Wallet</h3>
+              <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center" style={{backgroundColor:'rgba(59,130,246,0.2)', border:'1px solid rgba(59,130,246,0.3)'}}>
+                <svg className="w-4 h-4 sm:w-5 sm:h-5 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
+                </svg>
+              </div>
+            </div>
+            <div className="text-2xl sm:text-3xl font-bold text-blue-400 mb-2">
+              ${(nftPurchases.length * 100).toFixed(2)}
+            </div>
+            <p className="text-sm text-gray-400">
+              $100 per NFT purchased ({nftPurchases.length} NFTs)
+            </p>
+          </div>
+
+          {/* Holding Wallet */}
+          <div className="p-4 sm:p-6 rounded-xl sm:rounded-2xl border hover-lift-enhanced" style={{backgroundColor:'rgba(0,0,0,0.1)', backdropFilter:'blur(10px)', borderColor:'var(--default-border)'}}>
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="text-lg sm:text-xl font-bold text-white">Holding Wallet</h3>
+              <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center" style={{backgroundColor:'rgba(34,197,94,0.2)', border:'1px solid rgba(34,197,94,0.3)'}}>
+                <svg className="w-4 h-4 sm:w-5 sm:h-5 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+                </svg>
+              </div>
+            </div>
+            <div className="text-2xl sm:text-3xl font-bold text-green-400 mb-2">
+              ${(() => {
+                const totalPurchased = nftPurchases.length * 100;
+                const profit = nftPurchases.length * 5; // $5 profit per NFT
+                const profitAfterTax = profit - (profit * 0.25); // 25% tax on profit
+                return (totalPurchased + profitAfterTax).toFixed(2);
+              })()}
+            </div>
+            <p className="text-sm text-gray-400">
+              NFT value + profit (after 25% tax)
+            </p>
+          </div>
+        </div>
+      </div>
+
       {/* NFT Grid */}
       <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-6 sm:pb-8">
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 sm:gap-6">
@@ -353,6 +399,58 @@ export default function NFTBuyPage() {
               <div className="text-xs sm:text-sm text-gray-400">Locked</div>
             </div>
           </div>
+        </div>
+
+        {/* NFT Purchase History */}
+        <div className="mt-6 sm:mt-8 p-4 sm:p-6 rounded-xl sm:rounded-2xl border" style={{backgroundColor: 'rgba(0,0,0,0.1)', backdropFilter: 'blur(10px)', borderColor: 'var(--default-border)'}}>
+          <h3 className="text-lg sm:text-xl font-bold text-white mb-4 sm:mb-6">Purchase History</h3>
+          {nftPurchases.length === 0 ? (
+            <div className="text-center py-8">
+              <div className="w-16 h-16 mx-auto mb-4 rounded-full flex items-center justify-center" style={{backgroundColor:'rgba(148,163,184,0.1)', border:'1px solid rgba(148,163,184,0.2)'}}>
+                <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+              </div>
+              <p className="text-gray-400 text-sm sm:text-base">No NFTs purchased yet</p>
+              <p className="text-gray-500 text-xs sm:text-sm mt-1">Start by purchasing A1 NFT</p>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {nftPurchases
+                .sort((a, b) => new Date(b.purchasedAt) - new Date(a.purchasedAt))
+                .map((purchase, index) => (
+                <div key={`${purchase.code}-${purchase.purchasedAt}`} className="flex items-center justify-between p-3 sm:p-4 rounded-lg border" style={{backgroundColor:'rgba(255,255,255,0.02)', borderColor:'var(--default-border)'}}>
+                  <div className="flex items-center space-x-3 sm:space-x-4">
+                    <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-lg overflow-hidden flex-shrink-0">
+                      <Image 
+                        src={NFT_IMAGES[purchase.code] || '/logo.png'} 
+                        alt={`${purchase.code} NFT`} 
+                        width={48} 
+                        height={48} 
+                        className="w-full h-full object-cover" 
+                      />
+                    </div>
+                    <div>
+                      <div className="text-white font-semibold text-sm sm:text-base">{purchase.code}</div>
+                      <div className="text-gray-400 text-xs sm:text-sm">
+                        {new Date(purchase.purchasedAt).toLocaleDateString('en-US', {
+                          year: 'numeric',
+                          month: 'short',
+                          day: 'numeric',
+                          hour: '2-digit',
+                          minute: '2-digit'
+                        })}
+                      </div>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <div className="text-green-400 font-semibold text-sm sm:text-base">$100.00</div>
+                    <div className="text-gray-400 text-xs sm:text-sm">Purchase Price</div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       </div>
     </div>

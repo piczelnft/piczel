@@ -129,7 +129,8 @@ export default function LevelIncomePage() {
             </p>
           </div>
 
-          <div className="overflow-x-auto">
+          {/* Desktop Table */}
+          <div className="hidden md:block overflow-x-auto">
             <table className="w-full">
               <thead className="bg-white/5">
                 <tr>
@@ -266,6 +267,125 @@ export default function LevelIncomePage() {
                 ))}
               </tbody>
             </table>
+          </div>
+
+          {/* Mobile Grid */}
+          <div className="md:hidden p-4">
+            <div className="grid grid-cols-1 gap-4">
+              {levelIncomeData?.levelIncomeDetails?.map((referral, index) => (
+                <div key={referral.referral.memberId} className="bg-white/5 backdrop-blur-lg rounded-lg p-4 border border-white/10">
+                  <div className="flex items-start space-x-4">
+                    <div className="flex-shrink-0">
+                      <div className="h-12 w-12 bg-gradient-to-r from-green-500 to-emerald-500 rounded-full flex items-center justify-center">
+                        <span className="text-white text-lg font-bold">
+                          {index + 1}
+                        </span>
+                      </div>
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center space-x-3 mb-3">
+                        <div className="flex-shrink-0">
+                          {referral.referral.avatar ? (
+                            <Image
+                              className="h-10 w-10 rounded-full"
+                              src={referral.referral.avatar}
+                              alt={referral.referral.name}
+                              width={40}
+                              height={40}
+                            />
+                          ) : (
+                            <div className="h-10 w-10 rounded-full bg-gradient-to-r from-gray-400 to-gray-600 flex items-center justify-center">
+                              <span className="text-white text-sm font-medium">
+                                {referral.referral.name.charAt(0).toUpperCase()}
+                              </span>
+                            </div>
+                          )}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <h3 className="text-lg font-medium text-white truncate">
+                            {referral.referral.name}
+                          </h3>
+                          <p className="text-sm text-gray-300">
+                            {referral.referral.memberId}
+                          </p>
+                          <p className="text-xs text-gray-400 truncate">
+                            {referral.referral.email}
+                          </p>
+                        </div>
+                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-500/20 text-green-400 border border-green-500/30">
+                          {referral.commissionRate}
+                        </span>
+                      </div>
+                      
+                      <div className="grid grid-cols-2 gap-3 mb-4">
+                        <div className="bg-white/5 rounded-lg p-3">
+                          <div className="text-xs text-gray-400 mb-1">Total Commission</div>
+                          <div className="text-sm font-semibold text-white">
+                            {formatCurrency(referral.totalCommission)}
+                          </div>
+                        </div>
+                        <div className="bg-white/5 rounded-lg p-3">
+                          <div className="text-xs text-gray-400 mb-1">Total Paid</div>
+                          <div className="text-sm font-semibold text-green-400">
+                            {formatCurrency(referral.totalPaid)}
+                          </div>
+                        </div>
+                        <div className="bg-white/5 rounded-lg p-3">
+                          <div className="text-xs text-gray-400 mb-1">Remaining</div>
+                          <div className="text-sm font-semibold text-green-300">
+                            {formatCurrency(referral.remainingAmount)}
+                          </div>
+                        </div>
+                        <div className="bg-white/5 rounded-lg p-3">
+                          <div className="text-xs text-gray-400 mb-1">Daily Amount</div>
+                          <div className="text-sm font-semibold text-green-400">
+                            {formatCurrency(referral.dailyAmount)}
+                          </div>
+                        </div>
+                      </div>
+                      
+                      <div className="space-y-2">
+                        <div className="flex justify-between text-sm">
+                          <span className="text-gray-400">Last Payment:</span>
+                          <span className="text-gray-300">{formatDate(referral.lastPayment)}</span>
+                        </div>
+                        
+                        <div className="text-sm">
+                          <div className="text-gray-400 mb-2">NFT Purchases:</div>
+                          {referral.sourceInfo && referral.sourceInfo.length > 0 ? (
+                            <div className="space-y-2">
+                              {referral.sourceInfo.slice(0, 2).map((source, idx) => (
+                                <div key={idx} className="bg-white/5 rounded p-2">
+                                  <div className="text-xs text-green-400">
+                                    NFT #{source.nftPurchaseId?.toString().slice(-6) || 'N/A'}
+                                  </div>
+                                  <div className="text-xs text-green-300">
+                                    ${source.commissionAmount.toFixed(2)} commission
+                                  </div>
+                                  <div className="text-xs text-gray-400">
+                                    {formatDate(source.purchaseDate)}
+                                  </div>
+                                </div>
+                              ))}
+                              {referral.sourceInfo.length > 2 && (
+                                <div className="text-xs text-gray-500 text-center">
+                                  +{referral.sourceInfo.length - 2} more purchases
+                                </div>
+                              )}
+                            </div>
+                          ) : (
+                            <div className="text-xs text-gray-400 bg-white/5 rounded p-2">
+                              <div className="text-gray-500">No NFT purchases yet</div>
+                              <div className="text-gray-600">Commission will appear when they buy NFTs</div>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
 
           {(!levelIncomeData?.levelIncomeDetails || levelIncomeData.levelIncomeDetails.length === 0) && (

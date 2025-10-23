@@ -159,14 +159,14 @@ export default function WalletAddressPage() {
   return (
     <AdminLayout>
       {/* Header */}
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900">Wallet Address Management</h1>
-        <p className="mt-2 text-gray-600">Manage and monitor user wallet addresses</p>
+      <div className="mb-6 sm:mb-8 px-4 sm:px-0">
+        <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Wallet Address Management</h1>
+        <p className="mt-2 text-sm sm:text-base text-gray-600">Manage and monitor user wallet addresses</p>
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-8">
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6">
           <div className="flex items-center">
             <div className="flex-shrink-0">
               <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
@@ -232,30 +232,30 @@ export default function WalletAddressPage() {
       </div>
 
       {/* Main Content */}
-      <div className="bg-white rounded-lg shadow-sm border border-gray-200">
+      <div className="bg-white rounded-lg shadow-sm border border-gray-200 max-w-full">
         {/* Search and Filter */}
-        <div className="p-6 border-b border-gray-200">
+        <div className="p-4 sm:p-6 border-b border-gray-200">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-4 sm:space-y-0">
-            <div className="flex items-center space-x-4">
-              <div className="relative">
+            <div className="flex items-center w-full sm:w-auto">
+              <div className="relative flex-1 sm:flex-initial">
                 <input
                   type="text"
-                  placeholder="Search by member ID, name, or wallet address..."
+                  placeholder="Search by ID, name, or address..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                  className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent text-sm"
                 />
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                   <span className="text-gray-400">🔍</span>
                 </div>
               </div>
             </div>
-            <div className="flex items-center space-x-4">
-              <label className="text-sm text-gray-700">Show:</label>
+            <div className="flex items-center space-x-2 sm:space-x-4 w-full sm:w-auto">
+              <label className="text-sm text-gray-700 whitespace-nowrap">Show:</label>
               <select
                 value={limit}
                 onChange={(e) => setLimit(Number(e.target.value))}
-                className="border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                className="flex-1 sm:flex-initial border border-gray-300 rounded-lg px-2 sm:px-3 py-2 focus:ring-2 focus:ring-purple-500 focus:border-transparent text-sm"
               >
                 <option value={10}>10 entries</option>
                 <option value={25}>25 entries</option>
@@ -266,8 +266,8 @@ export default function WalletAddressPage() {
           </div>
         </div>
 
-        {/* Table */}
-        <div className="overflow-x-auto">
+        {/* Desktop Table */}
+        <div className="hidden md:block overflow-x-auto -mx-4 sm:mx-0">
           <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-50">
               <tr>
@@ -321,13 +321,13 @@ export default function WalletAddressPage() {
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="flex items-center space-x-2">
-                      <code className="text-sm text-gray-900 bg-gray-100 px-2 py-1 rounded">
+                      <code className="text-xs sm:text-sm text-gray-900 bg-gray-100 px-1.5 sm:px-2 py-1 rounded truncate max-w-[120px] sm:max-w-none">
                         {wallet.address ? `${wallet.address.slice(0, 6)}...${wallet.address.slice(-4)}` : 'Not Connected'}
                       </code>
                       {wallet.address && (
                         <button
                           onClick={() => copyToClipboard(wallet.address)}
-                          className="text-gray-400 hover:text-gray-600"
+                          className="text-gray-400 hover:text-gray-600 flex-shrink-0"
                           title="Copy full address"
                         >
                           📋
@@ -345,17 +345,74 @@ export default function WalletAddressPage() {
                     {getConnectionStatusBadge(wallet.isConnected)}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                    <button className="text-blue-600 hover:text-blue-900 mr-3">
-                      View Details
-                    </button>
-                    <button className="text-red-600 hover:text-red-900">
-                      Disconnect
-                    </button>
+                    <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
+                      <button className="text-blue-600 hover:text-blue-900 text-xs sm:text-sm">
+                        View Details
+                      </button>
+                      <button className="text-red-600 hover:text-red-900 text-xs sm:text-sm">
+                        Disconnect
+                      </button>
+                    </div>
                   </td>
                 </tr>
               ))}
             </tbody>
           </table>
+        </div>
+
+        {/* Mobile Grid */}
+        <div className="md:hidden grid grid-cols-1 gap-4">
+          {walletAddresses.map((wallet, index) => (
+            <div key={wallet._id || index} className="bg-white rounded-lg shadow p-4 border">
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-lg font-medium text-gray-900">
+                    {wallet.memberName || wallet.name || 'Member'}
+                  </h3>
+                  {getConnectionStatusBadge(wallet.isConnected)}
+                </div>
+                <div className="space-y-2">
+                  <p className="text-sm text-gray-600">
+                    <span className="font-medium">Member ID:</span> {wallet.memberId || 'N/A'}
+                  </p>
+                  <p className="text-sm text-gray-600">
+                    <span className="font-medium">Email:</span> {wallet.email || 'No email'}
+                  </p>
+                  <div className="text-sm text-gray-600">
+                    <span className="font-medium">Wallet Address:</span>
+                    <div className="flex items-center space-x-2 mt-1">
+                      <code className="text-xs text-gray-900 bg-gray-100 px-2 py-1 rounded truncate flex-1">
+                        {wallet.address ? `${wallet.address.slice(0, 8)}...${wallet.address.slice(-6)}` : 'Not Connected'}
+                      </code>
+                      {wallet.address && (
+                        <button
+                          onClick={() => copyToClipboard(wallet.address)}
+                          className="text-gray-400 hover:text-gray-600 flex-shrink-0"
+                          title="Copy full address"
+                        >
+                          📋
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                  <p className="text-sm text-gray-600">
+                    <span className="font-medium">Network:</span> {wallet.network || 'Unknown'}
+                  </p>
+                  <p className="text-sm text-gray-600">
+                    <span className="font-medium">Connected:</span> {wallet.connectedAt ? formatDate(wallet.connectedAt) : 'Never'}
+                  </p>
+                </div>
+                <div className="mt-3 flex space-x-2">
+                  <button className="text-blue-600 hover:text-blue-900 text-sm font-medium">
+                    View Details →
+                  </button>
+                  <button className="text-red-600 hover:text-red-900 text-sm font-medium">
+                    Disconnect
+                  </button>
+                </div>
+              </div>
+            </div>
+          ))}
         </div>
 
         {/* Pagination */}

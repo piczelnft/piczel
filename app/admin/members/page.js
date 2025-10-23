@@ -250,14 +250,14 @@ export default function MemberManagement() {
       <div className="bg-white rounded-lg shadow-sm border border-gray-200">
         {/* Header */}
         <div className="px-6 py-4 border-b border-gray-200">
-          <div className="flex justify-between items-center">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center space-y-4 sm:space-y-0">
             <div>
               <h2 className="text-xl font-semibold text-gray-900">
                 Member Details
               </h2>
               <p className="text-sm text-gray-600">Click on any row to view member details</p>
             </div>
-            <div className="flex items-center space-x-4">
+            <div className="flex items-center space-x-4 w-full sm:w-auto">
               <select
                 value={limit}
                 onChange={(e) => handleLimitChange(parseInt(e.target.value))}
@@ -288,8 +288,8 @@ export default function MemberManagement() {
           </div>
         </div>
 
-        {/* Table */}
-        <div className="overflow-x-auto">
+        {/* Desktop Table */}
+        <div className="hidden md:block overflow-x-auto -mx-4 sm:mx-0">
           <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-50">
               <tr>
@@ -394,6 +394,76 @@ export default function MemberManagement() {
               ))}
             </tbody>
           </table>
+        </div>
+
+        {/* Mobile Grid */}
+        <div className="md:hidden grid grid-cols-1 gap-4">
+          {members.map((member) => (
+            <div key={member.memberId} className="bg-white rounded-lg shadow p-4 border">
+              <div className="flex items-start space-x-4">
+                <div className="flex-shrink-0">
+                  {member.avatar ? (
+                    <Image
+                      src={member.avatar}
+                      alt="Avatar"
+                      width={48}
+                      height={48}
+                      className="w-12 h-12 rounded-full"
+                    />
+                  ) : (
+                    <div className="w-12 h-12 bg-gray-200 rounded-full flex items-center justify-center">
+                      <span className="text-gray-500 text-lg">👤</span>
+                    </div>
+                  )}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center justify-between">
+                    <h3 className="text-lg font-medium text-gray-900 truncate">
+                      {member.memberName}
+                    </h3>
+                    <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
+                      member.rank === "Basic" ? "bg-red-100 text-red-800" : 
+                      member.status === "Active" ? "bg-green-100 text-green-800" : 
+                      "bg-yellow-100 text-yellow-800"
+                    }`}>
+                      {member.rank === "Basic" ? "Inactive" : member.status}
+                    </span>
+                  </div>
+                  <div className="mt-2 space-y-1">
+                    <p className="text-sm text-gray-600">
+                      <span className="font-medium">Member ID:</span> {member.memberId}
+                    </p>
+                    <p className="text-sm text-gray-600">
+                      <span className="font-medium">Sponsor:</span> {member.sponsorName}
+                    </p>
+                    <p className="text-sm text-gray-600">
+                      <span className="font-medium">Rank:</span> {member.rank}
+                    </p>
+                    <p className="text-sm text-gray-600">
+                      <span className="font-medium">Wallet:</span> {formatCurrency(member.walletBalance)}
+                    </p>
+                    <p className="text-sm text-gray-600">
+                      <span className="font-medium">Joined:</span> {member.joining}
+                    </p>
+                  </div>
+                  <div className="mt-3 flex space-x-2">
+                    <button
+                      onClick={() => router.push(`/admin/members/${member.memberId}`)}
+                      className="text-indigo-600 hover:text-indigo-900 text-sm font-medium"
+                    >
+                      View Details →
+                    </button>
+                    <button
+                      onClick={() => handleDeleteMember(member.memberId)}
+                      className="text-red-600 hover:text-red-900 text-sm font-medium"
+                    >
+                      Delete
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          ))}
         </div>
 
         {/* Pagination */}

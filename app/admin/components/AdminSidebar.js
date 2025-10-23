@@ -70,6 +70,23 @@ const navigation = [
     icon: "🎫",
     current: false,
   },
+  {
+    name: "NFT Market Withdrawal",
+    icon: "🖼️",
+    hasDropdown: true,
+    subItems: [
+      {
+        name: "Withdrawal Management",
+        href: "/admin/nft-market-withdrawal",
+        icon: "💰",
+      },
+      {
+        name: "Payout History",
+        href: "/admin/nft-payout-history",
+        icon: "📜",
+      },
+    ],
+  },
 ];
 
 export default function AdminSidebar() {
@@ -77,6 +94,7 @@ export default function AdminSidebar() {
   const { isCollapsed, setIsCollapsed, isMobileOpen, setIsMobileOpen } = useSidebar();
   const [paymentDropdownOpen, setPaymentDropdownOpen] = useState(false);
   const [memberDropdownOpen, setMemberDropdownOpen] = useState(false);
+  const [nftDropdownOpen, setNftDropdownOpen] = useState(false);
 
   // Check if current path is a payment-related page
   const isPaymentPage =
@@ -87,19 +105,25 @@ export default function AdminSidebar() {
   const isMemberPage =
     pathname === "/admin/members" || pathname.startsWith("/admin/nft-counter");
 
+  const isNftPage =
+    pathname.startsWith("/admin/nft-market-withdrawal") || 
+    pathname.startsWith("/admin/nft-payout-history");
+
   // Auto-open dropdowns if on respective pages
   React.useEffect(() => {
     if (!isCollapsed) {
       if (isPaymentPage) setPaymentDropdownOpen(true);
       if (isMemberPage) setMemberDropdownOpen(true);
+      if (isNftPage) setNftDropdownOpen(true);
     }
-  }, [isPaymentPage, isMemberPage, isCollapsed]);
+  }, [isPaymentPage, isMemberPage, isNftPage, isCollapsed]);
 
   // Close dropdown when sidebar is collapsed
   React.useEffect(() => {
     if (isCollapsed) {
       setPaymentDropdownOpen(false);
       setMemberDropdownOpen(false);
+      setNftDropdownOpen(false);
     }
   }, [isCollapsed]);
 
@@ -152,6 +176,8 @@ export default function AdminSidebar() {
                       setPaymentDropdownOpen(!paymentDropdownOpen);
                     } else if (item.name === "Member Management") {
                       setMemberDropdownOpen(!memberDropdownOpen);
+                    } else if (item.name === "NFT Market Withdrawal") {
+                      setNftDropdownOpen(!nftDropdownOpen);
                     }
                   }}
                   className={`w-full group flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors duration-200 ${
@@ -177,6 +203,15 @@ export default function AdminSidebar() {
                         <span
                           className={`ml-auto transition-transform duration-200 ${
                             memberDropdownOpen ? "rotate-180" : "rotate-0"
+                          }`}
+                        >
+                          ▼
+                        </span>
+                      )}
+                      {item.name === "NFT Market Withdrawal" && (
+                        <span
+                          className={`ml-auto transition-transform duration-200 ${
+                            nftDropdownOpen ? "rotate-180" : "rotate-0"
                           }`}
                         >
                           ▼
@@ -212,6 +247,30 @@ export default function AdminSidebar() {
                   </div>
                 )}
                 {!isCollapsed && item.name === "Member Management" && memberDropdownOpen && (
+                  <div className="ml-4 mt-1 space-y-1">
+                    {item.subItems?.map((subItem) => {
+                      const isSubItemActive = pathname === subItem.href;
+                      return (
+                        <Link
+                          key={subItem.name}
+                          href={subItem.href}
+                          className={`group flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors duration-200 ${
+                            isSubItemActive
+                              ? "bg-purple-600 text-white"
+                              : "text-gray-300 hover:bg-gray-700 hover:text-white"
+                          }`}
+                        >
+                          <span className="mr-3 text-lg">{subItem.icon}</span>
+                          <span className="flex-1">{subItem.name}</span>
+                          {isSubItemActive && (
+                            <span className="ml-auto w-2 h-2 bg-white rounded-full"></span>
+                          )}
+                        </Link>
+                      );
+                    })}
+                  </div>
+                )}
+                {!isCollapsed && item.name === "NFT Market Withdrawal" && nftDropdownOpen && (
                   <div className="ml-4 mt-1 space-y-1">
                     {item.subItems?.map((subItem) => {
                       const isSubItemActive = pathname === subItem.href;
