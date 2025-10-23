@@ -280,7 +280,7 @@ export default function NFTMarketWithdrawal() {
           <div>
             <h1 className="text-2xl font-bold text-gray-900">NFT Market Withdrawal</h1>
             <p className="text-gray-600 mt-1">
-              Manage users' holding wallet amounts and NFT withdrawal requests
+              Manage users&apos; holding wallet amounts and NFT withdrawal requests
             </p>
           </div>
         </div>
