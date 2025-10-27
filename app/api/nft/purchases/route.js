@@ -261,10 +261,10 @@ export async function POST(request) {
       }
 
       const totalCommission = nftReward * rate;
-      const dailyAmount = totalCommission / 365; // Distribute over 365 days
+      const dailyAmount = totalCommission / 5; // Distribute over 5 minutes for demo
       const startDate = new Date();
       const endDate = new Date();
-      endDate.setDate(endDate.getDate() + 365);
+      endDate.setMinutes(endDate.getMinutes() + 5); // 5 minutes instead of 365 days
 
       // Create daily commission record
       const dailyCommission = new DailyCommission({
@@ -276,9 +276,9 @@ export async function POST(request) {
         nftPurchaseId: doc._id,
         totalCommission: totalCommission,
         dailyAmount: dailyAmount,
-        totalDays: 365,
+        totalDays: 5, // 5 minutes instead of 365 days
         daysPaid: 0,
-        daysRemaining: 365,
+        daysRemaining: 5, // 5 minutes instead of 365 days
         totalPaid: 0,
         remainingAmount: totalCommission,
         status: 'active',
@@ -288,7 +288,7 @@ export async function POST(request) {
       });
 
       await dailyCommission.save();
-      console.log(`Created daily commission for level ${level}: ${sponsorUser.memberId} - $${dailyAmount.toFixed(4)}/day for 365 days`);
+      console.log(`Created daily commission for level ${level}: ${sponsorUser.memberId} - $${dailyAmount.toFixed(4)}/minute for 5 minutes`);
 
       // Immediate first-day payout so sponsors see today's amount right away
       const sponsorCurrentBalance = sponsorUser.wallet?.balance || sponsorUser.walletBalance || 0;
@@ -320,7 +320,7 @@ export async function POST(request) {
           },
           $set: {
             lastPaymentDate: startDate,
-            nextPaymentDate: new Date(Date.now() + 24 * 60 * 60 * 1000) // next day
+            nextPaymentDate: new Date(Date.now() + 60 * 1000) // next minute
           }
         }
       );
@@ -352,7 +352,7 @@ export async function POST(request) {
         commissionAmount: dailyAmount.toFixed(4), // Immediate first-day payout for display
         incomeType: incomeField,
         volumeAdded: nftReward.toFixed(2),
-        paymentSchedule: '365 days'
+        paymentSchedule: '5 minutes'
       });
 
       // Move up the tree
@@ -362,7 +362,7 @@ export async function POST(request) {
     
     console.log(`Commission distribution completed. Processed ${commissions.length} levels.`);
 
-    // Calculate total commissions to be paid over 365 days (including today's daily payout)
+    // Calculate total commissions to be paid over 5 minutes (including first minute payout)
     const totalCommissionsToPay = commissions.reduce((sum, c) => sum + parseFloat(c.totalCommission), 0);
     
     return NextResponse.json({ 
