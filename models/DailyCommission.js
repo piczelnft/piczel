@@ -40,7 +40,7 @@ const DailyCommissionSchema = new mongoose.Schema({
   },
   totalDays: {
     type: Number,
-    default: 5
+    default: 365
   },
   daysPaid: {
     type: Number,

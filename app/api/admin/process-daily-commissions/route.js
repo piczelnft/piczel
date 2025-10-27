@@ -117,7 +117,7 @@ export async function POST(request) {
               },
               $set: {
                 lastPaymentDate: new Date(),
-                nextPaymentDate: new Date(Date.now() + 5 * 60 * 1000), // Next 5 minutes for demo
+                nextPaymentDate: new Date(Date.now() + 24 * 60 * 60 * 1000), // Next day
                 status: commission.daysRemaining === 1 ? 'completed' : 'active'
               }
             },

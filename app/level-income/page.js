@@ -408,15 +408,15 @@ export default function LevelIncomePage() {
                 <li>• Direct Referrals (Level 1): 10% commission</li>
                 <li>• When someone uses your sponsor ID</li>
                 <li>• You earn 10% of their NFT purchases</li>
-                <li>• Commission distributed over 5 minutes (demo mode)</li>
+                <li>• Commission distributed over 365 days</li>
               </ul>
             </div>
             <div>
               <h4 className="text-md font-medium text-green-400 mb-2">Payment Schedule</h4>
               <ul className="text-sm text-gray-300 space-y-1">
-                <li>• Commissions distributed over 5 minutes (demo mode)</li>
-                <li>• Payments processed every 5 minutes (demo mode)</li>
-                <li>• Immediate first payment</li>
+                <li>• Commissions distributed over 365 days</li>
+                <li>• Daily payments processed automatically</li>
+                <li>• Immediate first-day payout</li>
                 <li>• Track remaining amounts and schedules</li>
               </ul>
             </div>

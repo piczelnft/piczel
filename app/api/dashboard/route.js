@@ -81,12 +81,12 @@ export async function GET() {
             clubA: `http://piczelite.com/member/register/DGT123456/ClubA`,
             clubB: `http://piczelite.com/member/register/DGT123456/ClubB`
           },
-          totalNftPurchases: 5,
-          totalNftPurchaseAmount: "400.00", // 5 NFTs × $80 = $400
-          totalLevelIncome: "0.00",
-          totalSpotIncome: "850.75",
-          directMembersNftVolume: "160.00", // 2 NFTs × $80 = $160 (example)
-          totalMembersNftVolume: "400.00", // 5 NFTs × $80 = $400 (example)
+        totalNftPurchases: 5,
+        totalNftPurchaseAmount: "500.00", // 5 NFTs × $100 = $500
+        totalLevelIncome: "0.00",
+        totalSpotIncome: "850.75",
+        directMembersNftVolume: "200.00", // 2 NFTs × $100 = $200 (example)
+        totalMembersNftVolume: "500.00", // 5 NFTs × $100 = $500 (example)
         };
         
         return NextResponse.json(
@@ -101,6 +101,14 @@ export async function GET() {
       // Get user data
       console.log("Fetching user data for userId:", userId);
       const user = await User.findById(userId).select('memberId name email sponsorIncome levelIncome rewardIncome wallet.balance walletBalance isActivated package sponsoredMembersVolume');
+      
+      // Combine sponsorIncome and levelIncome
+      const combinedLevelIncome = (user.sponsorIncome || 0) + (user.levelIncome || 0);
+      console.log(`Dashboard level income calculation:`, {
+        sponsorIncome: user.sponsorIncome,
+        levelIncome: user.levelIncome,
+        combinedLevelIncome
+      });
       
       console.log("Dashboard API - Raw user data:", {
         memberId: user?.memberId,
@@ -152,13 +160,13 @@ export async function GET() {
           communityReward: "0.00"
         },
         totalNftPurchases: 5,
-        totalNftPurchaseAmount: "400.00", // 5 NFTs × $80 = $400
+        totalNftPurchaseAmount: "500.00", // 5 NFTs × $100 = $500
         totalSponsorsIncome: "1250.50",
         totalLevelIncome: "0.00",
         totalWithdrawalAmount: "750.25",
         totalSpotIncome: "850.75",
-        directMembersNftVolume: "160.00", // 2 NFTs × $80 = $160 (example)
-        totalMembersNftVolume: "400.00", // 5 NFTs × $80 = $400 (example)
+        directMembersNftVolume: "200.00", // 2 NFTs × $100 = $200 (example)
+        totalMembersNftVolume: "500.00", // 5 NFTs × $100 = $500 (example)
         memberVolumes: {
           sponsoredMembersVolume: "2500.00",
           directMembersVolume: "1250.50",
@@ -197,11 +205,9 @@ export async function GET() {
       });
 
       // Calculate wallet balance (convert to number for consistency)
-      // Total balance = sponsor income + level income + spot income (reward income)
-      const sponsorIncome = user.sponsorIncome || 0;
-      const levelIncome = user.levelIncome || 0;
+      // Total balance = combined level income (sponsor + level) + spot income (reward income)
       const rewardIncome = user.rewardIncome || 0; // This includes spot income
-      const walletBalance = sponsorIncome + levelIncome + rewardIncome;
+      const walletBalance = combinedLevelIncome + rewardIncome; // Use combined level income
 
       // Get club statistics (Club A and Club B teams) with error handling
       let clubAStats = { count: 0, business: 0 };
@@ -266,15 +272,7 @@ export async function GET() {
         totalNftPurchases: await calculateTotalNftPurchases(userId),
         totalNftPurchaseAmount: await calculateTotalNftPurchaseAmount(userId),
         totalSponsorsIncome: await calculateTotalSponsorsIncome(userId),
-        totalLevelIncome: (() => {
-          const levelIncomeValue = user.levelIncome || 0;
-          console.log(`Dashboard totalLevelIncome calculation:`, {
-            userLevelIncome: user.levelIncome,
-            levelIncomeValue,
-            finalValue: levelIncomeValue.toFixed(2)
-          });
-          return levelIncomeValue.toFixed(2);
-        })(),
+        totalLevelIncome: combinedLevelIncome.toFixed(2), // Combined sponsorIncome + levelIncome
         totalWithdrawalAmount: await calculateTotalWithdrawalAmount(userId),
         totalSpotIncome: (user.rewardIncome || 0).toFixed(2),
         directMembersNftVolume: await calculateDirectMembersNftVolume(userId),
@@ -452,10 +450,10 @@ async function calculateTotalNftPurchaseAmount(userId) {
     const NftPurchase = (await import("@/models/NftPurchase")).default;
     const purchases = await NftPurchase.find({ userId }).select('price');
     
-    // Each NFT purchase: $100 investment, $80 net after 20% commission
-    // This shows the net amount received after sponsor commissions
-    const netAmountPerNft = 80; // $100 - $20 commission = $80
-    const totalAmount = purchases.length * netAmountPerNft;
+    // Each NFT purchase: $100 - user receives full amount in wallet
+    // Commissions are deducted invisibly and paid to sponsors over 365 days
+    const amountPerNft = 100; // User sees full $100 in wallet
+    const totalAmount = purchases.length * amountPerNft;
     
     return totalAmount.toFixed(2);
   } catch (error) {
@@ -509,15 +507,15 @@ async function calculateDirectMembersNftVolume(userId) {
     }
     
     // Calculate total NFT purchase amount from direct members
-    // Each NFT purchase represents $80 net amount (after 20% commission)
+    // Each NFT purchase represents $100 (commissions deducted invisibly)
     const directMembersPurchases = await NftPurchase.find({ 
       userId: { $in: directMemberIds } 
     });
     
     console.log(`NFT purchases found for direct members: ${directMembersPurchases.length}`);
     
-    // Calculate total amount: number of purchases × $80 per NFT
-    const totalVolume = directMembersPurchases.length * 80;
+    // Calculate total amount: number of purchases × $100 per NFT
+    const totalVolume = directMembersPurchases.length * 100;
     
     console.log(`Total direct members NFT volume: ${totalVolume}`);
     return totalVolume.toFixed(2);
@@ -545,15 +543,15 @@ async function calculateTotalMembersNftVolume(userId) {
     }
     
     // Calculate total NFT purchase amount from all team members
-    // Each NFT purchase represents $80 net amount (after 20% commission)
+    // Each NFT purchase represents $100 (commissions deducted invisibly)
     const allMembersPurchases = await NftPurchase.find({ 
       userId: { $in: allDescendants } 
     });
     
     console.log(`NFT purchases found for all members: ${allMembersPurchases.length}`);
     
-    // Calculate total amount: number of purchases × $80 per NFT
-    const totalVolume = allMembersPurchases.length * 80;
+    // Calculate total amount: number of purchases × $100 per NFT
+    const totalVolume = allMembersPurchases.length * 100;
     
     console.log(`Total members NFT volume: ${totalVolume}`);
     return totalVolume.toFixed(2);

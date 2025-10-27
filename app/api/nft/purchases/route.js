@@ -28,6 +28,45 @@ function getAuthUserId() {
   }
 }
 
+// Helper function to distribute spot income to 3 levels
+async function distributeSpotIncome(sponsorId, actionMemberId, actionType = 'nft_purchase') {
+  const spotIncomeLevels = [3, 1, 1]; // Level 1 = $3, Level 2 = $1, Level 3 = $1
+  let currentSponsorId = sponsorId;
+  let totalPaid = 0;
+
+  for (let level = 0; level < spotIncomeLevels.length; level++) {
+    const spotAmount = spotIncomeLevels[level];
+    
+    if (!currentSponsorId) {
+      console.log(`No sponsor at level ${level + 1}`);
+      break;
+    }
+
+    const sponsor = await User.findById(currentSponsorId);
+    if (!sponsor) {
+      console.log(`Sponsor not found at level ${level + 1}`);
+      break;
+    }
+
+    console.log(`Distributing spot income at Level ${level + 1}: $${spotAmount} to ${sponsor.memberId} for ${actionType} by ${actionMemberId}`);
+
+    // Update sponsor's balance and spot income
+    await User.findByIdAndUpdate(currentSponsorId, {
+      $inc: {
+        'wallet.balance': spotAmount,
+        'walletBalance': spotAmount,
+        'rewardIncome': spotAmount
+      }
+    });
+
+    totalPaid += spotAmount;
+    currentSponsorId = sponsor.sponsor; // Move up to next level
+  }
+
+  console.log(`Total spot income distributed: $${totalPaid} for ${actionType} by ${actionMemberId}`);
+  return totalPaid;
+}
+
 export async function GET() {
   try {
     const userId = getAuthUserId();
@@ -93,14 +132,14 @@ export async function POST(request) {
       0.005, // L10
     ];
     const totalCommissions = COMMISSION_RATES.reduce((sum, r) => sum + r, 0) * nftReward; // 20%
-    const userReward = nftReward - totalCommissions; // $80
     const currentBalance = user.wallet?.balance || user.walletBalance || 0;
-    const newBalance = currentBalance + userReward;
+    // User gets full $100 in wallet - commissions are deducted invisibly and paid to sponsors over 365 days
+    const newBalance = currentBalance + nftReward;
 
     console.log(`NFT Purchase Debug - User: ${user.memberId}`);
     console.log(`Current wallet.balance: $${user.wallet?.balance || 0}`);
     console.log(`Current walletBalance: $${user.walletBalance || 0}`);
-    console.log(`User Reward: $${userReward}`);
+    console.log(`User Reward: $${nftReward} (full amount - commissions are invisible)`);
     console.log(`New Balance: $${newBalance}`);
 
     // Update both wallet balance fields to ensure consistency
@@ -118,6 +157,11 @@ export async function POST(request) {
     console.log(`Updated wallet.balance: $${updatedUser?.wallet?.balance}`);
     console.log(`Updated walletBalance: $${updatedUser?.walletBalance}`);
 
+    // Distribute spot income to 3 levels when NFT is purchased: Level 1 = $3, Level 2 = $1, Level 3 = $1
+    if (user.sponsor) {
+      await distributeSpotIncome(user.sponsor, user.memberId, 'nft_purchase');
+    }
+
     // Distribute commissions (up to 10 levels) and update member volumes
     const commissions = [];
     let currentUserForUpline = user;
@@ -133,8 +177,8 @@ export async function POST(request) {
       }
     );
 
-    // Create daily commission records for sponsors (up to 10 levels)
-    console.log(`Starting commission distribution for user: ${user.memberId}`);
+    // Distribute commissions instantly (up to 10 levels)
+    console.log(`Starting instant commission distribution for user: ${user.memberId}`);
     console.log(`Current user for upline: ${currentUserForUpline.memberId} (${currentUserForUpline.name})`);
     
     for (let level = 1; level <= 10; level++) {
@@ -160,11 +204,67 @@ export async function POST(request) {
 
       console.log(`Processing level ${level} sponsor: ${sponsorUser.memberId} (${sponsorUser.name})`);
 
+      // Check conditions for commission distribution
+      let canReceiveCommission = true;
+      let conditionNotMet = '';
+      
+      if (level === 2) {
+        // Level 2 requires 3 direct members
+        const directMemberCount = await User.countDocuments({ sponsor: sponsorUser._id });
+        if (directMemberCount < 3) {
+          canReceiveCommission = false;
+          conditionNotMet = 'needs 3 direct members';
+          console.log(`Level 2 sponsor ${sponsorUser.memberId} skipped: Has only ${directMemberCount} direct members (needs 3)`);
+        }
+      } else if (level === 3) {
+        // Level 3 requires 2 direct members
+        const directMemberCount = await User.countDocuments({ sponsor: sponsorUser._id });
+        if (directMemberCount < 2) {
+          canReceiveCommission = false;
+          conditionNotMet = 'needs 2 direct members';
+          console.log(`Level 3 sponsor ${sponsorUser.memberId} skipped: Has only ${directMemberCount} direct members (needs 2)`);
+        }
+      } else if (level >= 4 && level <= 10) {
+        // Levels 4-10 require active trade (NFT purchased within last 48 hours)
+        const NftPurchase = (await import("@/models/NftPurchase")).default;
+        const fortyEightHoursAgo = new Date(Date.now() - 48 * 60 * 60 * 1000);
+        const recentPurchase = await NftPurchase.findOne({
+          userId: sponsorUser._id,
+          purchasedAt: { $gte: fortyEightHoursAgo }
+        });
+        
+        if (!recentPurchase) {
+          canReceiveCommission = false;
+          conditionNotMet = 'needs active trade (NFT within 48h)';
+          console.log(`Level ${level} sponsor ${sponsorUser.memberId} skipped: No NFT purchased within last 48 hours`);
+        }
+      }
+      
+      if (!canReceiveCommission) {
+        console.log(`Skipping commission for level ${level} due to unmet condition: ${conditionNotMet}`);
+        // Still move up to next level but skip this commission
+        commissions.push({
+          level,
+          sponsorId: sponsorUser.memberId,
+          sponsorName: sponsorUser.name,
+          commissionRate: `${(rate * 100).toFixed(2)}%`,
+          totalCommission: '0.00',
+          dailyAmount: '0.00',
+          commissionAmount: '0.00',
+          incomeType: 'levelIncome',
+          volumeAdded: nftReward.toFixed(2),
+          paymentSchedule: 'Skipped',
+          reason: conditionNotMet
+        });
+        currentUserForUpline = sponsorUser;
+        continue;
+      }
+
       const totalCommission = nftReward * rate;
-      const dailyAmount = totalCommission / 5; // Distribute over 5 minutes for demo
+      const dailyAmount = totalCommission / 365; // Distribute over 365 days
       const startDate = new Date();
       const endDate = new Date();
-      endDate.setMinutes(endDate.getMinutes() + 5); // 5 minutes for demo
+      endDate.setDate(endDate.getDate() + 365);
 
       // Create daily commission record
       const dailyCommission = new DailyCommission({
@@ -176,9 +276,9 @@ export async function POST(request) {
         nftPurchaseId: doc._id,
         totalCommission: totalCommission,
         dailyAmount: dailyAmount,
-        totalDays: 5,
+        totalDays: 365,
         daysPaid: 0,
-        daysRemaining: 5,
+        daysRemaining: 365,
         totalPaid: 0,
         remainingAmount: totalCommission,
         status: 'active',
@@ -188,12 +288,12 @@ export async function POST(request) {
       });
 
       await dailyCommission.save();
-      console.log(`Created daily commission for level ${level}: ${sponsorUser.memberId} - $${dailyAmount.toFixed(4)}/5min for 5 minutes`);
+      console.log(`Created daily commission for level ${level}: ${sponsorUser.memberId} - $${dailyAmount.toFixed(4)}/day for 365 days`);
 
       // Immediate first-day payout so sponsors see today's amount right away
       const sponsorCurrentBalance = sponsorUser.wallet?.balance || sponsorUser.walletBalance || 0;
       const sponsorNewBalance = sponsorCurrentBalance + dailyAmount;
-      const incomeField = level > 1 ? 'levelIncome' : 'sponsorIncome';
+      const incomeField = 'levelIncome';
       console.log(`Updating ${incomeField} for ${sponsorUser.memberId} by $${dailyAmount.toFixed(4)}`);
 
       await User.findOneAndUpdate(
@@ -220,7 +320,7 @@ export async function POST(request) {
           },
           $set: {
             lastPaymentDate: startDate,
-            nextPaymentDate: new Date(Date.now() + 5 * 60 * 1000) // next 5 minutes for demo
+            nextPaymentDate: new Date(Date.now() + 24 * 60 * 60 * 1000) // next day
           }
         }
       );
@@ -248,9 +348,11 @@ export async function POST(request) {
         sponsorName: sponsorUser.name,
         commissionRate: `${(rate * 100).toFixed(2)}%`,
         totalCommission: totalCommission.toFixed(2),
-        dailyAmount: dailyAmount.toFixed(2),
+        dailyAmount: dailyAmount.toFixed(4),
+        commissionAmount: dailyAmount.toFixed(4), // Immediate first-day payout for display
+        incomeType: incomeField,
         volumeAdded: nftReward.toFixed(2),
-        paymentSchedule: '5 minutes (demo)'
+        paymentSchedule: '365 days'
       });
 
       // Move up the tree
@@ -260,6 +362,9 @@ export async function POST(request) {
     
     console.log(`Commission distribution completed. Processed ${commissions.length} levels.`);
 
+    // Calculate total commissions to be paid over 365 days (including today's daily payout)
+    const totalCommissionsToPay = commissions.reduce((sum, c) => sum + parseFloat(c.totalCommission), 0);
+    
     return NextResponse.json({ 
       purchase: doc,
       user: {
@@ -268,10 +373,10 @@ export async function POST(request) {
           balance: updatedUser.wallet?.balance || newBalance,
         },
       },
-      userReward: Number(userReward.toFixed(2)),
+      userReward: Number(nftReward.toFixed(2)), // Show full $100 to user (commissions are invisible)
       nftReward,
       commissions,
-      totalCommissionsPaid: commissions.reduce((sum, c) => sum + parseFloat(c.commissionAmount), 0).toFixed(2),
+      totalCommissionsPaid: totalCommissionsToPay.toFixed(2),
     }, { status: 201, headers: corsHeaders() });
   } catch (error) {
     // Handle duplicate purchase gracefully

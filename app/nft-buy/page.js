@@ -154,23 +154,12 @@ export default function NFTBuyPage() {
       const next = [...nftPurchases, { code, purchasedAt: new Date().toISOString() }];
       setNftPurchases(next);
       
-      // Display success message with commission details (use server-calculated reward)
+      // Display success message (commission details hidden from user)
       const received = (data.userReward ?? 0).toFixed(2);
       const displayBalance = data.user?.wallet?.balance || data.user?.walletBalance || 0;
-      let successMessage = `🎉 Purchase Successful!\n\nNFT: ${code}\nYou received: $${received}\nYour Balance: $${Number(displayBalance).toFixed(2)}`;
+      const successMessage = `🎉 Purchase Successful!\n\nNFT: ${code}\nYou received: $${received}\nYour Balance: $${Number(displayBalance).toFixed(2)}\n\nNext NFT will unlock tomorrow.`;
       
-      if (data.commissions && data.commissions.length > 0) {
-        successMessage += `\n\n🎉 COMMISSIONS DISTRIBUTED:\n`;
-        successMessage += `Total Paid: $${data.totalCommissionsPaid}\n`;
-        successMessage += `Recipients: ${data.commissions.length} sponsors\n\n`;
-
-        data.commissions.forEach((commission) => {
-          successMessage += `Level ${commission.level}: ${commission.sponsorName} (${commission.sponsorId})\n`;
-          successMessage += `  💰 ${commission.commissionRate} = $${commission.commissionAmount}\n`;
-        });
-      }
-      
-      alert(successMessage + `\n\nNext NFT will unlock tomorrow.`);
+      alert(successMessage);
       
       // Refresh dashboard data to update wallet balance display
       setTimeout(() => {

@@ -16,8 +16,7 @@ export default function WithdrawalRequestPage() {
   const [message, setMessage] = useState("");
   const [userBalance, setUserBalance] = useState(0);
   const [withdrawalBalance, setWithdrawalBalance] = useState(0);
-  const [sponsorIncome, setSponsorIncome] = useState(0); // direct sponsor income (level 1)
-  const [levelIncome, setLevelIncome] = useState(0); // level (2-10) income
+  const [levelIncome, setLevelIncome] = useState(0); // Combined level income (levels 1-10)
   const [spotIncome, setSpotIncome] = useState(0);
   const [walletAddresses, setWalletAddresses] = useState([]);
   const { token, user } = useAuth();
@@ -44,8 +43,7 @@ export default function WithdrawalRequestPage() {
           const balanceData = await balanceResponse.json();
           setUserBalance(balanceData.balance || 0);
           setWithdrawalBalance(balanceData.withdrawalBalance || 0);
-          setSponsorIncome(balanceData.sponsorIncome || 0);
-          setLevelIncome(balanceData.levelIncome || 0);
+          setLevelIncome(balanceData.levelIncome || 0); // Combined sponsorIncome + levelIncome
           setSpotIncome(balanceData.spotIncome || 0);
         }
 
@@ -159,7 +157,7 @@ export default function WithdrawalRequestPage() {
         if (formData.withdrawalType === "spot") {
           setSpotIncome(prev => prev - withdrawalAmount);
         } else {
-          setSponsorIncome(prev => prev - withdrawalAmount);
+          setLevelIncome(prev => prev - withdrawalAmount);
         }
       } else {
         const errorData = await response.json();
@@ -228,12 +226,12 @@ export default function WithdrawalRequestPage() {
               </div>
             </div>
 
-            {/* Sponsor Income */}
+            {/* Level Income */}
             <div className="card-enhanced rounded-xl p-4 sm:p-6" style={{backgroundColor: 'rgba(0, 0, 0, 0.1)', backdropFilter: 'blur(10px)', borderColor: 'var(--default-border)'}}>
               <div className="flex items-center justify-between">
                 <div>
                   <h3 className="text-white font-semibold mb-1 text-sm sm:text-base">Level Income</h3>
-                  <p className="text-xl sm:text-2xl font-bold text-blue-400">${sponsorIncome.toFixed(2)}</p>
+                  <p className="text-xl sm:text-2xl font-bold text-blue-400">${levelIncome.toFixed(2)}</p>
                 </div>
                 <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full flex items-center justify-center" style={{backgroundColor: 'rgba(59, 130, 246, 0.2)'}}>
                   <svg className="w-5 h-5 sm:w-6 sm:h-6 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
