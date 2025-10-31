@@ -1,10 +1,11 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useAuth } from "@/contexts/AuthContext";
 import { useRedirectIfAuthenticated } from "../../lib/auth-utils";
+import { useSearchParams } from 'next/navigation';
 
 export default function SignupPage() {
   const [formData, setFormData] = useState({
@@ -27,6 +28,24 @@ export default function SignupPage() {
   const router = useRouter();
   const { signup } = useAuth();
   const { isAuthenticated, isLoading: authLoading } = useRedirectIfAuthenticated();
+
+  const searchParams = useSearchParams();
+
+  useEffect(() => {
+    const sponsorIdFromUrl = searchParams.get('sponsor');
+    if (sponsorIdFromUrl && sponsorIdFromUrl !== formData.sponsorId) {
+      setFormData(prev => ({
+        ...prev,
+        sponsorId: sponsorIdFromUrl
+      }));
+    }
+  }, [searchParams, formData.sponsorId]); // Added formData.sponsorId to dependency array
+
+  useEffect(() => {
+    if (formData.sponsorId && sponsorValid === null && !sponsorChecking) {
+      validateSponsor();
+    }
+  }, [formData.sponsorId, sponsorValid, sponsorChecking, validateSponsor]); // New useEffect for auto-validation
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -87,8 +106,13 @@ export default function SignupPage() {
     return newErrors;
   };
 
-  const validateSponsor = async () => {
-    if (!formData.sponsorId.trim()) return;
+  const validateSponsor = useCallback(async () => {
+    if (!formData.sponsorId.trim()) {
+      setSponsorValid(null); // Reset if empty
+      return;
+    }
+    if (sponsorValid !== null) return; // Already validated or invalid
+
     setSponsorChecking(true);
     try {
       const res = await fetch(
@@ -107,7 +131,7 @@ export default function SignupPage() {
     } finally {
       setSponsorChecking(false);
     }
-  };
+  }, [formData.sponsorId, sponsorValid, setSponsorValid, setSponsorChecking]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
