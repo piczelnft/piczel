@@ -1,12 +1,12 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useState, useEffect, useCallback, Suspense } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { useAuth } from "@/contexts/AuthContext";
 import { useRedirectIfAuthenticated } from "../../lib/auth-utils";
 
-export default function SignupPage() {
+function SignupPageContent() {
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -27,6 +27,54 @@ export default function SignupPage() {
   const router = useRouter();
   const { signup } = useAuth();
   const { isAuthenticated, isLoading: authLoading } = useRedirectIfAuthenticated();
+
+  const searchParams = useSearchParams();
+  const [initialSponsorId, setInitialSponsorId] = useState(null); // New state to store sponsorId from URL
+
+  useEffect(() => {
+    const sponsorIdFromUrl = searchParams.get('sponsor');
+    if (sponsorIdFromUrl) {
+      setInitialSponsorId(sponsorIdFromUrl); // Set initialSponsorId once from URL
+    }
+  }, [searchParams]); // Only run once on mount for searchParams
+
+  useEffect(() => {
+    if (initialSponsorId && formData.sponsorId === "") {
+      setFormData(prev => ({
+        ...prev,
+        sponsorId: initialSponsorId
+      }));
+    }
+  }, [initialSponsorId, formData.sponsorId]); // Set formData.sponsorId from initialSponsorId
+
+  const validateSponsor = useCallback(async () => {
+    if (!formData.sponsorId.trim()) return;
+    setSponsorChecking(true);
+    try {
+      const res = await fetch(
+        `/api/users/validate-sponsor?memberId=${encodeURIComponent(
+          formData.sponsorId.trim()
+        )}`
+      );
+      const data = await res.json();
+      if (res.ok && data.valid) {
+        setSponsorValid(true);
+      } else {
+        setSponsorValid(false);
+      }
+    } catch {
+      setSponsorValid(false);
+    } finally {
+      setSponsorChecking(false);
+    }
+  }, [formData.sponsorId]); // Re-add useCallback with correct dependencies
+
+  useEffect(() => {
+    if (formData.sponsorId && sponsorValid === null && !sponsorChecking) {
+      validateSponsor();
+    }
+  }, [formData.sponsorId, sponsorValid, sponsorChecking, validateSponsor]); // Add validateSponsor to dependencies
+
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -85,28 +133,6 @@ export default function SignupPage() {
     }
 
     return newErrors;
-  };
-
-  const validateSponsor = async () => {
-    if (!formData.sponsorId.trim()) return;
-    setSponsorChecking(true);
-    try {
-      const res = await fetch(
-        `/api/users/validate-sponsor?memberId=${encodeURIComponent(
-          formData.sponsorId.trim()
-        )}`
-      );
-      const data = await res.json();
-      if (res.ok && data.valid) {
-        setSponsorValid(true);
-      } else {
-        setSponsorValid(false);
-      }
-    } catch {
-      setSponsorValid(false);
-    } finally {
-      setSponsorChecking(false);
-    }
   };
 
   const handleSubmit = async (e) => {
@@ -653,5 +679,13 @@ export default function SignupPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function SignupPage() {
+  return (
+    <Suspense fallback={<div>Loading signup form...</div>}>
+      <SignupPageContent />
+    </Suspense>
   );
 }
