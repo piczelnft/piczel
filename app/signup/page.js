@@ -29,16 +29,23 @@ function SignupPageContent() {
   const { isAuthenticated, isLoading: authLoading } = useRedirectIfAuthenticated();
 
   const searchParams = useSearchParams();
+  const [initialSponsorId, setInitialSponsorId] = useState(null); // New state to store sponsorId from URL
 
   useEffect(() => {
     const sponsorIdFromUrl = searchParams.get('sponsor');
-    if (sponsorIdFromUrl && sponsorIdFromUrl !== formData.sponsorId) {
+    if (sponsorIdFromUrl) {
+      setInitialSponsorId(sponsorIdFromUrl); // Set initialSponsorId once from URL
+    }
+  }, [searchParams]); // Only run once on mount for searchParams
+
+  useEffect(() => {
+    if (initialSponsorId && formData.sponsorId === "") {
       setFormData(prev => ({
         ...prev,
-        sponsorId: sponsorIdFromUrl
+        sponsorId: initialSponsorId
       }));
     }
-  }, [searchParams, formData.sponsorId]);
+  }, [initialSponsorId, formData.sponsorId]); // Set formData.sponsorId from initialSponsorId
 
   useEffect(() => {
     if (formData.sponsorId && sponsorValid === null && !sponsorChecking) {
