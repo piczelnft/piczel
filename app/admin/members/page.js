@@ -132,13 +132,12 @@ export default function MemberManagement() {
     }).format(amount);
   };
 
-  const getStatusBadge = (status) => {
+  const getStatusBadge = (walletBalance) => {
+    const status = walletBalance > 0 ? 'Active' : 'Inactive';
     const statusClasses = {
       Active: "bg-green-100 text-green-800",
       Inactive: "bg-yellow-100 text-yellow-800",
-      Blocked: "bg-red-100 text-red-800",
     };
-
     return (
       <span
         className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
@@ -375,9 +374,7 @@ export default function MemberManagement() {
                     {formatCurrency(member.walletBalance)}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    {getStatusBadge(
-                      member.rank === "Basic" ? "Inactive" : member.status
-                    )}
+                    {getStatusBadge(member.walletBalance)}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                     <button
@@ -421,13 +418,7 @@ export default function MemberManagement() {
                     <h3 className="text-lg font-medium text-gray-900 truncate">
                       {member.memberName}
                     </h3>
-                    <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                      member.rank === "Basic" ? "bg-red-100 text-red-800" : 
-                      member.status === "Active" ? "bg-green-100 text-green-800" : 
-                      "bg-yellow-100 text-yellow-800"
-                    }`}>
-                      {member.rank === "Basic" ? "Inactive" : member.status}
-                    </span>
+                    {getStatusBadge(member.walletBalance)}
                   </div>
                   <div className="mt-2 space-y-1">
                     <p className="text-sm text-gray-600">

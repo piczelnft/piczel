@@ -88,43 +88,38 @@ export default function NFTBuyPage() {
     fetchNftPurchases();
   }, [isAuthenticated, token, fetchNftPurchases]);
 
-  const getLastPurchasedIndex = () => {
-    if (!nftPurchases.length) return -1;
-    const last = nftPurchases[nftPurchases.length - 1];
-    return NFT_SERIES.findIndex(c => c === last.code);
-  };
-
-  const isOneDayPassedSinceLast = () => {
-    if (!nftPurchases.length) return true;
-    const last = nftPurchases[nftPurchases.length - 1];
-    const lastTime = new Date(last.purchasedAt).getTime();
-    const now = Date.now();
-    const diffMs = now - lastTime;
-    return diffMs >= 5 * 60 * 1000; // 5 minutes for demo testing
-  };
-
   const getNftStatus = (code) => {
-    // owned
-    if (nftPurchases.some(p => p.code === code)) {
+    const targetIdx = NFT_SERIES.findIndex(c => c === code);
+    if (targetIdx === -1) return { owned: false, available: false, locked: true }; // Should not happen
+
+    const isOwned = nftPurchases.some(p => p.code === code);
+    if (isOwned) {
       return { owned: true, available: false, locked: false };
     }
-    const lastIdx = getLastPurchasedIndex();
-    const targetIdx = NFT_SERIES.findIndex(c => c === code);
-    // next in sequence?
-    if (targetIdx === lastIdx + 1) {
-      // A1 case when lastIdx==-1 also handled here
-      return {
-        owned: false,
-        available: isOneDayPassedSinceLast() || lastIdx === -1,
-        locked: !(isOneDayPassedSinceLast() || lastIdx === -1)
-      };
+
+    // For A1, it's always available if not owned
+    if (code === 'A1') {
+      return { owned: false, available: true, locked: false };
     }
-    // future ones locked
-    if (targetIdx > lastIdx + 1) {
+
+    // For subsequent NFTs, check the preceding one
+    const previousNftCode = NFT_SERIES[targetIdx - 1];
+    const previousNftPurchase = nftPurchases.find(p => p.code === previousNftCode);
+
+    if (!previousNftPurchase) {
+      return { owned: false, available: false, locked: true }; // Previous not purchased, so locked
+    }
+
+    const lastPurchaseTime = new Date(previousNftPurchase.purchasedAt).getTime();
+    const now = Date.now();
+    const diffMs = now - lastPurchaseTime;
+    const fiveMinutesPassed = diffMs >= 5 * 60 * 1000;
+
+    if (fiveMinutesPassed) {
+      return { owned: false, available: true, locked: false };
+    } else {
       return { owned: false, available: false, locked: true };
     }
-    // default locked
-    return { owned: false, available: false, locked: true };
   };
 
   const handleBuyNft = async (code) => {
@@ -289,15 +284,10 @@ export default function NFTBuyPage() {
               </div>
             </div>
             <div className="text-2xl sm:text-3xl font-bold text-green-400 mb-2">
-              ${(() => {
-                const totalPurchased = nftPurchases.length * 100;
-                const profit = nftPurchases.length * 5; // $5 profit per NFT
-                const profitAfterTax = profit - (profit * 0.25); // 25% tax on profit
-                return (totalPurchased + profitAfterTax).toFixed(2);
-              })()}
+              ${(nftPurchases.length * 105).toFixed(2)}
             </div>
             <p className="text-sm text-gray-400">
-              NFT value + profit (after 25% tax)
+              $105 per NFT (Total Target)
             </p>
           </div>
         </div>

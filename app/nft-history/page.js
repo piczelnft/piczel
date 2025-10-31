@@ -7,6 +7,7 @@ export default function NftHistory() {
   const [purchases, setPurchases] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [walletBalance, setWalletBalance] = useState(0);
   const { user, isAuthenticated } = useAuth();
 
   useEffect(() => {
@@ -39,6 +40,7 @@ export default function NftHistory() {
 
       const data = await response.json();
       setPurchases(data.purchases || []);
+      setWalletBalance(data.walletBalance || 0);
     } catch (err) {
       console.error('Error fetching NFT purchases:', err);
       setError(err.message);
@@ -122,14 +124,23 @@ export default function NftHistory() {
             {purchases.map((purchase) => (
               <div key={purchase._id} className="bg-white/10 backdrop-blur-sm rounded-lg p-6 border border-white/20 hover:bg-white/15 transition-all duration-300">
                 <div className="mb-4">
-                  <h3 className="text-xl font-bold text-white mb-1">{purchase.series}</h3>
+                  <div className="flex items-center justify-between mb-1">
+                    <h3 className="text-xl font-bold text-white">{purchase.series}</h3>
+                    <span className={`px-2 py-1 text-xs font-semibold rounded-full ${
+                      walletBalance > 0 
+                        ? 'bg-yellow-500/20 text-yellow-400 border border-yellow-500/30' 
+                        : 'bg-green-500/20 text-green-400 border border-green-500/30'
+                    }`}>
+                      {walletBalance > 0 ? 'Pending' : 'Completed'}
+                    </span>
+                  </div>
                   <p className="text-gray-300 text-sm mb-2">Code: {purchase.code}</p>
                 </div>
                 
                 <div className="space-y-2 text-sm">
                   <div className="flex justify-between">
                     <span className="text-gray-400">Price:</span>
-                    <span className="text-white font-semibold">${purchase.price}</span>
+                    <span className="text-white font-semibold">${purchase.price || 100}</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-gray-400">Member ID:</span>

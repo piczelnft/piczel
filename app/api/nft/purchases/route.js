@@ -30,12 +30,19 @@ function getAuthUserId() {
 
 // Helper function to distribute spot income to 3 levels
 async function distributeSpotIncome(sponsorId, actionMemberId, actionType = 'nft_purchase') {
-  const spotIncomeLevels = [3, 1, 1]; // Level 1 = $3, Level 2 = $1, Level 3 = $1
+  console.log(`=== Starting spot income distribution ===`);
+  console.log(`For: ${actionMemberId}, Action: ${actionType}, SponsorId: ${sponsorId}`);
+  
+  const spotIncomeLevels = [
+    { amount: 3, condition: 'nft_purchased' },  // L1: $3 - must have NFT purchased
+    { amount: 1, condition: '3_directs' },     // L2: $1 - must have 3 direct members
+    { amount: 1, condition: '2_directs' }      // L3: $1 - must have 2 direct members
+  ];
   let currentSponsorId = sponsorId;
   let totalPaid = 0;
 
   for (let level = 0; level < spotIncomeLevels.length; level++) {
-    const spotAmount = spotIncomeLevels[level];
+    const { amount: spotAmount, condition } = spotIncomeLevels[level];
     
     if (!currentSponsorId) {
       console.log(`No sponsor at level ${level + 1}`);
@@ -48,18 +55,54 @@ async function distributeSpotIncome(sponsorId, actionMemberId, actionType = 'nft
       break;
     }
 
-    console.log(`Distributing spot income at Level ${level + 1}: $${spotAmount} to ${sponsor.memberId} for ${actionType} by ${actionMemberId}`);
+    // Check conditions based on level
+    let meetsCondition = false;
+    let conditionNotMet = '';
 
-    // Update sponsor's balance and spot income
-    await User.findByIdAndUpdate(currentSponsorId, {
-      $inc: {
-        'wallet.balance': spotAmount,
-        'walletBalance': spotAmount,
-        'rewardIncome': spotAmount
+    if (condition === 'nft_purchased') {
+      // Level 1: Check if sponsor has at least one NFT purchased
+      const NftPurchase = (await import("@/models/NftPurchase")).default;
+      const hasNft = await NftPurchase.exists({ userId: sponsor._id });
+      console.log(`L1 Sponsor ${sponsor.memberId}: Checking if has NFT purchased - exists: ${hasNft !== null}`);
+      meetsCondition = hasNft !== null;
+      if (!meetsCondition) {
+        conditionNotMet = 'no NFT purchased';
       }
-    });
+    } else if (condition === '3_directs') {
+      // Level 2: Check if sponsor has at least 3 direct members
+      const directMemberCount = await User.countDocuments({ sponsor: sponsor._id });
+      console.log(`L2 Sponsor ${sponsor.memberId}: Direct members count = ${directMemberCount}, needs >= 3`);
+      meetsCondition = directMemberCount >= 3;
+      if (!meetsCondition) {
+        conditionNotMet = `only ${directMemberCount} direct members (needs 3)`;
+      }
+    } else if (condition === '2_directs') {
+      // Level 3: Check if sponsor has at least 2 direct members
+      const directMemberCount = await User.countDocuments({ sponsor: sponsor._id });
+      console.log(`L3 Sponsor ${sponsor.memberId}: Direct members count = ${directMemberCount}, needs >= 2`);
+      meetsCondition = directMemberCount >= 2;
+      if (!meetsCondition) {
+        conditionNotMet = `only ${directMemberCount} direct members (needs 2)`;
+      }
+    }
 
-    totalPaid += spotAmount;
+    if (meetsCondition) {
+      console.log(`Distributing spot income at Level ${level + 1}: $${spotAmount} to ${sponsor.memberId} for ${actionType} by ${actionMemberId}`);
+
+      // Update sponsor's balance and spot income
+      await User.findByIdAndUpdate(currentSponsorId, {
+        $inc: {
+          'wallet.balance': spotAmount,
+          'walletBalance': spotAmount,
+          'rewardIncome': spotAmount
+        }
+      });
+
+      totalPaid += spotAmount;
+    } else {
+      console.log(`Level ${level + 1} sponsor ${sponsor.memberId} skipped: ${conditionNotMet}`);
+    }
+
     currentSponsorId = sponsor.sponsor; // Move up to next level
   }
 
@@ -75,13 +118,17 @@ export async function GET() {
     }
 
     await dbConnect();
-    const user = await User.findById(userId).select("memberId");
+    const user = await User.findById(userId).select("memberId wallet.balance walletBalance");
     if (!user) {
       return NextResponse.json({ purchases: [] }, { status: 200, headers: corsHeaders() });
     }
 
     const purchases = await NftPurchase.find({ userId }).sort({ purchasedAt: 1 });
-    return NextResponse.json({ purchases }, { status: 200, headers: corsHeaders() });
+    
+    // Get current wallet balance to determine NFT status
+    const walletBalance = user.wallet?.balance || user.walletBalance || 0;
+    
+    return NextResponse.json({ purchases, walletBalance }, { status: 200, headers: corsHeaders() });
   } catch (error) {
     return NextResponse.json({ error: "Internal server error", details: error.message }, { status: 500, headers: corsHeaders() });
   }
@@ -113,7 +160,7 @@ export async function POST(request) {
       memberId: user.memberId || "",
       code,
       series,
-      price: typeof price === "number" ? price : 0,
+      price: typeof price === "number" ? price : 100, // Default price to $100
       purchasedAt: purchasedAt ? new Date(purchasedAt) : new Date(),
     });
 
@@ -261,10 +308,10 @@ export async function POST(request) {
       }
 
       const totalCommission = nftReward * rate;
-      const dailyAmount = totalCommission / 5; // Distribute over 5 minutes for demo
+      const TOTAL_INTERVALS = 365; // Represents 30 hours and 25 minutes (365 * 5 minutes)
+      const dailyAmount = totalCommission / TOTAL_INTERVALS; // Distribute over new total intervals
       const startDate = new Date();
-      const endDate = new Date();
-      endDate.setMinutes(endDate.getMinutes() + 5); // 5 minutes instead of 365 days
+      const endDate = new Date(Date.now() + (TOTAL_INTERVALS * 5 * 60 * 1000)); // Total duration: 365 * 5 minutes
 
       // Create daily commission record
       const dailyCommission = new DailyCommission({
@@ -276,21 +323,21 @@ export async function POST(request) {
         nftPurchaseId: doc._id,
         totalCommission: totalCommission,
         dailyAmount: dailyAmount,
-        totalDays: 5, // 5 minutes instead of 365 days
+        totalDays: TOTAL_INTERVALS, // Use TOTAL_INTERVALS
         daysPaid: 0,
-        daysRemaining: 5, // 5 minutes instead of 365 days
+        daysRemaining: TOTAL_INTERVALS, // Use TOTAL_INTERVALS
         totalPaid: 0,
         remainingAmount: totalCommission,
         status: 'active',
         startDate: startDate,
         endDate: endDate,
-        nextPaymentDate: startDate
+        nextPaymentDate: new Date(Date.now() + 5 * 60 * 1000) // Next payment in 5 minutes
       });
 
       await dailyCommission.save();
-      console.log(`Created daily commission for level ${level}: ${sponsorUser.memberId} - $${dailyAmount.toFixed(4)}/minute for 5 minutes`);
+      console.log(`Created daily commission for level ${level}: ${sponsorUser.memberId} - $${dailyAmount.toFixed(4)}/5 minutes for ${TOTAL_INTERVALS * 5} minutes`);
 
-      // Immediate first-day payout so sponsors see today's amount right away
+      // Immediate first-day payout so sponsors see today's amount right away (first 5-minute interval)
       const sponsorCurrentBalance = sponsorUser.wallet?.balance || sponsorUser.walletBalance || 0;
       const sponsorNewBalance = sponsorCurrentBalance + dailyAmount;
       const incomeField = 'levelIncome';
@@ -320,7 +367,7 @@ export async function POST(request) {
           },
           $set: {
             lastPaymentDate: startDate,
-            nextPaymentDate: new Date(Date.now() + 60 * 1000) // next minute
+            nextPaymentDate: new Date(Date.now() + 5 * 60 * 1000) // next 5 minutes
           }
         }
       );

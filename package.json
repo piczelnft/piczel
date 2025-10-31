@@ -6,7 +6,8 @@
     "dev": "next dev --turbopack",
     "build": "next build --turbopack",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "commission-processor": "node scripts/auto-process-commissions.js"
   },
   "dependencies": {
     "bcryptjs": "^3.0.2",

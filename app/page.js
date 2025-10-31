@@ -11,6 +11,8 @@ export default function Home() {
   const [dashboardData, setDashboardData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [lastUpdated, setLastUpdated] = useState(null);
+  const [nftPurchases, setNftPurchases] = useState([]); // Add this line
 
   const fetchDashboardData = useCallback(async () => {
     try {
@@ -33,20 +35,52 @@ export default function Home() {
       }
 
       const data = await response.json();
-      setDashboardData(data);
+
+      // Fetch NFT purchases
+      const nftResponse = await fetch('/api/nft/purchases', {
+        headers: { 'Authorization': `Bearer ${token}` },
+      });
+      let nftData = { purchases: [] };
+      if (nftResponse.ok) {
+        nftData = await nftResponse.json();
+      }
+      const currentNftPurchases = Array.isArray(nftData.purchases) ? nftData.purchases : [];
+      setNftPurchases(currentNftPurchases);
+      
+      const isActive = currentNftPurchases.length > 0;
+      const statusText = isActive ? "Active" : "Inactive";
+
+      setDashboardData({ 
+        ...data, 
+        userName: user?.name || data.userName || "John Doe", 
+        userEmail: user?.email || data.userEmail || "john.doe@example.com",
+        status: statusText, // Set status based on NFT purchases
+      });
+      setLastUpdated(new Date().toLocaleTimeString());
     } catch (err) {
       console.error('Error fetching dashboard data:', err);
       setError(err.message);
     } finally {
       setLoading(false);
     }
-  }, [token]);
+  }, [token, user]);
 
   useEffect(() => {
     if (isAuthenticated && token) {
       fetchDashboardData();
     }
   }, [isAuthenticated, token, fetchDashboardData]);
+
+  // Auto-refresh dashboard every 30 seconds to show level income updates
+  useEffect(() => {
+    if (!isAuthenticated || !token) return;
+
+    const interval = setInterval(() => {
+      fetchDashboardData();
+    }, 30000); // 30 seconds
+
+    return () => clearInterval(interval);
+  }, [isAuthenticated, token, fetchDashboardData, setNftPurchases]); // Add setNftPurchases
 
 
   // Show loading while checking authentication
@@ -119,7 +153,7 @@ export default function Home() {
   // Fallback to default data if API fails
   const data = dashboardData || {
     memberId: "DGT123456",
-    status: "Active",
+    status: nftPurchases.length > 0 ? "Active" : "Inactive", // Dynamically set status in fallback
     rank: "Basic",
     totalTeam: 863,
     myDirects: 65,
@@ -162,6 +196,8 @@ export default function Home() {
     totalSpotIncome: "850.75",
     directMembersNftVolume: "160.00", // 2 NFTs × $80 = $160 (example)
     totalMembersNftVolume: "400.00", // 5 NFTs × $80 = $400 (example)
+    userName: user?.name || "John Doe", // Fallback for user name
+    userEmail: user?.email || "john.doe@example.com", // Fallback for user email
   };
   return (
     <div className="relative overflow-hidden">
@@ -199,7 +235,7 @@ export default function Home() {
             
               {dashboardData && (
                 <div className="text-xs text-green-400">
-                  ✅ Live Data
+                  ✅ Live Data {lastUpdated && `(Updated: ${lastUpdated})`}
                 </div>
               )}
               {!dashboardData && (
@@ -234,6 +270,24 @@ export default function Home() {
                   <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/20 to-teal-500/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                 </div>
               </Link>
+            </div>
+          </div>
+
+          {/* User Name */}
+          <div className="p-6 hover-lift-enhanced animate-fadeInUp glow-border-blue-light rounded-2xl border" style={{animationDelay: '0.2s', backgroundColor: 'rgba(0, 0, 0, 0.1)', backdropFilter: 'blur(10px)', borderColor: 'var(--default-border)'}}>
+            <div className="text-center relative">
+              <div className="absolute -top-2 -right-2 w-3 h-3 rounded-full animate-pulse" style={{backgroundColor: 'rgb(74, 222, 255)'}}></div>
+              <div className="text-sm mb-2 font-medium" style={{color: 'rgba(255, 255, 255, 0.7)'}}>User Name</div>
+              <div className="font-bold text-lg animate-neonGlow" style={{color: 'rgb(74, 222, 255)'}}>{data.userName}</div>
+            </div>
+          </div>
+
+          {/* User Email */}
+          <div className="p-6 hover-lift-enhanced animate-fadeInUp glow-border-purple-light rounded-2xl border" style={{animationDelay: '0.3s', backgroundColor: 'rgba(0, 0, 0, 0.1)', backdropFilter: 'blur(10px)', borderColor: 'var(--default-border)'}}>
+            <div className="text-center relative">
+              <div className="absolute -top-2 -right-2 w-3 h-3 rounded-full animate-pulse" style={{backgroundColor: 'rgb(192, 132, 252)'}}></div>
+              <div className="text-sm mb-2 font-medium" style={{color: 'rgba(255, 255, 255, 0.7)'}}>Email</div>
+              <div className="font-bold text-lg animate-neonGlow" style={{color: 'rgb(192, 132, 252)'}}>{data.userEmail}</div>
             </div>
           </div>
 

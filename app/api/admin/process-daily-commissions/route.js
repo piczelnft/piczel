@@ -84,12 +84,8 @@ export async function POST(request) {
           const currentBalance = sponsorUser.wallet?.balance || sponsorUser.walletBalance || 0;
           const newBalance = currentBalance + paymentAmount;
 
-          // Determine which income field to update based on commission level
-          let incomeField = 'sponsorIncome'; // Default to sponsorIncome for Level 1
-          
-          if (commission.level > 1) {
-            incomeField = 'levelIncome'; // Levels 2-10 should update levelIncome
-          }
+          // All levels now use levelIncome (combined sponsorIncome + levelIncome)
+          let incomeField = 'levelIncome';
 
           // Update sponsor's wallet and income
           await User.findOneAndUpdate(
@@ -117,7 +113,7 @@ export async function POST(request) {
               },
               $set: {
                 lastPaymentDate: new Date(),
-                nextPaymentDate: new Date(Date.now() + 24 * 60 * 60 * 1000), // Next day
+                nextPaymentDate: new Date(Date.now() + 60 * 1000), // Next minute for demo
                 status: commission.daysRemaining === 1 ? 'completed' : 'active'
               }
             },

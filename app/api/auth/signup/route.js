@@ -9,45 +9,6 @@ export async function OPTIONS(request) {
   return handleCors(request);
 }
 
-// Helper function to distribute spot income to 3 levels
-async function distributeSpotIncome(sponsorId, newUserMemberId) {
-  const spotIncomeLevels = [3, 1, 1]; // Level 1 = $3, Level 2 = $1, Level 3 = $1
-  let currentSponsorId = sponsorId;
-  let totalPaid = 0;
-
-  for (let level = 0; level < spotIncomeLevels.length; level++) {
-    const spotAmount = spotIncomeLevels[level];
-    
-    if (!currentSponsorId) {
-      console.log(`No sponsor at level ${level + 1}`);
-      break;
-    }
-
-    const sponsor = await User.findById(currentSponsorId);
-    if (!sponsor) {
-      console.log(`Sponsor not found at level ${level + 1}`);
-      break;
-    }
-
-    console.log(`Distributing spot income at Level ${level + 1}: $${spotAmount} to ${sponsor.memberId}`);
-
-    // Update sponsor's balance and spot income
-    await User.findByIdAndUpdate(currentSponsorId, {
-      $inc: {
-        'wallet.balance': spotAmount,
-        'walletBalance': spotAmount,
-        'rewardIncome': spotAmount
-      }
-    });
-
-    totalPaid += spotAmount;
-    currentSponsorId = sponsor.sponsor; // Move up to next level
-  }
-
-  console.log(`Total spot income distributed: $${totalPaid} for new user ${newUserMemberId}`);
-  return totalPaid;
-}
-
 export async function POST(request) {
   try {
     // Check if MongoDB URI is configured
@@ -125,8 +86,8 @@ export async function POST(request) {
       rewardIncome: 0,
     });
 
-    // Distribute spot income to 3 levels: Level 1 = $3, Level 2 = $1, Level 3 = $1
-    const totalSpotIncome = await distributeSpotIncome(sponsor._id, user.memberId);
+    // Spot income is only distributed when users purchase NFTs, not on signup
+    const totalSpotIncome = 0;
 
     // Generate JWT token
     const token = jwt.sign(
@@ -142,8 +103,8 @@ export async function POST(request) {
         user,
         token,
         spotIncome: {
-          amount: totalSpotIncome,
-          message: `Welcome! Your sponsors received $${totalSpotIncome} in spot income for your registration ($3, $1, $1 across 3 levels).`,
+          amount: 0,
+          message: `Welcome! Your sponsors will receive spot income when you purchase NFTs.`,
         },
         genealogy: {
           sponsorMemberId: sponsor.memberId,
