@@ -37,6 +37,13 @@ export async function GET(request) {
 
     for (const commission of commissionsToProcess) {
       try {
+        // Validate sponsorId is a valid ObjectId
+        if (!commission.sponsorId || !/^[0-9a-fA-F]{24}$/.test(commission.sponsorId)) {
+          console.error(`Invalid sponsorId format for commission ${commission._id}: ${commission.sponsorId}`);
+          errors.push(`Invalid sponsorId format for commission ${commission._id}: ${commission.sponsorId}`);
+          continue;
+        }
+
         // Get the sponsor user
         const sponsorUser = await User.findById(commission.sponsorId);
         if (!sponsorUser) {
@@ -111,6 +118,7 @@ export async function GET(request) {
     const completedCommissions = processedCommissions.filter(comm => comm.status === 'completed').length;
 
     console.log(`Automatic commission processing completed: ${totalProcessed} commissions processed, $${totalAmount.toFixed(2)} distributed`);
+    console.log(`API Response Summary: Processed: ${totalProcessed}, Distributed: $${totalAmount.toFixed(2)}, Completed: ${completedCommissions}, Errors: ${errors.length}`);
 
     return NextResponse.json(
       {
