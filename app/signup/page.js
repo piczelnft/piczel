@@ -1,12 +1,12 @@
 "use client";
 
-import { useState, useEffect, useCallback, Suspense } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useAuth } from "@/contexts/AuthContext";
 import { useRedirectIfAuthenticated } from "../../lib/auth-utils";
 
-function SignupPageContent() {
+export default function SignupPage() {
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -27,31 +27,6 @@ function SignupPageContent() {
   const router = useRouter();
   const { signup } = useAuth();
   const { isAuthenticated, isLoading: authLoading } = useRedirectIfAuthenticated();
-
-  const searchParams = useSearchParams();
-  const [initialSponsorId, setInitialSponsorId] = useState(null); // New state to store sponsorId from URL
-
-  useEffect(() => {
-    const sponsorIdFromUrl = searchParams.get('sponsor');
-    if (sponsorIdFromUrl) {
-      setInitialSponsorId(sponsorIdFromUrl); // Set initialSponsorId once from URL
-    }
-  }, [searchParams]); // Only run once on mount for searchParams
-
-  useEffect(() => {
-    if (initialSponsorId && formData.sponsorId === "") {
-      setFormData(prev => ({
-        ...prev,
-        sponsorId: initialSponsorId
-      }));
-    }
-  }, [initialSponsorId, formData.sponsorId]); // Set formData.sponsorId from initialSponsorId
-
-  useEffect(() => {
-    if (formData.sponsorId && sponsorValid === null && !sponsorChecking) {
-      validateSponsor();
-    }
-  }, [formData.sponsorId, sponsorValid, sponsorChecking, validateSponsor]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -81,49 +56,39 @@ function SignupPageContent() {
 
     if (!formData.email.trim()) {
       newErrors.email = "Email is required";
-    }
-    else if (!/\S+@\S+\.\S+/.test(formData.email)) {
+    } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
       newErrors.email = "Email is invalid";
     }
 
     if (!formData.mobile.trim()) {
       newErrors.mobile = "Mobile number is required";
-    }
-    else if (!/^[\+]?[1-9][\d]{0,15}$/.test(formData.mobile.replace(/[\s\-\(\)]/g, ''))) {
+    } else if (!/^[\+]?[1-9][\d]{0,15}$/.test(formData.mobile.replace(/[\s\-\(\)]/g, ''))) {
       newErrors.mobile = "Please enter a valid mobile number";
     }
 
     if (!formData.password) {
       newErrors.password = "Password is required";
-    }
-    else if (formData.password.length < 6) {
+    } else if (formData.password.length < 6) {
       newErrors.password = "Password must be at least 6 characters";
     }
 
     if (!formData.confirmPassword) {
       newErrors.confirmPassword = "Please confirm your password";
-    }
-    else if (formData.password !== formData.confirmPassword) {
+    } else if (formData.password !== formData.confirmPassword) {
       newErrors.confirmPassword = "Passwords do not match";
     }
 
     if (!formData.sponsorId.trim()) {
       newErrors.sponsorId = "Sponsorship ID is required";
-    }
-    else if (sponsorValid !== true) {
+    } else if (sponsorValid !== true) {
       newErrors.sponsorId = "Please validate a valid Sponsorship ID";
     }
 
     return newErrors;
   };
 
-  const validateSponsor = useCallback(async () => {
-    if (!formData.sponsorId.trim()) {
-      setSponsorValid(null); // Reset if empty
-      return;
-    }
-    if (sponsorValid !== null) return; // Already validated or invalid
-
+  const validateSponsor = async () => {
+    if (!formData.sponsorId.trim()) return;
     setSponsorChecking(true);
     try {
       const res = await fetch(
@@ -142,7 +107,7 @@ function SignupPageContent() {
     } finally {
       setSponsorChecking(false);
     }
-  }, [formData.sponsorId, sponsorValid, setSponsorValid, setSponsorChecking]);
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -168,14 +133,14 @@ function SignupPageContent() {
 
       if (result.success) {
         let successMessage = "Account created successfully! You've been added to the genealogy tree.";
-
+        
         // Show spot income notification if available
         if (result.spotIncome) {
           successMessage += ` ${result.spotIncome.message}`;
         }
-
+        
         successMessage += " Redirecting...";
-
+        
         setMessage(successMessage);
         setTimeout(() => {
           router.push("/");
@@ -688,13 +653,5 @@ function SignupPageContent() {
         </div>
       </div>
     </div>
-  );
-}
-
-export default function SignupPage() {
-  return (
-    <Suspense fallback={<div>Loading signup form...</div>}>
-      <SignupPageContent />
-    </Suspense>
   );
 }
