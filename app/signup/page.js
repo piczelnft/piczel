@@ -1,13 +1,12 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
-import { useRouter } from "next/navigation";
+import { useState, useEffect, useCallback, Suspense } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { useAuth } from "@/contexts/AuthContext";
 import { useRedirectIfAuthenticated } from "../../lib/auth-utils";
-import { useSearchParams } from 'next/navigation';
 
-export default function SignupPage() {
+function SignupPageContent() {
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -39,13 +38,13 @@ export default function SignupPage() {
         sponsorId: sponsorIdFromUrl
       }));
     }
-  }, [searchParams, formData.sponsorId]); // Added formData.sponsorId to dependency array
+  }, [searchParams, formData.sponsorId]);
 
   useEffect(() => {
     if (formData.sponsorId && sponsorValid === null && !sponsorChecking) {
       validateSponsor();
     }
-  }, [formData.sponsorId, sponsorValid, sponsorChecking, validateSponsor]); // New useEffect for auto-validation
+  }, [formData.sponsorId, sponsorValid, sponsorChecking, validateSponsor]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -75,31 +74,36 @@ export default function SignupPage() {
 
     if (!formData.email.trim()) {
       newErrors.email = "Email is required";
-    } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
+    }
+    else if (!/\S+@\S+\.\S+/.test(formData.email)) {
       newErrors.email = "Email is invalid";
     }
 
     if (!formData.mobile.trim()) {
       newErrors.mobile = "Mobile number is required";
-    } else if (!/^[\+]?[1-9][\d]{0,15}$/.test(formData.mobile.replace(/[\s\-\(\)]/g, ''))) {
+    }
+    else if (!/^[\+]?[1-9][\d]{0,15}$/.test(formData.mobile.replace(/[\s\-\(\)]/g, ''))) {
       newErrors.mobile = "Please enter a valid mobile number";
     }
 
     if (!formData.password) {
       newErrors.password = "Password is required";
-    } else if (formData.password.length < 6) {
+    }
+    else if (formData.password.length < 6) {
       newErrors.password = "Password must be at least 6 characters";
     }
 
     if (!formData.confirmPassword) {
       newErrors.confirmPassword = "Please confirm your password";
-    } else if (formData.password !== formData.confirmPassword) {
+    }
+    else if (formData.password !== formData.confirmPassword) {
       newErrors.confirmPassword = "Passwords do not match";
     }
 
     if (!formData.sponsorId.trim()) {
       newErrors.sponsorId = "Sponsorship ID is required";
-    } else if (sponsorValid !== true) {
+    }
+    else if (sponsorValid !== true) {
       newErrors.sponsorId = "Please validate a valid Sponsorship ID";
     }
 
@@ -157,14 +161,14 @@ export default function SignupPage() {
 
       if (result.success) {
         let successMessage = "Account created successfully! You've been added to the genealogy tree.";
-        
+
         // Show spot income notification if available
         if (result.spotIncome) {
           successMessage += ` ${result.spotIncome.message}`;
         }
-        
+
         successMessage += " Redirecting...";
-        
+
         setMessage(successMessage);
         setTimeout(() => {
           router.push("/");
@@ -677,5 +681,13 @@ export default function SignupPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function SignupPage() {
+  return (
+    <Suspense fallback={<div>Loading signup form...</div>}>
+      <SignupPageContent />
+    </Suspense>
   );
 }
