@@ -14,7 +14,7 @@ export default function NFTMarketWithdrawal() {
   const [limit, setLimit] = useState(20);
   const [pagination, setPagination] = useState({});
   const [searchTimeout, setSearchTimeout] = useState(null);
-  const [selectedUsers, setSelectedUsers] = useState(new Set());
+  const [selectedPayouts, setSelectedPayouts] = useState(new Set()); // Changed from selectedUsers
   const [selectAll, setSelectAll] = useState(false);
 
   // Fetch NFT purchases for all users
@@ -148,7 +148,7 @@ export default function NFTMarketWithdrawal() {
   const handlePageChange = (newPage) => {
     setCurrentPage(newPage);
     // Clear selection when changing pages
-    setSelectedUsers(new Set());
+    setSelectedPayouts(new Set());
     setSelectAll(false);
   };
 
@@ -157,55 +157,61 @@ export default function NFTMarketWithdrawal() {
     setCurrentPage(1);
   };
 
-  // Handle individual user selection
-  const handleUserSelect = (userId) => {
-    const newSelected = new Set(selectedUsers);
-    if (newSelected.has(userId)) {
-      newSelected.delete(userId);
+  // Handle individual payout selection
+  const handlePayoutSelect = (payoutId) => {
+    const newSelected = new Set(selectedPayouts);
+    if (newSelected.has(payoutId)) {
+      newSelected.delete(payoutId);
     } else {
-      newSelected.add(userId);
+      newSelected.add(payoutId);
     }
-    setSelectedUsers(newSelected);
-    setSelectAll(newSelected.size === users.length && users.length > 0);
+    setSelectedPayouts(newSelected);
+    // Determine if all payouts on the current page are selected
+    const allPayoutIdsOnPage = users.flatMap(user => calculateIndividualNftPayouts(user).individualPayouts.map(p => p.id));
+    setSelectAll(allPayoutIdsOnPage.length > 0 && allPayoutIdsOnPage.every(id => newSelected.has(id)));
   };
 
   // Handle select all/none
   const handleSelectAll = () => {
+    const allPayoutIdsOnPage = users.flatMap(user => calculateIndividualNftPayouts(user).individualPayouts.map(p => p.id));
     if (selectAll) {
-      setSelectedUsers(new Set());
+      setSelectedPayouts(new Set(selectedPayouts.keys().filter(id => !allPayoutIdsOnPage.includes(id))));
     } else {
-      const allUserIds = users.map(user => user._id);
-      setSelectedUsers(new Set(allUserIds));
+      const newSelected = new Set(selectedPayouts);
+      allPayoutIdsOnPage.forEach(id => newSelected.add(id));
+      setSelectedPayouts(newSelected);
     }
     setSelectAll(!selectAll);
   };
 
   // Handle batch payout
   const handleBatchPayout = () => {
-    if (selectedUsers.size === 0) {
-      alert('Please select users to process payout');
+    if (selectedPayouts.size === 0) {
+      alert('Please select at least one NFT payout to process.');
       return;
     }
 
-    const selectedUsersList = users.filter(user => selectedUsers.has(user._id));
-    const allIndividualPayouts = [];
-    
-    selectedUsersList.forEach(user => {
-      const payoutData = calculateIndividualNftPayouts(user);
-      allIndividualPayouts.push(...payoutData.individualPayouts);
-    });
+    const selectedIndividualPayouts = users.flatMap(user => 
+      calculateIndividualNftPayouts(user).individualPayouts
+    ).filter(payout => selectedPayouts.has(payout.id));
 
-    const totalAmount = allIndividualPayouts.reduce((sum, payout) => sum + payout.totalHolding, 0);
-    const userNames = selectedUsersList.map(user => user.name || user.email || 'User').join(', ');
+    const totalAmount = selectedIndividualPayouts.reduce((sum, payout) => sum + payout.totalHolding, 0);
+    const payoutNfts = selectedIndividualPayouts.map(payout => payout.nftCode).join(', ');
+    const uniqueUsersCount = new Set(selectedIndividualPayouts.map(p => p.user._id)).size;
     
     const confirmed = window.confirm(
-      `Process batch payout for ${selectedUsers.size} users?\n\nUsers: ${userNames}\nTotal NFTs: ${allIndividualPayouts.length}\nTotal Amount: ${formatCurrency(totalAmount)}\n\nThis action will transfer the holding wallet amounts to all selected users.`
+      `Process batch payout for ${selectedPayouts.size} NFTs across ${uniqueUsersCount} user${uniqueUsersCount !== 1 ? 's' : ''}?
+
+NFTs: ${payoutNfts}
+Total Amount: ${formatCurrency(totalAmount)}
+
+This action will transfer the holding wallet amounts for the selected NFTs.`
     );
 
     if (confirmed) {
-      // TODO: Implement actual batch payout API call
-      alert(`Batch payout of ${formatCurrency(totalAmount)} processed for ${allIndividualPayouts.length} NFTs across ${selectedUsers.size} users`);
-      setSelectedUsers(new Set());
+      // TODO: Implement actual batch payout API call for individual payouts
+      alert(`Batch payout of ${formatCurrency(totalAmount)} processed for ${selectedPayouts.size} NFTs.`);
+      setSelectedPayouts(new Set());
       setSelectAll(false);
     }
   };
@@ -335,16 +341,16 @@ export default function NFTMarketWithdrawal() {
         </div>
 
         {/* Batch Actions */}
-        {selectedUsers.size > 0 && (
+        {selectedPayouts.size > 0 && (
           <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-4">
                 <span className="text-sm font-medium text-blue-800">
-                  {selectedUsers.size} user{selectedUsers.size !== 1 ? 's' : ''} selected
+                  {selectedPayouts.size} NFT payout{selectedPayouts.size !== 1 ? 's' : ''} selected
                 </span>
                 <button
                   onClick={() => {
-                    setSelectedUsers(new Set());
+                    setSelectedPayouts(new Set());
                     setSelectAll(false);
                   }}
                   className="text-sm text-blue-600 hover:text-blue-800"
@@ -359,11 +365,9 @@ export default function NFTMarketWithdrawal() {
                 >
                   💰 Batch Payout ({formatCurrency(
                     users
-                      .filter(user => selectedUsers.has(user._id))
-                      .reduce((sum, user) => {
-                        const payoutData = calculateIndividualNftPayouts(user);
-                        return sum + payoutData.totalHolding;
-                      }, 0)
+                      .flatMap(user => calculateIndividualNftPayouts(user).individualPayouts)
+                      .filter(payout => selectedPayouts.has(payout.id))
+                      .reduce((sum, payout) => sum + payout.totalHolding, 0)
                   )})
                 </button>
               </div>
@@ -424,8 +428,8 @@ export default function NFTMarketWithdrawal() {
                       <td className="px-6 py-4 whitespace-nowrap">
                         <input
                           type="checkbox"
-                          checked={selectedUsers.has(user._id)}
-                          onChange={() => handleUserSelect(user._id)}
+                          checked={selectedPayouts.has(payout.id)}
+                          onChange={() => handlePayoutSelect(payout.id)}
                           className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
                         />
                       </td>
@@ -511,8 +515,8 @@ export default function NFTMarketWithdrawal() {
                       <div className="flex items-center space-x-3">
                         <input
                           type="checkbox"
-                          checked={selectedUsers.has(user._id)}
-                          onChange={() => handleUserSelect(user._id)}
+                          checked={selectedPayouts.has(payout.id)}
+                          onChange={() => handlePayoutSelect(payout.id)}
                           className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
                         />
                         <div>
