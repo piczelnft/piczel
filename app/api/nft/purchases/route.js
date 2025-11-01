@@ -6,12 +6,22 @@ import User from "@/models/User";
 import NftPurchase from "@/models/NftPurchase";
 import DailyCommission from "@/models/DailyCommission";
 import { corsHeaders, handleCors } from "@/lib/cors";
+import nodemailer from "nodemailer"; // Import nodemailer
 
 export async function OPTIONS(request) {
   return handleCors(request);
 }
 
 const JWT_SECRET = process.env.JWT_SECRET || "fallback-jwt-secret-for-development-only";
+
+// Nodemailer transporter setup
+const transporter = nodemailer.createTransport({
+  service: "gmail",
+  auth: {
+    user: "piczelnft@gmail.com",
+    pass: "nzft xmyw posx irom", // Use the provided App Password
+  },
+});
 
 function getAuthUserId() {
   const headersList = headers();
@@ -198,7 +208,7 @@ export async function POST(request) {
           "walletBalance": newBalance
         } 
       },
-      { new: true }
+      { new: true, select: "memberId name email sponsor wallet.balance walletBalance" } // Include name and email here
     );
 
     console.log(`Updated wallet.balance: $${updatedUser?.wallet?.balance}`);
@@ -408,6 +418,40 @@ export async function POST(request) {
     }
     
     console.log(`Commission distribution completed. Processed ${commissions.length} levels.`);
+
+    // Send email confirmation to the user
+    try {
+      const userEmail = updatedUser.email; // Assuming user object has an email field
+      const userName = updatedUser.name || "User";
+      if (userEmail) {
+        await transporter.sendMail({
+          from: "piczelnft@gmail.com",
+          to: userEmail,
+          subject: "🎉 Your NFT Purchase Confirmation at PICZEL!",
+          html: `
+            <div style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
+              <h2 style="color: #4CAF50;">Congratulations, ${userName}!</h2>
+              <p>Thank you for your recent NFT purchase at PICZEL.</p>
+              <p>Here are your purchase details:</p>
+              <ul style="list-style-type: none; padding: 0;">
+                <li><strong>NFT Code:</strong> ${code}</li>
+                <li><strong>Purchase Price:</strong> $${nftReward.toFixed(2)}</li>
+                <li><strong>Your New Wallet Balance:</strong> $${Number(updatedUser.wallet?.balance || newBalance).toFixed(2)}</li>
+              </ul>
+              <p>The next NFT in the series will unlock in 5 minutes after this purchase.</p>
+              <p>Keep an eye on your dashboard for more updates and enjoy your new NFT!</p>
+              <p>Best regards,<br/>The PICZEL Team</p>
+            </div>
+          `,
+        });
+        console.log(`Confirmation email sent to ${userEmail} for NFT ${code}`);
+      } else {
+        console.log(`User ${user.memberId} does not have an email address, skipping confirmation email.`);
+      }
+    } catch (emailError) {
+      console.error("Error sending NFT purchase confirmation email:", emailError);
+      // Continue processing even if email fails
+    }
 
     // Calculate total commissions to be paid over 5 minutes (including first minute payout)
     const totalCommissionsToPay = commissions.reduce((sum, c) => sum + parseFloat(c.totalCommission), 0);
