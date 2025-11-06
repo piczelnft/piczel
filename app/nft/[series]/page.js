@@ -51,20 +51,38 @@ export default function NFTDetailPage() {
     return seriesImages[baseSeries] || '/logo.png';
   };
 
-  // Wallet balance-based unlocking logic
-  const getWalletThreshold = (nftCode) => {
-    const number = parseInt(nftCode.substring(1));
-    // A2=110, A3=115, A4=120, then all A5-A100 require $120
-    if (number <= 4) {
-      return (number - 1) * 5 + 110;
-    } else {
-      return 120; // All A5-A100 require $120
+  // Fixed profit amounts per NFT number (applies to all series A-J)
+  const getProfitAmount = (nftNumber) => {
+    if (nftNumber === 2) return 110;
+    if (nftNumber === 3) return 115;
+    if (nftNumber >= 4 && nftNumber <= 100) return 120;
+    return 0; // for A1 or invalid
+  };
+
+  // Current Holding Wallet total profit (full amount, no tax)
+  const getHoldingWalletProfit = () => {
+    let totalProfit = 0;
+    purchases.forEach(nftCode => {
+      const number = parseInt(nftCode.substring(1));
+      totalProfit += getProfitAmount(number);
+    });
+    return totalProfit;
+  };
+
+  // Determine the next unlockable NFT number based on purchases (2..100)
+  const getNextUnlockNumber = () => {
+    for (let i = 2; i <= 100; i++) {
+      if (!purchases.includes(`${baseSeries}${i}`)) return i;
     }
+    return null;
   };
 
   const isNFTAvailable = (nftCode) => {
-    const threshold = getWalletThreshold(nftCode);
-    return userBalance >= threshold;
+    // Only allow the next NFT if holding wallet amount is empty (zero)
+    const holdingProfit = getHoldingWalletProfit();
+    const number = parseInt(nftCode.substring(1));
+    const nextUnlock = getNextUnlockNumber();
+    return holdingProfit === 0 && nextUnlock !== null && number === nextUnlock;
   };
 
   const isNFTOwned = (nftCode) => {
@@ -78,11 +96,10 @@ export default function NFTDetailPage() {
     if (isNFTAvailable(nftCode)) {
       return { status: 'available', message: 'Available' };
     }
-    const threshold = getWalletThreshold(nftCode);
-    return { 
-      status: 'locked', 
-      message: `Need $${threshold}`,
-      threshold 
+    const nextUnlock = getNextUnlockNumber();
+    return {
+      status: 'locked',
+      message: nextUnlock ? `Locked — next unlock: ${baseSeries}${nextUnlock} after profit payout` : 'Locked'
     };
   };
 
@@ -138,7 +155,7 @@ export default function NFTDetailPage() {
 
     try {
       // Confirm purchase similar to swap buy flow
-      const usdPrice = getWalletThreshold(nftCode) - 5;
+      const usdPrice = 100;
       const message = `Buy ${nftCode} for $${usdPrice}?`;
       if (!confirm(message)) return;
 
@@ -152,7 +169,7 @@ export default function NFTDetailPage() {
         code: nftCode,
         purchasedAt: new Date().toISOString(),
         series: baseSeries,
-        price: getWalletThreshold(nftCode) - 5
+        price: 100
       };
       const res = await fetch('/api/nft/purchases', {
         method: 'POST',
@@ -266,7 +283,7 @@ export default function NFTDetailPage() {
       {/* Header */}
       <div className="relative z-10 pt-4 sm:pt-8 pb-4 sm:pb-6">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 sm:mb-6 space-y-4 sm:space-y-0">
+          <div className="flex flex-col sm:flex-row sm:items-center mb-4 sm:mb-6 space-y-4 sm:space-y-0">
             <div>
               <Link 
                 href="/"
@@ -284,12 +301,7 @@ export default function NFTDetailPage() {
                 Available NFTs: {baseSeries}2 - {baseSeries}100
               </p>
             </div>
-            <div className="text-center sm:text-right">
-              <div className="text-xs sm:text-sm text-gray-400">Wallet Balance</div>
-              <div className="text-xl sm:text-2xl font-bold text-green-400">
-                ${userBalance.toFixed(2)}
-              </div>
-            </div>
+            
           </div>
         </div>
       </div>
@@ -312,7 +324,7 @@ export default function NFTDetailPage() {
                 let totalSpent = 0;
                 purchases.forEach(nftCode => {
                   const number = parseInt(nftCode.substring(1));
-                  const price = getWalletThreshold(nftCode) - 5;
+                  const price = 100;
                   totalSpent += price;
                 });
                 return totalSpent.toFixed(2);
@@ -335,33 +347,19 @@ export default function NFTDetailPage() {
             </div>
             <div className="text-2xl sm:text-3xl font-bold text-green-400 mb-2">
               ${(() => {
-                let totalValue = 0;
                 let totalProfit = 0;
                 
                 purchases.forEach(nftCode => {
                   const number = parseInt(nftCode.substring(1));
-                  const price = getWalletThreshold(nftCode) - 5;
-                  
-                  // Calculate profit percentage based on series number
-                  let profitPercentage = 0;
-                  if (number >= 2 && number <= 10) {
-                    profitPercentage = number * 10; // A2=10%, A3=15%, A4=20%, etc.
-                  } else if (number > 10) {
-                    profitPercentage = 100; // A11+ = 100% (double)
-                  }
-                  
-                  const profit = price * (profitPercentage / 100);
-                  const profitAfterTax = profit - (profit * 0.25); // 25% tax on profit
-                  
-                  totalValue += price;
-                  totalProfit += profitAfterTax;
+                  const profit = getProfitAmount(number);
+                  totalProfit += profit; // full profit, no tax deduction
                 });
-                
-                return (totalValue + totalProfit).toFixed(2);
+
+                return (totalProfit).toFixed(2);
               })()}
             </div>
             <p className="text-sm text-gray-400">
-              NFT value + profit (after 25% tax)
+              Total profit (full amount)
             </p>
           </div>
         </div>
@@ -421,7 +419,7 @@ export default function NFTDetailPage() {
                 {/* Price Info */}
                 {!isOwned && (
                   <div className="text-xs text-gray-400 mb-2 sm:mb-3">
-                    Price: ${getWalletThreshold(nftCode) - 5}
+                    Price: $100
                   </div>
                 )}
 
@@ -443,7 +441,7 @@ export default function NFTDetailPage() {
                 {/* Locked Message */}
                 {isLocked && (
                   <p className="mt-1 sm:mt-2 text-xs text-gray-500 text-center">
-                    Need ${status.threshold} wallet balance
+                    {status.message}
                   </p>
                 )}
               </div>
@@ -493,7 +491,7 @@ export default function NFTDetailPage() {
                 .sort((a, b) => parseInt(b.substring(1)) - parseInt(a.substring(1))) // Sort by number descending
                 .map((nftCode, index) => {
                   const number = parseInt(nftCode.substring(1));
-                  const price = getWalletThreshold(nftCode) - 5;
+                  const price = 100;
                   
                   // Calculate profit percentage based on series number
                   let profitPercentage = 0;

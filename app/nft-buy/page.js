@@ -11,6 +11,7 @@ export default function NFTBuyPage() {
   const { isAuthenticated, isLoading } = useAuthGuard();
   const [dashboardData, setDashboardData] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [dashboardLoading, setDashboardLoading] = useState(false);
   const [error, setError] = useState(null);
   const [nftPurchases, setNftPurchases] = useState([]);
 
@@ -34,7 +35,7 @@ export default function NFTBuyPage() {
 
   const fetchDashboardData = useCallback(async () => {
     try {
-      setLoading(true);
+      setDashboardLoading(true);
       setError(null);
       
       if (!token) {
@@ -58,7 +59,7 @@ export default function NFTBuyPage() {
       console.error('Error fetching dashboard data:', err);
       setError(err.message);
     } finally {
-      setLoading(false);
+      setDashboardLoading(false);
     }
   }, [token]);
 
@@ -73,6 +74,7 @@ export default function NFTBuyPage() {
   const fetchNftPurchases = useCallback(async () => {
     if (!token) return;
     try {
+      setLoading(true);
       const res = await fetch('/api/nft/purchases', {
         headers: { 'Authorization': `Bearer ${token}` },
       });
@@ -80,7 +82,11 @@ export default function NFTBuyPage() {
       const data = await res.json();
       const list = Array.isArray(data.purchases) ? data.purchases : [];
       setNftPurchases(list.map(p => ({ code: p.code, purchasedAt: p.purchasedAt })));
-    } catch {}
+    } catch {
+      // ignore silently for purchases list; page can still render
+    } finally {
+      setLoading(false);
+    }
   }, [token]);
 
   useEffect(() => {

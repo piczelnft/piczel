@@ -17,6 +17,68 @@ const TeamLevelsPage = () => {
   const [levelDetails, setLevelDetails] = useState(null);
   const [loadingDetails, setLoadingDetails] = useState(false);
 
+  const formatCurrency = (amount) => {
+    if (amount === null || amount === undefined || Number.isNaN(amount)) return '-';
+    const num = typeof amount === 'number' ? amount : parseFloat(String(amount));
+    if (!Number.isFinite(num)) return '-';
+    return `$${num.toFixed(2)}`;
+  };
+
+  const getLevelIndex = (levelNo) => {
+    if (!levelNo) return null;
+    // Expect formats like "1st Level", "Level 1", or just number
+    const match = String(levelNo).match(/(\d+)/);
+    if (!match) return null;
+    const idx = parseInt(match[1], 10);
+    return Number.isFinite(idx) ? idx : null;
+  };
+
+  const getPerPersonRate = (levelNo) => {
+    const idx = getLevelIndex(levelNo);
+    if (!idx) return 0;
+    switch (idx) {
+      case 1: return 10;
+      case 2: return 3;
+      case 3: return 2;
+      case 4: return 1;
+      case 5: return 1;
+      case 6: return 1;
+      case 7: return 0.5;
+      case 8: return 0.5;
+      case 9: return 0.5;
+      case 10: return 0.5;
+      default: return 0;
+    }
+  };
+
+  const computeLevelTotalAmount = (level) => {
+    const perPerson = getPerPersonRate(level?.levelNo);
+    const members = Number(level?.totalMembers) || 0;
+    return perPerson * members;
+  };
+
+  const getLevelAmount = (level) => {
+    const candidateKeys = [
+      'amount',
+      'totalAmount',
+      'earnings',
+      'earning',
+      'income',
+      'commission',
+      'levelAmount'
+    ];
+    for (const key of candidateKeys) {
+      const value = level?.[key];
+      if (typeof value === 'number' && !Number.isNaN(value)) return value;
+      if (typeof value === 'string' && value.trim() !== '') {
+        const cleaned = value.replace(/[^0-9.-]/g, '');
+        const parsed = parseFloat(cleaned);
+        if (!Number.isNaN(parsed)) return parsed;
+      }
+    }
+    return null;
+  };
+
   // Fetch team levels data
   const fetchLevelsData = useCallback(async () => {
     if (!isAuthenticated || !token) return;
@@ -151,7 +213,7 @@ const TeamLevelsPage = () => {
                   <th className="px-6 py-4 text-white font-semibold">S.No</th>
                   <th className="px-6 py-4 text-white font-semibold">Level No</th>
                   <th className="px-6 py-4 text-white font-semibold">Total Members</th>
-                  <th className="px-6 py-4 text-white font-semibold">Action</th>
+                  <th className="px-6 py-4 text-white font-semibold">Total Amount</th>
                 </tr>
               </thead>
               <tbody>
@@ -163,13 +225,8 @@ const TeamLevelsPage = () => {
                     <td className="px-6 py-4" style={{color: 'rgba(255, 255, 255, 0.8)'}}>{index + 1}</td>
                     <td className="px-6 py-4 text-white font-medium">{level.levelNo}</td>
                     <td className="px-6 py-4 font-medium" style={{color: 'var(--secondary-color)'}}>{level.totalMembers}</td>
-                    <td className="px-6 py-4">
-                      <button
-                        onClick={() => handleLevelAction(level)}
-                        className="btn-enhanced px-4 py-2 text-white rounded-lg text-sm font-medium transition-all duration-300 cursor-pointer shadow-lg hover:shadow-xl"
-                      >
-                        View Details
-                      </button>
+                    <td className="px-6 py-4 font-medium" style={{color: 'var(--secondary-color)'}}>
+                      {formatCurrency(computeLevelTotalAmount(level))}
                     </td>
                   </tr>
                 ))}

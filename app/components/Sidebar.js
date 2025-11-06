@@ -212,7 +212,8 @@ export default function Sidebar({ isOpen, onClose }) {
         { name: 'Geneology', icon: 'tree', href: '/team/geneology' },
         { name: 'Direct Members', icon: 'user', href: '/team/members' },
         { name: 'Level Member Table', icon: 'bar-chart', href: '/team/levels' },
-        { name: 'Level Income Details', icon: 'dollar-sign', href: '/level-income' }
+        { name: 'Level Income Details', icon: 'dollar-sign', href: '/level-income' },
+        { name: 'Spotincome History', icon: 'clock', href: '/team/spot-income-history' }
       ]
     },
     { 

@@ -46,7 +46,7 @@ async function distributeSpotIncome(sponsorId, actionMemberId, actionType = 'nft
   const spotIncomeLevels = [
     { amount: 3, condition: 'nft_purchased' },  // L1: $3 - must have NFT purchased
     { amount: 1, condition: '3_directs' },     // L2: $1 - must have 3 direct members
-    { amount: 1, condition: '2_directs' }      // L3: $1 - must have 2 direct members
+    { amount: 1, condition: '5_directs' }      // L3: $1 - must have 5 direct members
   ];
   let currentSponsorId = sponsorId;
   let totalPaid = 0;
@@ -86,13 +86,13 @@ async function distributeSpotIncome(sponsorId, actionMemberId, actionType = 'nft
       if (!meetsCondition) {
         conditionNotMet = `only ${directMemberCount} direct members (needs 3)`;
       }
-    } else if (condition === '2_directs') {
-      // Level 3: Check if sponsor has at least 2 direct members
+    } else if (condition === '5_directs') {
+      // Level 3: Check if sponsor has at least 5 direct members
       const directMemberCount = await User.countDocuments({ sponsor: sponsor._id });
-      console.log(`L3 Sponsor ${sponsor.memberId}: Direct members count = ${directMemberCount}, needs >= 2`);
-      meetsCondition = directMemberCount >= 2;
+      console.log(`L3 Sponsor ${sponsor.memberId}: Direct members count = ${directMemberCount}, needs >= 5`);
+      meetsCondition = directMemberCount >= 5;
       if (!meetsCondition) {
-        conditionNotMet = `only ${directMemberCount} direct members (needs 2)`;
+        conditionNotMet = `only ${directMemberCount} direct members (needs 5)`;
       }
     }
 
@@ -265,7 +265,15 @@ export async function POST(request) {
       let canReceiveCommission = true;
       let conditionNotMet = '';
       
-      if (level === 2) {
+      if (level === 1) {
+        // Level 1 requires sponsor to have purchased at least one NFT (active trader)
+        const sponsorNftCount = await NftPurchase.countDocuments({ userId: sponsorUser._id });
+        if (sponsorNftCount < 1) {
+          canReceiveCommission = false;
+          conditionNotMet = 'needs at least one NFT purchase (active trader)';
+          console.log(`Level 1 sponsor ${sponsorUser.memberId} skipped: Has ${sponsorNftCount} NFT purchases (needs at least 1)`);
+        }
+      } else if (level === 2) {
         // Level 2 requires 3 direct members
         const directMemberCount = await User.countDocuments({ sponsor: sponsorUser._id });
         if (directMemberCount < 3) {
@@ -276,10 +284,10 @@ export async function POST(request) {
       } else if (level === 3) {
         // Level 3 requires 2 direct members
         const directMemberCount = await User.countDocuments({ sponsor: sponsorUser._id });
-        if (directMemberCount < 2) {
+        if (directMemberCount < 5) {
           canReceiveCommission = false;
-          conditionNotMet = 'needs 2 direct members';
-          console.log(`Level 3 sponsor ${sponsorUser.memberId} skipped: Has only ${directMemberCount} direct members (needs 2)`);
+          conditionNotMet = 'needs 5 direct members';
+          console.log(`Level 3 sponsor ${sponsorUser.memberId} skipped: Has only ${directMemberCount} direct members (needs 5)`);
         }
       } else if (level >= 4 && level <= 10) {
         // Levels 4-10 require active trade (NFT purchased within last 48 hours)

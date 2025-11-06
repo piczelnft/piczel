@@ -14,6 +14,21 @@ export default function Home() {
   const [lastUpdated, setLastUpdated] = useState(null);
   const [nftPurchases, setNftPurchases] = useState([]); // Add this line
 
+  // Truncate to 5 decimals without rounding
+  const formatFixed5Trunc = (value) => {
+    const str = String(value ?? 0).trim();
+    if (!str) return '0.00000';
+    let s = str;
+    let sign = '';
+    if (s.startsWith('+')) s = s.slice(1);
+    if (s.startsWith('-')) { sign = '-'; s = s.slice(1); }
+    const [intRaw, fracRaw = ''] = s.split('.');
+    const intPart = intRaw && /\d/.test(intRaw) ? intRaw.replace(/[^0-9]/g, '') || '0' : '0';
+    const fracPart = fracRaw.replace(/[^0-9]/g, '');
+    const truncated = (fracPart + '00000').slice(0, 5);
+    return `${sign}${intPart}.${truncated}`;
+  };
+
   const fetchDashboardData = useCallback(async () => {
     try {
       setLoading(true);
@@ -71,16 +86,7 @@ export default function Home() {
     }
   }, [isAuthenticated, token, fetchDashboardData]);
 
-  // Auto-refresh dashboard every 30 seconds to show level income updates
-  useEffect(() => {
-    if (!isAuthenticated || !token) return;
-
-    const interval = setInterval(() => {
-      fetchDashboardData();
-    }, 30000); // 30 seconds
-
-    return () => clearInterval(interval);
-  }, [isAuthenticated, token, fetchDashboardData, setNftPurchases]); // Add setNftPurchases
+  // Auto-refresh disabled per request
 
 
   // Show loading while checking authentication
@@ -350,7 +356,7 @@ export default function Home() {
             <div className="text-center relative">
               <div className="absolute -top-2 -right-2 w-3 h-3 rounded-full animate-pulse" style={{backgroundColor: 'rgb(16, 185, 129)'}}></div>
               <div className="text-sm mb-2 font-medium" style={{color: 'rgba(255, 255, 255, 0.7)'}}>Total Level Income</div>
-              <div className="font-bold text-lg animate-neonGlow" style={{color: 'rgb(16, 185, 129)'}}>${data.totalLevelIncome || 0}</div>
+              <div className="font-bold text-lg animate-neonGlow" style={{color: 'rgb(16, 185, 129)'}}>${formatFixed5Trunc(data.levelIncome ?? data.totalLevelIncome ?? 0)}</div>
             </div>
           </div>
 
