@@ -81,7 +81,11 @@ export default function NFTBuyPage() {
       if (!res.ok) return;
       const data = await res.json();
       const list = Array.isArray(data.purchases) ? data.purchases : [];
-      setNftPurchases(list.map(p => ({ code: p.code, purchasedAt: p.purchasedAt })));
+      setNftPurchases(list.map(p => ({ 
+        code: p.code, 
+        purchasedAt: p.purchasedAt,
+        payoutStatus: p.payoutStatus || 'pending'
+      })));
     } catch {
       // ignore silently for purchases list; page can still render
     } finally {
@@ -132,7 +136,7 @@ export default function NFTBuyPage() {
     const status = getNftStatus(code);
     if (!status.available) return;
     try {
-      const message = `Buy ${code}? Next NFT unlocks in 5 minutes.`;
+      const message = `Buy ${code}?`;
       if (!confirm(message)) return;
 
       if (!token) {
@@ -152,13 +156,15 @@ export default function NFTBuyPage() {
         throw new Error(data.error || 'Purchase failed');
       }
       const data = await res.json();
-      const next = [...nftPurchases, { code, purchasedAt: new Date().toISOString() }];
+      const next = [...nftPurchases, { 
+        code, 
+        purchasedAt: new Date().toISOString(),
+        payoutStatus: 'pending'
+      }];
       setNftPurchases(next);
       
-      // Display success message (commission details hidden from user)
-      const received = (data.userReward ?? 0).toFixed(2);
-      const displayBalance = data.user?.wallet?.balance || data.user?.walletBalance || 0;
-      const successMessage = `🎉 Purchase Successful!\n\nNFT: ${code}\nYou received: $${received}\nYour Balance: $${Number(displayBalance).toFixed(2)}\n\nNext NFT will unlock in 5 minutes.`;
+      // Display success message
+      const successMessage = `Purchase Successful! ${code}`;
       
       alert(successMessage);
       
@@ -272,10 +278,24 @@ export default function NFTBuyPage() {
               </div>
             </div>
             <div className="text-2xl sm:text-3xl font-bold text-blue-400 mb-2">
-              ${(nftPurchases.length * 100).toFixed(2)}
+              ${(() => {
+                // Only count A1-J1 NFTs (number = 1)
+                const a1J1Purchases = nftPurchases.filter(p => {
+                  const code = p.code;
+                  const number = parseInt(code.substring(1));
+                  return number === 1;
+                });
+                return (a1J1Purchases.length * 100).toFixed(2);
+              })()}
             </div>
             <p className="text-sm text-gray-400">
-              $100 per NFT purchased ({nftPurchases.length} NFTs)
+              $100 per NFT purchased ({(() => {
+                const a1J1Purchases = nftPurchases.filter(p => {
+                  const number = parseInt(p.code.substring(1));
+                  return number === 1;
+                });
+                return a1J1Purchases.length;
+              })()} A1-J1 NFTs)
             </p>
           </div>
 
@@ -290,10 +310,20 @@ export default function NFTBuyPage() {
               </div>
             </div>
             <div className="text-2xl sm:text-3xl font-bold text-green-400 mb-2">
-              ${(nftPurchases.length * 105).toFixed(2)}
+              ${(() => {
+                // Only count A1-J1 NFTs (number = 1) and filter out paid ones
+                const unpaidA1J1Purchases = nftPurchases.filter(p => {
+                  const code = p.code;
+                  const number = parseInt(code.substring(1));
+                  return number === 1 && (!p.payoutStatus || p.payoutStatus !== 'paid');
+                });
+                // A1-J1: Show $105 to user ($100 purchase + $5 profit before tax)
+                const holdingPerNft = 105; // Display amount (tax is hidden from user)
+                return (unpaidA1J1Purchases.length * holdingPerNft).toFixed(2);
+              })()}
             </div>
             <p className="text-sm text-gray-400">
-              $105 per NFT (Total Target)
+              A1-J1 holding amount ($105 each, unpaid)
             </p>
           </div>
         </div>

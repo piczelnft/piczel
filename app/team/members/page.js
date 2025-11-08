@@ -206,7 +206,6 @@ const TeamMembersPage = () => {
                   <th className="px-2 sm:px-6 py-3 sm:py-4 text-white font-semibold">Member ID</th>
                   <th className="px-2 sm:px-6 py-3 sm:py-4 text-white font-semibold">Name</th>
                   <th className="px-2 sm:px-6 py-3 sm:py-4 text-white font-semibold hidden md:table-cell">Email ID</th>
-                  <th className="px-2 sm:px-6 py-3 sm:py-4 text-white font-semibold hidden lg:table-cell">Downline</th>
                   <th className="px-2 sm:px-6 py-3 sm:py-4 text-white font-semibold hidden lg:table-cell">Package</th>
                   <th className="px-2 sm:px-6 py-3 sm:py-4 text-white font-semibold hidden lg:table-cell">Sponsor ID</th>
                   <th className="px-2 sm:px-6 py-3 sm:py-4 text-white font-semibold">Status</th>
@@ -215,7 +214,7 @@ const TeamMembersPage = () => {
               <tbody>
                 {membersData.length === 0 && !loading ? (
                   <tr>
-                    <td colSpan="10" className="px-4 sm:px-6 py-6 sm:py-8 text-center text-white text-sm">
+                    <td colSpan="9" className="px-4 sm:px-6 py-6 sm:py-8 text-center text-white text-sm">
                       No team members found
                     </td>
                   </tr>
@@ -241,7 +240,6 @@ const TeamMembersPage = () => {
                       <td className="px-2 sm:px-6 py-3 sm:py-4 font-medium max-w-xs truncate text-xs sm:text-sm hidden md:table-cell" style={{color: 'rgb(var(--info-rgb))'}} title={item.email}>
                         {item.email}
                       </td>
-                      <td className="px-2 sm:px-6 py-3 sm:py-4 font-medium text-xs sm:text-sm hidden lg:table-cell" style={{color: 'var(--secondary-color)'}}>{item.downline}</td>
                       <td className="px-2 sm:px-6 py-3 sm:py-4 font-medium text-xs sm:text-sm hidden lg:table-cell" style={{color: 'rgb(var(--success-rgb))'}}>{item.package}</td>
                       <td className="px-2 sm:px-6 py-3 sm:py-4 font-medium text-xs sm:text-sm hidden lg:table-cell" style={{color: 'rgb(var(--warning-rgb))'}}>{item.sponsorId}</td>
                       <td className="px-2 sm:px-6 py-3 sm:py-4">

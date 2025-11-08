@@ -50,9 +50,19 @@ export async function GET(request) {
     const search = searchParams.get("search") || "";
     const series = searchParams.get("series") || "";
 
-    const query = {};
+    // Build query to exclude paid NFTs - only show pending/unpaid NFTs
+    const queryConditions = [
+      {
+        $or: [
+          { payoutStatus: { $exists: false } },
+          { payoutStatus: { $ne: 'paid' } },
+          { payoutStatus: null }
+        ]
+      }
+    ];
+    
     if (series) {
-      query.series = series;
+      queryConditions.push({ series: series });
     }
     if (search) {
       // Find users by memberId, email or name then filter purchases by those users
@@ -63,8 +73,10 @@ export async function GET(request) {
           { name: { $regex: search, $options: "i" } },
         ],
       }).select("_id");
-      query.userId = { $in: users.map((u) => u._id) };
+      queryConditions.push({ userId: { $in: users.map((u) => u._id) } });
     }
+    
+    const query = queryConditions.length > 1 ? { $and: queryConditions } : queryConditions[0];
 
     const skip = (page - 1) * limit;
     const [items, total] = await Promise.all([

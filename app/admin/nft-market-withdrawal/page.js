@@ -99,7 +99,8 @@ export default function NFTMarketWithdrawal() {
         userMap.get(userId).nftPurchases.push({
           code: purchase.code,
           series: purchase.series,
-          purchasedAt: purchase.purchasedAt
+          purchasedAt: purchase.purchasedAt,
+          payoutStatus: purchase.payoutStatus || 'pending'
         });
       });
       
@@ -184,8 +185,44 @@ export default function NFTMarketWithdrawal() {
     setSelectAll(!selectAll);
   };
 
+  // Handle individual payout
+  const handleIndividualPayout = async (userId, nftCode, amount, userName) => {
+    try {
+      const adminToken = localStorage.getItem("adminToken");
+      if (!adminToken) {
+        alert('Admin token not found. Please log in again.');
+        return;
+      }
+
+      const response = await fetch('/api/admin/nft-payout', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${adminToken}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          userId: userId,
+          nftCode: nftCode
+        })
+      });
+
+      const data = await response.json();
+
+      if (response.ok && data.success) {
+        alert(`Payout of ${formatCurrency(amount)} processed successfully for ${nftCode} to ${userName || 'User'}.\n\nThe holding wallet amount has been reduced.`);
+        // Refresh the data
+        fetchUsers();
+      } else {
+        alert(`Payout failed: ${data.error || 'Unknown error'}`);
+      }
+    } catch (error) {
+      console.error('Payout error:', error);
+      alert(`Payout failed: ${error.message || 'Network error'}`);
+    }
+  };
+
   // Handle batch payout
-  const handleBatchPayout = () => {
+  const handleBatchPayout = async () => {
     if (selectedPayouts.size === 0) {
       alert('Please select at least one NFT payout to process.');
       return;
@@ -209,11 +246,67 @@ This action will transfer the holding wallet amounts for the selected NFTs.`
     );
 
     if (confirmed) {
-      // TODO: Implement actual batch payout API call for individual payouts
-      alert(`Batch payout of ${formatCurrency(totalAmount)} processed for ${selectedPayouts.size} NFTs.`);
-      setSelectedPayouts(new Set());
-      setSelectAll(false);
+      try {
+        const adminToken = localStorage.getItem("adminToken");
+        if (!adminToken) {
+          alert('Admin token not found. Please log in again.');
+          return;
+        }
+
+        const payouts = selectedIndividualPayouts.map(payout => ({
+          userId: payout.user._id,
+          nftCode: payout.nftCode
+        }));
+
+        const response = await fetch('/api/admin/nft-payout', {
+          method: 'PUT',
+          headers: {
+            'Authorization': `Bearer ${adminToken}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ payouts })
+        });
+
+        const data = await response.json();
+
+        if (response.ok && data.success) {
+          alert(`Batch payout processed successfully!\n\nProcessed: ${data.processed} NFTs\nFailed: ${data.failed} NFTs\n\nTotal Amount: ${formatCurrency(totalAmount)}`);
+          setSelectedPayouts(new Set());
+          setSelectAll(false);
+          // Refresh the data
+          fetchUsers();
+        } else {
+          alert(`Batch payout failed: ${data.error || 'Unknown error'}`);
+        }
+      } catch (error) {
+        console.error('Batch payout error:', error);
+        alert(`Batch payout failed: ${error.message || 'Network error'}`);
+      }
     }
+  };
+
+  // Calculate holding amount for an NFT based on its code
+  const calculateHoldingAmount = (nftCode) => {
+    const purchasePrice = 100; // $100 per NFT
+    const number = parseInt(nftCode.substring(1)); // Extract number from code (A2 -> 2)
+    
+    // Calculate profit based on NFT number (same logic as series page)
+    let profit = 0;
+    if (number === 1) {
+      profit = 5; // $5 profit for A1-J1
+    } else if (number === 2) {
+      profit = 10; // $10 profit for A2
+    } else if (number === 3) {
+      profit = 15; // $15 profit for A3
+    } else if (number >= 4 && number <= 100) {
+      profit = 20; // $20 profit for A4-A100
+    }
+    
+    // Apply 25% tax on profit
+    const profitAfterTax = profit - (profit * 0.25);
+    const totalHolding = purchasePrice + profitAfterTax;
+    
+    return { purchasePrice, profit, profitAfterTax, totalHolding };
   };
 
   // Calculate individual NFT payout data
@@ -234,24 +327,28 @@ This action will transfer the holding wallet amounts for the selected NFTs.`
       return { individualPayouts: [], totalValue: 0, totalProfit: 0, totalHolding: 0, nftCount: 0 };
     }
 
-    // Calculate individual payout for each NFT
-    const individualPayouts = nftPurchases.map((nft, index) => {
-      const purchasePrice = 100; // $100 per NFT
-      const profit = 5; // $5 profit per NFT
-      const profitAfterTax = profit - (profit * 0.25); // 25% tax on profit
-      const totalHolding = purchasePrice + profitAfterTax;
+    // Filter out already paid out NFTs and calculate individual payout for each NFT
+    const individualPayouts = nftPurchases
+      .filter(nft => {
+        // Only show NFTs that haven't been paid out yet
+        return nft.payoutStatus !== 'paid';
+      })
+      .map((nft, index) => {
+        const nftCode = nft.code || nft.series || `NFT-${index + 1}`;
+        const holdingData = calculateHoldingAmount(nftCode);
 
-      return {
-        id: `${user._id}-${nft.code || nft.series || index}`,
-        nftCode: nft.code || nft.series || `NFT-${index + 1}`,
-        purchasePrice: purchasePrice,
-        profit: profit,
-        profitAfterTax: profitAfterTax,
-        totalHolding: totalHolding,
-        purchasedAt: nft.purchasedAt || new Date().toISOString(),
-        user: user
-      };
-    });
+        return {
+          id: `${user._id}-${nftCode}`,
+          nftCode: nftCode,
+          purchasePrice: holdingData.purchasePrice,
+          profit: holdingData.profit,
+          profitAfterTax: holdingData.profitAfterTax,
+          totalHolding: holdingData.totalHolding,
+          purchasedAt: nft.purchasedAt || new Date().toISOString(),
+          payoutStatus: nft.payoutStatus || 'pending',
+          user: user
+        };
+      });
 
     // Calculate totals
     const totalValue = individualPayouts.reduce((sum, payout) => sum + payout.purchasePrice, 0);
@@ -263,7 +360,7 @@ This action will transfer the holding wallet amounts for the selected NFTs.`
       totalValue: totalValue,
       totalProfit: totalProfit,
       totalHolding: totalHolding,
-      nftCount: nftPurchases.length
+      nftCount: individualPayouts.length
     };
   };
 
@@ -483,14 +580,13 @@ This action will transfer the holding wallet amounts for the selected NFTs.`
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                         <button
-                          className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded text-sm font-medium"
+                          className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed"
                           onClick={() => {
                             const confirmed = window.confirm(
                               `Process payout of ${formatCurrency(payout.totalHolding)} for ${payout.nftCode} to ${user.name || user.email || 'User'}?\n\nThis action will transfer the holding wallet amount for this specific NFT to the user.`
                             );
                             if (confirmed) {
-                              // TODO: Implement actual payout API call
-                              alert(`Payout of ${formatCurrency(payout.totalHolding)} processed for ${payout.nftCode} to ${user.name || user.email || 'User'}`);
+                              handleIndividualPayout(user._id, payout.nftCode, payout.totalHolding, user.name || user.email);
                             }
                           }}
                         >
@@ -560,14 +656,13 @@ This action will transfer the holding wallet amounts for the selected NFTs.`
                     
                     <div className="mt-4 pt-3 border-t border-gray-200">
                       <button
-                        className="w-full bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors"
+                        className="w-full bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                         onClick={() => {
                           const confirmed = window.confirm(
                             `Process payout of ${formatCurrency(payout.totalHolding)} for ${payout.nftCode} to ${user.name || user.email || 'User'}?\n\nThis action will transfer the holding wallet amount for this specific NFT to the user.`
                           );
                           if (confirmed) {
-                            // TODO: Implement actual payout API call
-                            alert(`Payout of ${formatCurrency(payout.totalHolding)} processed for ${payout.nftCode} to ${user.name || user.email || 'User'}`);
+                            handleIndividualPayout(user._id, payout.nftCode, payout.totalHolding, user.name || user.email);
                           }
                         }}
                       >

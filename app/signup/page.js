@@ -22,6 +22,7 @@ function SignupPageContent() {
   const [message, setMessage] = useState("");
   const [sponsorValid, setSponsorValid] = useState(null);
   const [sponsorChecking, setSponsorChecking] = useState(false);
+  const [sponsorName, setSponsorName] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const router = useRouter();
@@ -50,6 +51,7 @@ function SignupPageContent() {
   const validateSponsor = useCallback(async () => {
     if (!formData.sponsorId.trim()) return;
     setSponsorChecking(true);
+    setSponsorName("");
     try {
       const res = await fetch(
         `/api/users/validate-sponsor?memberId=${encodeURIComponent(
@@ -59,11 +61,14 @@ function SignupPageContent() {
       const data = await res.json();
       if (res.ok && data.valid) {
         setSponsorValid(true);
+        setSponsorName(data.sponsor?.name || "");
       } else {
         setSponsorValid(false);
+        setSponsorName("");
       }
     } catch {
       setSponsorValid(false);
+      setSponsorName("");
     } finally {
       setSponsorChecking(false);
     }
@@ -92,6 +97,7 @@ function SignupPageContent() {
     // Reset sponsor validation when sponsor ID changes
     if (name === "sponsorId") {
       setSponsorValid(null);
+      setSponsorName("");
     }
   };
 
@@ -516,12 +522,22 @@ function SignupPageContent() {
                 </button>
               </div>
               {sponsorValid === true && (
-                <p
-                  className="mt-1 text-sm"
-                  style={{ color: "rgb(var(--success-rgb))" }}
-                >
-                  Sponsor ID is valid.
-                </p>
+                <div className="mt-1">
+                  <p
+                    className="text-sm"
+                    style={{ color: "rgb(var(--success-rgb))" }}
+                  >
+                    Sponsor ID is valid.
+                  </p>
+                  {sponsorName && (
+                    <p
+                      className="text-sm mt-1 font-medium"
+                      style={{ color: "rgba(255, 255, 255, 0.9)" }}
+                    >
+                      Sponsor: {sponsorName}
+                    </p>
+                  )}
+                </div>
               )}
               {sponsorValid === false && (
                 <p

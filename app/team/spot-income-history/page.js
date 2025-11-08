@@ -28,12 +28,24 @@ export default function SpotIncomeHistoryPage() {
   const normalizeEntries = (rawList) => {
     if (!Array.isArray(rawList)) return [];
     return rawList.map((it) => {
-      const amount = it.amount ?? it.value ?? it.commissionAmount ?? it.credit ?? 0;
-      const date = it.date ?? it.createdAt ?? it.time ?? it.timestamp ?? null;
-      const from = it.from || it.sender || it.referral || it.user || {};
-      const memberId = from.memberId || from.id || it.fromMemberId || it.senderId || '-';
-      const name = from.name || it.fromName || it.senderName || '-';
-      const note = it.note || it.reason || it.description || it.remark || '';
+      const amount = it.amount ?? it.value ?? it.spotAmount ?? it.commissionAmount ?? it.credit ?? 0;
+      const date = it.date 
+        ?? it.purchaseDate 
+        ?? it.purchasedAt 
+        ?? it.createdAt 
+        ?? it.time 
+        ?? it.timestamp 
+        ?? null;
+      // Try common shapes for who generated the income
+      const fromObj = it.from 
+        || it.sender 
+        || it.referral 
+        || it.user 
+        || (it.sponsorName || it.sponsorMemberId ? { name: it.sponsorName, memberId: it.sponsorMemberId || it.sponsorId } : {})
+        || {};
+      const memberId = fromObj.memberId || fromObj.id || it.fromMemberId || it.senderId || it.sponsorMemberId || it.sponsorId || '-';
+      const name = fromObj.name || it.fromName || it.senderName || it.referralName || '-';
+      const note = it.note || it.reason || it.description || it.remark || it.incomeType || '';
       return {
         from: { name, memberId },
         amount: typeof amount === 'number' ? amount : parseFloat(String(amount).replace(/[^0-9.-]/g, '')) || 0,
@@ -51,7 +63,8 @@ export default function SpotIncomeHistoryPage() {
       const candidateUrls = [
         "/api/spot-income-history",
         "/api/team/spot-income-history",
-        "/api/spot-income"
+        "/api/spot-income",
+        "/api/level-income" // will be handled specially below
       ];
 
       let success = false;
@@ -59,7 +72,30 @@ export default function SpotIncomeHistoryPage() {
         const res = await fetch(url, { headers: { Authorization: `Bearer ${token}` } });
         if (res.ok) {
           const data = await res.json();
-          setEntries(Array.isArray(data?.history) ? data.history : (Array.isArray(data) ? data : []));
+          // Special handling for /api/level-income: flatten into spot-income-like entries
+          if (data?.levelIncomeDetails && Array.isArray(data.levelIncomeDetails)) {
+            const flat = [];
+            for (const detail of data.levelIncomeDetails) {
+              const ref = detail.referral || {};
+              const sources = Array.isArray(detail.sourceInfo) ? detail.sourceInfo : [];
+              for (const src of sources) {
+                flat.push({
+                  from: { name: ref.name || '-', memberId: ref.memberId || '-' },
+                  amount: 3, // L1 spot income per purchase (from route reference)
+                  date: src.purchaseDate || src.createdAt || null,
+                  note: 'Spot income from referral NFT purchase'
+                });
+              }
+            }
+            if (flat.length) {
+              setEntries(flat);
+              success = true;
+              break;
+            }
+          }
+          // Generic handling
+          const list = Array.isArray(data?.history) ? data.history : (Array.isArray(data) ? data : []);
+          setEntries(list);
           success = true;
           break;
         }

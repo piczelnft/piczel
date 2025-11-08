@@ -32,8 +32,10 @@ export default function NFTPayoutHistory() {
         sortOrder: "desc",
       });
 
-      // Try to fetch from API, but fall back to mock data if it doesn't exist
+      // Fetch payout history from API
       let payouts = [];
+      let paginationData = {};
+      
       try {
         const response = await fetch(`/api/admin/nft-payouts?${params}`, {
           headers: {
@@ -46,13 +48,15 @@ export default function NFTPayoutHistory() {
           const data = await response.json();
           console.log("Fetched payout history data:", data); // Debug log
           payouts = data.payouts || [];
+          paginationData = data.pagination || {};
         } else {
-          console.log("API endpoint not available, using mock data");
-          // Fall back to mock data
+          const errorData = await response.json().catch(() => ({}));
+          console.error("API error:", errorData);
+          setError(errorData.error || "Failed to fetch payout history");
         }
       } catch (apiError) {
-        console.log("API error, using mock data:", apiError.message);
-        // Fall back to mock data
+        console.error("API error:", apiError);
+        setError(apiError.message || "Failed to fetch payout history");
       }
 
       // Use mock data if API is not available or returns empty
@@ -102,7 +106,7 @@ export default function NFTPayoutHistory() {
       // }
 
       setPayouts(payouts);
-      setPagination({
+      setPagination(paginationData || {
         total: payouts.length,
         totalPages: Math.ceil(payouts.length / limit),
         currentPage: currentPage
@@ -227,11 +231,6 @@ export default function NFTPayoutHistory() {
             <p className="text-gray-600 mt-1">
               Track all NFT market withdrawal payouts and their status
             </p>
-            <div className="mt-2 p-2 bg-blue-50 border border-blue-200 rounded-md">
-              <p className="text-sm text-blue-800">
-                📝 <strong>Note:</strong> Currently showing sample data. Real payout history will appear here once payouts are processed from the Withdrawal Management page.
-              </p>
-            </div>
           </div>
         </div>
 

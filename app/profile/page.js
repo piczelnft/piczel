@@ -313,18 +313,7 @@ export default function ProfilePage() {
                         {user?.profile?.country || "Not set"}
                       </span>
                     </div>
-                    <div className="flex justify-between items-center py-3 border-b border-white/10">
-                      <span className="text-gray-300">Account Status</span>
-                      <span
-                        className={`font-medium ${
-                          user?.isVerified
-                            ? "text-green-400"
-                            : "text-yellow-400"
-                        }`}
-                      >
-                        {user?.isVerified ? "Verified" : "Pending Verification"}
-                      </span>
-                    </div>
+                    
                   </div>
                 )}
               </div>

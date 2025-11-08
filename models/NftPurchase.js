@@ -32,6 +32,20 @@ const NftPurchaseSchema = new mongoose.Schema(
       default: Date.now,
       index: true,
     },
+    payoutStatus: {
+      type: String,
+      enum: ['pending', 'paid'],
+      default: 'pending',
+      index: true,
+    },
+    paidOutAt: {
+      type: Date,
+      default: null,
+    },
+    paidOutAmount: {
+      type: Number,
+      default: 0,
+    },
   },
   {
     timestamps: true,

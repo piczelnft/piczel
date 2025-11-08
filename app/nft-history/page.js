@@ -127,11 +127,11 @@ export default function NftHistory() {
                   <div className="flex items-center justify-between mb-1">
                     <h3 className="text-xl font-bold text-white">{purchase.series}</h3>
                     <span className={`px-2 py-1 text-xs font-semibold rounded-full ${
-                      walletBalance > 0 
-                        ? 'bg-yellow-500/20 text-yellow-400 border border-yellow-500/30' 
-                        : 'bg-green-500/20 text-green-400 border border-green-500/30'
+                      purchase.payoutStatus === 'paid' 
+                        ? 'bg-green-500/20 text-green-400 border border-green-500/30' 
+                        : 'bg-yellow-500/20 text-yellow-400 border border-yellow-500/30'
                     }`}>
-                      {walletBalance > 0 ? 'Pending' : 'Completed'}
+                      {purchase.payoutStatus === 'paid' ? 'Completed' : 'Pending'}
                     </span>
                   </div>
                   <p className="text-gray-300 text-sm mb-2">Code: {purchase.code}</p>

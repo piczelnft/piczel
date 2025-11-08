@@ -118,7 +118,7 @@ export default function NewWithdrawalRequests() {
     );
   };
 
-  const handleBulkMetaMaskPayment = async () => {
+  const handleBulkPayment = async () => {
     const selected = getSelectedRequests();
     if (selected.length === 0) {
       alert("Please select at least one withdrawal request to process.");
@@ -133,88 +133,44 @@ export default function NewWithdrawalRequests() {
         `Are you sure you want to process ${selected.length} payments?\n\n` +
         `Total Amount: $${getTotalSelectedAmount().toFixed(2)}\n` +
         `Selected Requests: ${selected.length}\n\n` +
-        `This will initiate ${selected.length} separate blockchain transactions.`;
+        `This will mark these requests as paid and move them to payment history.`;
 
       if (!confirm(confirmMessage)) {
         setProcessingBulkPayment(false);
         return;
       }
 
-      // Check if MetaMask is installed
-      if (typeof window.ethereum === "undefined") {
-        alert(
-          "MetaMask is not installed. Please install MetaMask to process payments."
-        );
-        setProcessingBulkPayment(false);
-        return;
-      }
-
-      // Request account access
-      const accounts = await window.ethereum.request({
-        method: "eth_requestAccounts",
-      });
-      if (accounts.length === 0) {
-        alert("No accounts found. Please connect your MetaMask wallet.");
-        setProcessingBulkPayment(false);
-        return;
-      }
-
-      const fromAddress = accounts[0];
       const results = [];
       let successCount = 0;
       let failureCount = 0;
 
-      // Process each payment sequentially to avoid overwhelming the user
+      // Process each payment sequentially
       for (let i = 0; i < selected.length; i++) {
         const request = selected[i];
         try {
-          // Convert amount to wei (assuming ETH payments)
-          const amountInWei = (
-            parseFloat(request.net) * Math.pow(10, 18)
-          ).toString(16);
-
-          // Get current gas price
-          const gasPrice = await window.ethereum.request({
-            method: "eth_gasPrice",
-          });
-
-          // Create transaction parameters
-          const transactionParams = {
-            from: fromAddress,
-            to: request.walletAddress,
-            value: "0x" + amountInWei,
-            gas: "0x5208", // 21000 gas limit for simple ETH transfer
-            gasPrice: gasPrice,
-          };
+          // Generate a demo transaction hash
+          const demoTxHash = `0x${Math.random().toString(16).substr(2, 64)}`;
 
           console.log(
-            `Sending transaction ${i + 1}/${selected.length} with params:`,
-            transactionParams
+            `Processing payment ${i + 1}/${selected.length} for request:`,
+            request.requestId
           );
 
-          // Send transaction
-          const txHash = await window.ethereum.request({
-            method: "eth_sendTransaction",
-            params: [transactionParams],
-          });
-
-          console.log(`Transaction ${i + 1} sent:`, txHash);
-
-          // Update withdrawal status to processing with transaction hash
-          await handleWithdrawalAction(request.requestId, "approve", txHash);
+          // Update withdrawal status to approved with demo transaction hash
+          await handleWithdrawalAction(request.requestId, "approve", demoTxHash);
 
           results.push({
             requestId: request.requestId,
             memberId: request.memberId,
             amount: request.net,
-            txHash: txHash,
+            txHash: demoTxHash,
             status: "success",
           });
           successCount++;
 
-          // Small delay between transactions to avoid rate limiting
+          // Small delay between transactions
           if (i < selected.length - 1) {
-            await new Promise((resolve) => setTimeout(resolve, 1000));
+            await new Promise((resolve) => setTimeout(resolve, 500));
           }
         } catch (error) {
           console.error(
@@ -238,16 +194,16 @@ export default function NewWithdrawalRequests() {
       resultMessage += `❌ Failed: ${failureCount}\n\n`;
 
       if (successCount > 0) {
-        resultMessage += `Successful transactions:\n`;
+        resultMessage += `Successful payments:\n`;
         results
           .filter((r) => r.status === "success")
           .forEach((r) => {
-            resultMessage += `• ${r.memberId}: $${r.amount} (${r.txHash})\n`;
+            resultMessage += `• ${r.memberId}: $${r.amount}\n`;
           });
       }
 
       if (failureCount > 0) {
-        resultMessage += `\nFailed transactions:\n`;
+        resultMessage += `\nFailed payments:\n`;
         results
           .filter((r) => r.status === "failed")
           .forEach((r) => {
@@ -260,7 +216,7 @@ export default function NewWithdrawalRequests() {
       // Clear selection after processing
       setSelectedRequests(new Set());
     } catch (error) {
-      console.error("Bulk MetaMask payment error:", error);
+      console.error("Bulk payment error:", error);
       alert(`Bulk payment failed: ${error.message}`);
     } finally {
       setProcessingBulkPayment(false);
@@ -302,7 +258,7 @@ export default function NewWithdrawalRequests() {
     }
   };
 
-  const handleMetaMaskPayment = async (request) => {
+  const handleDirectPayment = async (request) => {
     try {
       setProcessingPayment(request.requestId);
 
@@ -311,84 +267,28 @@ export default function NewWithdrawalRequests() {
         `Are you sure you want to process this payment?\n\n` +
         `Amount: $${request.net}\n` +
         `To: ${request.walletAddress}\n` +
-        `Member: ${request.memberId}`;
+        `Member: ${request.memberId}\n\n` +
+        `This will mark the request as paid and move it to payment history.`;
 
       if (!confirm(confirmMessage)) {
         setProcessingPayment(null);
         return;
       }
 
-      // Check if MetaMask is installed
-      if (typeof window.ethereum === "undefined") {
-        alert(
-          "MetaMask is not installed. Please install MetaMask to process payments."
-        );
-        setProcessingPayment(null);
-        return;
-      }
+      // Generate a demo transaction hash for testing
+      const demoTxHash = `0x${Math.random().toString(16).substr(2, 64)}`;
 
-      // Request account access
-      const accounts = await window.ethereum.request({
-        method: "eth_requestAccounts",
-      });
-      if (accounts.length === 0) {
-        alert("No accounts found. Please connect your MetaMask wallet.");
-        setProcessingPayment(null);
-        return;
-      }
+      console.log("Processing payment with demo transaction hash:", demoTxHash);
 
-      // Get the current account
-      const fromAddress = accounts[0];
-
-      // Convert amount to wei (assuming ETH payments)
-      // You might want to adjust this based on your token
-      const amountInWei = (parseFloat(request.net) * Math.pow(10, 18)).toString(
-        16
-      );
-
-      // Get current gas price
-      const gasPrice = await window.ethereum.request({
-        method: "eth_gasPrice",
-      });
-
-      // Create transaction parameters
-      const transactionParams = {
-        from: fromAddress,
-        to: request.walletAddress,
-        value: "0x" + amountInWei,
-        gas: "0x5208", // 21000 gas limit for simple ETH transfer
-        gasPrice: gasPrice,
-      };
-
-      console.log("Sending transaction with params:", transactionParams);
-
-      // Send transaction
-      const txHash = await window.ethereum.request({
-        method: "eth_sendTransaction",
-        params: [transactionParams],
-      });
-
-      console.log("Transaction sent:", txHash);
-
-      // Update withdrawal status to processing with transaction hash
-      await handleWithdrawalAction(request.requestId, "approve", txHash);
+      // Update withdrawal status to approved with demo transaction hash
+      await handleWithdrawalAction(request.requestId, "approve", demoTxHash);
 
       alert(
-        `Payment initiated successfully!\n\nTransaction Hash: ${txHash}\n\nYou can track this transaction on Etherscan.`
+        `Payment processed successfully!\n\nAmount: $${request.net}\nMember: ${request.memberId}\n\nThe payment has been moved to payment history.`
       );
     } catch (error) {
-      console.error("MetaMask payment error:", error);
-      if (error.code === 4001) {
-        alert("Transaction was rejected by user.");
-      } else if (error.code === -32602) {
-        alert(
-          "Invalid transaction parameters. Please check the wallet address and amount."
-        );
-      } else if (error.code === -32603) {
-        alert("Internal JSON-RPC error. Please try again.");
-      } else {
-        alert(`Payment failed: ${error.message}`);
-      }
+      console.error("Payment error:", error);
+      alert(`Payment failed: ${error.message}`);
     } finally {
       setProcessingPayment(null);
     }
@@ -543,12 +443,11 @@ export default function NewWithdrawalRequests() {
               <span className="text-blue-400 text-sm sm:text-base">ℹ️</span>
             </div>
             <div className="ml-3">
-              <h3 className="text-sm font-medium text-blue-800">Integration</h3>
+              <h3 className="text-sm font-medium text-blue-800">Demo Mode</h3>
               <div className="mt-1 text-xs sm:text-sm text-blue-700">
                 <p>
-                  To process payments, you need MetaMask or TokenPocket
-                  installed and connected. Click &quot;Pay&quot; to initiate
-                  blockchain transactions directly from your wallet.
+                  Click &quot;Pay&quot; to process withdrawal requests directly.
+                  Approved payments will be moved to the payment history page.
                 </p>
               </div>
             </div>
@@ -634,7 +533,7 @@ export default function NewWithdrawalRequests() {
                 </button>
                 <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
                   <button
-                    onClick={handleBulkMetaMaskPayment}
+                    onClick={handleBulkPayment}
                     disabled={processingBulkPayment}
                     className={`px-3 sm:px-4 py-2 text-xs sm:text-sm font-medium rounded-md ${
                       processingBulkPayment
@@ -803,7 +702,7 @@ export default function NewWithdrawalRequests() {
                           {request.status === "pending" && (
                             <>
                               <button
-                                onClick={() => handleMetaMaskPayment(request)}
+                                onClick={() => handleDirectPayment(request)}
                                 disabled={processingPayment === request.requestId}
                                 className={`${
                                   processingPayment === request.requestId
@@ -947,7 +846,7 @@ export default function NewWithdrawalRequests() {
                     {request.status === "pending" && (
                       <>
                         <button
-                          onClick={() => handleMetaMaskPayment(request)}
+                          onClick={() => handleDirectPayment(request)}
                           disabled={processingPayment === request.requestId}
                           className={`px-3 py-1 text-xs rounded-full ${
                             processingPayment === request.requestId

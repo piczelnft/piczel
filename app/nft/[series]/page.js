@@ -16,6 +16,7 @@ export default function NFTDetailPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [purchases, setPurchases] = useState([]);
+  const [purchaseData, setPurchaseData] = useState([]); // Store full purchase objects with payoutStatus
 
   const series = params.series; // A1, B1, C1, etc.
   const baseSeries = series?.charAt(0); // A, B, C, etc.
@@ -59,10 +60,13 @@ export default function NFTDetailPage() {
     return 0; // for A1 or invalid
   };
 
-  // Current Holding Wallet total profit (full amount, no tax)
+  // Current Holding Wallet total profit (full amount, no tax) - only for unpaid NFTs
   const getHoldingWalletProfit = () => {
     let totalProfit = 0;
-    purchases.forEach(nftCode => {
+    // Filter out paid NFTs
+    const unpaidPurchases = purchaseData.filter(p => !p.payoutStatus || p.payoutStatus !== 'paid');
+    unpaidPurchases.forEach(purchase => {
+      const nftCode = purchase.code;
       const number = parseInt(nftCode.substring(1));
       totalProfit += getProfitAmount(number);
     });
@@ -140,9 +144,9 @@ export default function NFTDetailPage() {
       const data = await res.json();
       const all = Array.isArray(data.purchases) ? data.purchases : [];
       const seriesPurchases = all
-        .filter(p => typeof p.code === 'string' && p.code.startsWith(baseSeries))
-        .map(p => p.code);
-      setPurchases(seriesPurchases);
+        .filter(p => typeof p.code === 'string' && p.code.startsWith(baseSeries));
+      setPurchaseData(seriesPurchases); // Store full purchase objects
+      setPurchases(seriesPurchases.map(p => p.code)); // Keep codes for compatibility
     } catch (err) {
       console.error('Error loading purchases:', err);
     }
@@ -186,21 +190,11 @@ export default function NFTDetailPage() {
 
       const data = await res.json();
       setPurchases(prev => [...prev, nftCode]);
+      // Update purchaseData with the new purchase
+      setPurchaseData(prev => [...prev, { code: nftCode, payoutStatus: 'pending' }]);
       
-      // Display success message with commission details (use server-calculated reward)
-      const received = (data.userReward ?? 0).toFixed(2);
-      let successMessage = `🎉 Purchase Successful!\n\nNFT: ${nftCode}\nYou received: $${received}\nYour Balance: $${data.user?.wallet?.balance?.toFixed ? data.user.wallet.balance.toFixed(2) : Number(data.user?.wallet?.balance || 0).toFixed(2)}`;
-      
-      if (data.commissions && data.commissions.length > 0) {
-        successMessage += `\n\n🎉 COMMISSIONS DISTRIBUTED:\n`;
-        successMessage += `Total Paid: $${data.totalCommissionsPaid}\n`;
-        successMessage += `Recipients: ${data.commissions.length} sponsors\n\n`;
-
-        data.commissions.forEach((commission) => {
-          successMessage += `Level ${commission.level}: ${commission.sponsorName} (${commission.sponsorId})\n`;
-          successMessage += `  💰 ${commission.commissionRate} = $${commission.commissionAmount}\n`;
-        });
-      }
+      // Display success message
+      const successMessage = `Purchase Successful! ${nftCode}`;
       
       alert(successMessage);
       
@@ -349,7 +343,10 @@ export default function NFTDetailPage() {
               ${(() => {
                 let totalProfit = 0;
                 
-                purchases.forEach(nftCode => {
+                // Filter out paid NFTs
+                const unpaidPurchases = purchaseData.filter(p => !p.payoutStatus || p.payoutStatus !== 'paid');
+                unpaidPurchases.forEach(purchase => {
+                  const nftCode = purchase.code;
                   const number = parseInt(nftCode.substring(1));
                   const profit = getProfitAmount(number);
                   totalProfit += profit; // full profit, no tax deduction

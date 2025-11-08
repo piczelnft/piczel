@@ -3,6 +3,7 @@ import { headers } from "next/headers";
 import jwt from "jsonwebtoken";
 import dbConnect from "@/lib/mongodb";
 import User from "@/models/User";
+import NftPurchase from "@/models/NftPurchase";
 import { corsHeaders, handleCors } from "@/lib/cors";
 
 // Handle CORS preflight requests
@@ -101,6 +102,14 @@ export async function GET(request) {
           // Calculate downline count for each member
           const downlineCount = await User.countDocuments({ sponsor: member._id });
           
+          // Calculate total NFT purchase amount for this member
+          const nftPurchases = await NftPurchase.find({ userId: member._id });
+          const totalNftAmount = nftPurchases.reduce((sum, purchase) => {
+            const price = typeof purchase.price === 'number' ? purchase.price : parseFloat(purchase.price) || 0;
+            return sum + price;
+          }, 0);
+          const packageAmount = totalNftAmount > 0 ? `$${totalNftAmount.toFixed(2)}` : '$0';
+          
           return {
             id: member._id,
             image: member.profile?.avatar || '',
@@ -109,7 +118,7 @@ export async function GET(request) {
             name: member.name,
             email: member.email,
             downline: downlineCount,
-            package: member.package || '$0',
+            package: packageAmount,
             sponsorId: member.sponsor?.memberId || 'N/A',
             status: member.isActivated ? 'Active' : 'Inactive'
           };
