@@ -304,38 +304,38 @@ export default function WithdrawalRequestPage() {
                 
                 {/* Quick Amount Buttons */}
                 <div className="flex gap-1 sm:gap-2 mt-2 flex-wrap">
-                  <button
+                  {/* <button
                     type="button"
                     onClick={() => handleQuickAmount(25)}
                     className="px-2 sm:px-3 py-1 text-xs rounded-full transition-colors duration-200"
                     style={{backgroundColor: 'rgba(0, 255, 136, 0.1)', color: 'var(--primary-color)', border: '1px solid rgba(0, 255, 136, 0.3)'}}
                   >
                     25%
-                  </button>
-                  <button
+                  </button> */}
+                  {/* <button
                     type="button"
                     onClick={() => handleQuickAmount(50)}
                     className="px-2 sm:px-3 py-1 text-xs rounded-full transition-colors duration-200"
                     style={{backgroundColor: 'rgba(0, 255, 136, 0.1)', color: 'var(--primary-color)', border: '1px solid rgba(0, 255, 136, 0.3)'}}
                   >
                     50%
-                  </button>
-                  <button
+                  </button> */}
+                  {/* <button
                     type="button"
                     onClick={() => handleQuickAmount(75)}
                     className="px-2 sm:px-3 py-1 text-xs rounded-full transition-colors duration-200"
                     style={{backgroundColor: 'rgba(0, 255, 136, 0.1)', color: 'var(--primary-color)', border: '1px solid rgba(0, 255, 136, 0.3)'}}
                   >
                     75%
-                  </button>
-                  <button
+                  </button> */}
+                  {/* <button
                     type="button"
                     onClick={() => handleQuickAmount(100)}
                     className="px-2 sm:px-3 py-1 text-xs rounded-full transition-colors duration-200"
                     style={{backgroundColor: 'rgba(0, 255, 136, 0.1)', color: 'var(--primary-color)', border: '1px solid rgba(0, 255, 136, 0.3)'}}
                   >
                     Max
-                  </button>
+                  </button> */}
                 </div>
 
                 {errors.amount && (
@@ -361,7 +361,7 @@ export default function WithdrawalRequestPage() {
                     focusRingColor: 'var(--primary-color)'
                   }}
                 >
-                  <option value="crypto">Cryptocurrency</option>
+                  <option value="crypto">USDT</option>
                 </select>
                 {errors.paymentMethod && (
                   <p className="mt-1 text-sm" style={{color: 'rgb(var(--danger-rgb))'}}>{errors.paymentMethod}</p>
@@ -460,7 +460,7 @@ export default function WithdrawalRequestPage() {
               </div>
 
               {/* Notes */}
-              <div>
+              {/* <div>
                 <label htmlFor="notes" className="block text-sm font-medium mb-2" style={{color: 'rgba(255, 255, 255, 0.8)'}}>
                   Notes (Optional)
                 </label>
@@ -479,7 +479,7 @@ export default function WithdrawalRequestPage() {
                   }}
                   placeholder="Any additional notes for this withdrawal"
                 />
-              </div>
+              </div> */}
 
               {/* Submit Button */}
               <div>

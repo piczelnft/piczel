@@ -213,7 +213,7 @@ export default function Sidebar({ isOpen, onClose }) {
         { name: 'Direct Members', icon: 'user', href: '/team/members' },
         { name: 'Level Member Table', icon: 'bar-chart', href: '/team/levels' },
         { name: 'Level Income Details', icon: 'dollar-sign', href: '/level-income' },
-        { name: 'Spotincome History', icon: 'clock', href: '/team/spot-income-history' }
+        { name: 'Spot Income History', icon: 'clock', href: '/team/spot-income-history' }
       ]
     },
     { 
@@ -259,16 +259,16 @@ export default function Sidebar({ isOpen, onClose }) {
         {/* Header */}
         <div className="flex items-center p-4 border-b" style={{borderColor: 'var(--default-border)'}}>
           <div className="flex items-center space-x-3 group">
-            <div className="w-6 h-6 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform duration-300 animate-cardFloat" style={{background: 'linear-gradient(135deg, var(--primary-color), var(--secondary-color))'}}>
+            {/* <div className="w-6 h-6 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform duration-300 animate-cardFloat" style={{background: 'linear-gradient(135deg, var(--primary-color), var(--secondary-color))'}}>
               <div className="w-3 h-3 bg-white rounded-full flex items-center justify-center">
                 <div className="w-1.5 h-1.5 rounded-full animate-pulse" style={{backgroundColor: 'var(--primary-color)'}}></div>
               </div>
-            </div>
+            </div> */}
             <div>
-              <h2 className="font-bold text-lg text-white gradient-text-enhanced animate-neonGlow">
+              {/* <h2 className="font-bold text-lg text-white gradient-text-enhanced animate-neonGlow">
                 PICZEL
-              </h2>
-              <p className="text-xs" style={{color: 'rgba(255, 255, 255, 0.7)'}}>Crypto Trading Platform</p>
+              </h2> */}
+              {/* <p className="text-xs" style={{color: 'rgba(255, 255, 255, 0.7)'}}></p> */}
             </div>
           </div>
         </div>

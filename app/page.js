@@ -241,7 +241,7 @@ export default function Home() {
             
               {dashboardData && (
                 <div className="text-xs text-green-400">
-                  ✅ Live Data {lastUpdated && `(Updated: ${lastUpdated})`}
+                   {}
                 </div>
               )}
               {!dashboardData && (
@@ -478,7 +478,7 @@ export default function Home() {
             </div>
 
             {/* Referral Instructions */}
-            <div className="mt-6 p-4 rounded-xl border" style={{backgroundColor: 'rgba(59,130,246,0.1)', borderColor: 'rgba(59,130,246,0.3)'}}>
+            {/* <div className="mt-6 p-4 rounded-xl border" style={{backgroundColor: 'rgba(59,130,246,0.1)', borderColor: 'rgba(59,130,246,0.3)'}}>
               <h4 className="text-sm font-semibold text-white mb-2">How to use your referral link:</h4>
               <ul className="text-sm space-y-1" style={{color: 'rgba(255,255,255,0.8)'}}>
                 <li>• Copy your referral link and share it with potential new members</li>
@@ -486,7 +486,7 @@ export default function Home() {
                 <li>• You&apos;ll earn commissions from their NFT purchases and activities</li>
                 <li>• The sponsor ID will be automatically filled in the signup form</li>
               </ul>
-            </div>
+            </div> */}
           </div>
         </div>
       </div>

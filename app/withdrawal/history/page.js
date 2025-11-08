@@ -294,9 +294,6 @@ export default function WithdrawalHistoryPage() {
                           <th className="text-left py-4 px-6 text-white font-semibold">
                             Date
                           </th>
-                          <th className="text-left py-4 px-6 text-white font-semibold">
-                            Actions
-                          </th>
                         </tr>
                       </thead>
                       <tbody>
@@ -337,20 +334,6 @@ export default function WithdrawalHistoryPage() {
                               <span className="text-white/80 text-sm">
                                 {formatDate(withdrawal.createdAt)}
                               </span>
-                            </td>
-                            <td className="py-4 px-6">
-                              <button
-                                className="text-blue-400 hover:text-blue-300 text-sm font-medium transition-colors duration-200"
-                                onClick={() => {
-                                  // TODO: Implement view details modal
-                                  console.log(
-                                    "View details for:",
-                                    withdrawal._id
-                                  );
-                                }}
-                              >
-                                View Details
-                              </button>
                             </td>
                           </tr>
                         ))}
@@ -405,16 +388,6 @@ export default function WithdrawalHistoryPage() {
                         </p>
                       </div>
                     </div>
-                    
-                    <button
-                      className="w-full text-blue-400 hover:text-blue-300 text-sm font-medium transition-colors duration-200 py-2 border-t border-white/10"
-                      onClick={() => {
-                        // TODO: Implement view details modal
-                        console.log("View details for:", withdrawal._id);
-                      }}
-                    >
-                      View Details
-                    </button>
                   </div>
                 ))}
               </div>

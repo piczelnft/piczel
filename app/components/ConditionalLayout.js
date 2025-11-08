@@ -2,7 +2,6 @@
 
 import { usePathname } from 'next/navigation';
 import Navbar from './Navbar';
-import CryptoPriceTicker from './CryptoPriceTicker';
 import LayoutWithSidebar from './LayoutWithSidebar';
 
 export default function ConditionalLayout({ children }) {
@@ -26,7 +25,7 @@ export default function ConditionalLayout({ children }) {
   return (
     <>
       <Navbar />
-      <CryptoPriceTicker />
+      {/* <CryptoPriceTicker /> */}
       <LayoutWithSidebar>
         <main className="pt-28">{children}</main>
       </LayoutWithSidebar>
