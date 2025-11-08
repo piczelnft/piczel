@@ -73,20 +73,46 @@ export default function NFTDetailPage() {
     return totalProfit;
   };
 
-  // Determine the next unlockable NFT number based on purchases (2..100)
+  // Determine the next unlockable NFT number based on purchases and payout status (2..100)
   const getNextUnlockNumber = () => {
+    // Check if all previous NFTs have been paid out
     for (let i = 2; i <= 100; i++) {
-      if (!purchases.includes(`${baseSeries}${i}`)) return i;
+      const nftCode = `${baseSeries}${i}`;
+      if (!purchases.includes(nftCode)) {
+        // This NFT is not purchased yet
+        // Check if all previous NFTs (if any) have been paid out
+        if (i === 2) {
+          // For A2, check if A1 is paid out (A1 must exist AND be paid)
+          const previousCode = `${baseSeries}1`;
+          const previousPurchase = purchaseData.find(p => p.code === previousCode);
+          // A1 must exist AND be paid out for A2 to unlock
+          if (previousPurchase && previousPurchase.payoutStatus === 'paid') {
+            return i;
+          }
+        } else {
+          // For A3+, check if the immediate previous NFT is paid out
+          const previousCode = `${baseSeries}${i - 1}`;
+          const previousPurchase = purchaseData.find(p => p.code === previousCode);
+          // Previous NFT must exist AND be paid out
+          if (previousPurchase && previousPurchase.payoutStatus === 'paid') {
+            return i;
+          }
+        }
+        // If conditions not met, this is locked
+        return null;
+      }
     }
     return null;
   };
 
   const isNFTAvailable = (nftCode) => {
-    // Only allow the next NFT if holding wallet amount is empty (zero)
-    const holdingProfit = getHoldingWalletProfit();
+    // NFT is available if:
+    // 1. It's not already owned
+    // 2. It's the next in sequence
+    // 3. All previous NFTs in this series have been paid out
     const number = parseInt(nftCode.substring(1));
     const nextUnlock = getNextUnlockNumber();
-    return holdingProfit === 0 && nextUnlock !== null && number === nextUnlock;
+    return nextUnlock !== null && number === nextUnlock;
   };
 
   const isNFTOwned = (nftCode) => {
@@ -101,10 +127,35 @@ export default function NFTDetailPage() {
       return { status: 'available', message: 'Available' };
     }
     const nextUnlock = getNextUnlockNumber();
-    return {
-      status: 'locked',
-      message: nextUnlock ? `Locked — next unlock: ${baseSeries}${nextUnlock} after profit payout` : 'Locked'
-    };
+    const number = parseInt(nftCode.substring(1));
+    
+    if (nextUnlock === null) {
+      // No NFT can be unlocked - either no purchases yet or previous NFT not paid out
+      if (purchases.length === 0) {
+        // No NFTs purchased in this series yet
+        return {
+          status: 'locked',
+          message: `Locked — ${baseSeries}1 must be purchased first`
+        };
+      } else {
+        // Previous NFT exists but not paid out yet
+        const lastPurchased = Math.max(...purchases.map(p => parseInt(p.substring(1))));
+        return {
+          status: 'locked',
+          message: `Locked — ${baseSeries}${lastPurchased} profit must be paid first`
+        };
+      }
+    } else if (number > nextUnlock) {
+      return {
+        status: 'locked',
+        message: `Locked — ${baseSeries}${nextUnlock} must be purchased first`
+      };
+    } else {
+      return {
+        status: 'locked',
+        message: 'Locked'
+      };
+    }
   };
 
   // Fetch user balance
