@@ -79,6 +79,15 @@ export default function NewWithdrawalRequests() {
     });
   };
 
+  // Calculate payout amount after 10% company deduction
+  const calculatePayoutAmount = (netAmount) => {
+    return netAmount * 0.9; // 90% of net amount
+  };
+
+  const calculateCompanyDeduction = (netAmount) => {
+    return netAmount * 0.1; // 10% company deduction
+  };
+
   // Selection helper functions
   const handleSelectRequest = (requestId) => {
     const newSelected = new Set(selectedRequests);
@@ -118,6 +127,13 @@ export default function NewWithdrawalRequests() {
     );
   };
 
+  const getTotalPayoutAmount = () => {
+    return getSelectedRequests().reduce(
+      (total, req) => total + calculatePayoutAmount(parseFloat(req.net)),
+      0
+    );
+  };
+
   const handleBulkPayment = async () => {
     const selected = getSelectedRequests();
     if (selected.length === 0) {
@@ -129,10 +145,17 @@ export default function NewWithdrawalRequests() {
       setProcessingBulkPayment(true);
 
       // Show confirmation dialog
+      const totalRequested = getTotalSelectedAmount();
+      const totalPayout = getTotalPayoutAmount();
+      const totalDeduction = totalRequested - totalPayout;
+      
       const confirmMessage =
         `Are you sure you want to process ${selected.length} payments?\n\n` +
-        `Total Amount: $${getTotalSelectedAmount().toFixed(2)}\n` +
+        `Total Requested Amount: $${totalRequested.toFixed(2)}\n` +
+        `Company Deduction (10%): -$${totalDeduction.toFixed(2)}\n` +
+        `Total Payout Amount: $${totalPayout.toFixed(2)}\n` +
         `Selected Requests: ${selected.length}\n\n` +
+        `Note: Admin will pay 90% of each request (10% company deduction).\n` +
         `This will mark these requests as paid and move them to payment history.`;
 
       if (!confirm(confirmMessage)) {
@@ -159,10 +182,12 @@ export default function NewWithdrawalRequests() {
           // Update withdrawal status to approved with demo transaction hash
           await handleWithdrawalAction(request.requestId, "approve", demoTxHash);
 
+          const payoutAmount = calculatePayoutAmount(parseFloat(request.net));
           results.push({
             requestId: request.requestId,
             memberId: request.memberId,
-            amount: request.net,
+            requestedAmount: request.net,
+            payoutAmount: payoutAmount,
             txHash: demoTxHash,
             status: "success",
           });
@@ -180,7 +205,7 @@ export default function NewWithdrawalRequests() {
           results.push({
             requestId: request.requestId,
             memberId: request.memberId,
-            amount: request.net,
+            requestedAmount: request.net,
             error: error.message,
             status: "failed",
           });
@@ -198,7 +223,7 @@ export default function NewWithdrawalRequests() {
         results
           .filter((r) => r.status === "success")
           .forEach((r) => {
-            resultMessage += `• ${r.memberId}: $${r.amount}\n`;
+            resultMessage += `• ${r.memberId}: Requested $${r.requestedAmount} → Paid $${r.payoutAmount.toFixed(2)}\n`;
           });
       }
 
@@ -207,7 +232,7 @@ export default function NewWithdrawalRequests() {
         results
           .filter((r) => r.status === "failed")
           .forEach((r) => {
-            resultMessage += `• ${r.memberId}: $${r.amount} - ${r.error}\n`;
+            resultMessage += `• ${r.memberId}: $${r.requestedAmount} - ${r.error}\n`;
           });
       }
 
@@ -230,9 +255,15 @@ export default function NewWithdrawalRequests() {
       return;
     }
 
+    const totalRequested = getTotalSelectedAmount();
+    const totalPayout = getTotalPayoutAmount();
+    const totalDeduction = totalRequested - totalPayout;
+
     const confirmMessage =
       `Are you sure you want to reject ${selected.length} withdrawal requests?\n\n` +
-      `Total Amount: $${getTotalSelectedAmount().toFixed(2)}\n` +
+      `Total Requested: $${totalRequested.toFixed(2)}\n` +
+      `Would have deducted: $${totalDeduction.toFixed(2)} (10%)\n` +
+      `Would have paid: $${totalPayout.toFixed(2)}\n` +
       `Selected Requests: ${selected.length}\n\n` +
       `This action will refund the amounts back to the users' balances.`;
 
@@ -262,12 +293,19 @@ export default function NewWithdrawalRequests() {
     try {
       setProcessingPayment(request.requestId);
 
+      const netAmount = parseFloat(request.net);
+      const payoutAmount = calculatePayoutAmount(netAmount);
+      const deduction = calculateCompanyDeduction(netAmount);
+
       // Show confirmation dialog
       const confirmMessage =
         `Are you sure you want to process this payment?\n\n` +
-        `Amount: $${request.net}\n` +
+        `Requested Amount: $${netAmount.toFixed(2)}\n` +
+        `Company Deduction (10%): -$${deduction.toFixed(2)}\n` +
+        `Payout Amount: $${payoutAmount.toFixed(2)}\n\n` +
         `To: ${request.walletAddress}\n` +
         `Member: ${request.memberId}\n\n` +
+        `Note: You will pay 90% of the requested amount (10% company deduction).\n` +
         `This will mark the request as paid and move it to payment history.`;
 
       if (!confirm(confirmMessage)) {
@@ -284,7 +322,12 @@ export default function NewWithdrawalRequests() {
       await handleWithdrawalAction(request.requestId, "approve", demoTxHash);
 
       alert(
-        `Payment processed successfully!\n\nAmount: $${request.net}\nMember: ${request.memberId}\n\nThe payment has been moved to payment history.`
+        `Payment processed successfully!\n\n` +
+        `Requested Amount: $${netAmount.toFixed(2)}\n` +
+        `Company Deduction (10%): -$${deduction.toFixed(2)}\n` +
+        `Paid Amount: $${payoutAmount.toFixed(2)}\n\n` +
+        `Member: ${request.memberId}\n\n` +
+        `The payment has been moved to payment history.`
       );
     } catch (error) {
       console.error("Payment error:", error);
@@ -309,11 +352,16 @@ export default function NewWithdrawalRequests() {
           (req) => req.requestId === requestId
         );
         if (request) {
+          const netAmount = parseFloat(request.net);
+          const payoutAmount = calculatePayoutAmount(netAmount);
+          const deduction = calculateCompanyDeduction(netAmount);
+
           const confirmMessage =
             `Are you sure you want to reject this withdrawal request?\n\n` +
             `Request ID: ${request.requestId}\n` +
             `Member: ${request.memberId}\n` +
-            `Amount: $${request.net}\n\n` +
+            `Requested Amount: $${netAmount.toFixed(2)}\n` +
+            `Would have paid: $${payoutAmount.toFixed(2)} (after 10% deduction)\n\n` +
             `This action will refund the amount back to the user's balance.`;
 
           if (!confirm(confirmMessage)) {
@@ -520,9 +568,14 @@ export default function NewWithdrawalRequests() {
                   {selectedRequests.size} request
                   {selectedRequests.size !== 1 ? "s" : ""} selected
                 </span>
-                <span className="text-sm text-blue-700">
-                  Total Amount: {formatCurrency(getTotalSelectedAmount())}
-                </span>
+                <div className="flex flex-col sm:flex-row gap-1 sm:gap-3">
+                  <span className="text-sm text-blue-700">
+                    Requested: {formatCurrency(getTotalSelectedAmount())}
+                  </span>
+                  <span className="text-sm font-semibold text-green-700">
+                    Payout: {formatCurrency(getTotalPayoutAmount())} (90%)
+                  </span>
+                </div>
               </div>
               <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3">
                 <button
