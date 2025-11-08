@@ -25,6 +25,21 @@ export default function SpotIncomeHistoryPage() {
     });
   };
 
+  const getLevel = (amount) => {
+    if (amount === null || amount === undefined || Number.isNaN(amount)) return "-";
+    const num = typeof amount === "number" ? amount : parseFloat(String(amount));
+    if (!Number.isFinite(num)) return "-";
+    
+    // L1 = $3, L2 = $1, L3 = $1
+    if (num >= 3) return "L1";
+    if (num >= 1) {
+      // For $1, we need to determine if it's L2 or L3
+      // Since both L2 and L3 are $1, we'll use index to alternate or default to L2
+      return "L2";
+    }
+    return "L3";
+  };
+
   const normalizeEntries = (rawList) => {
     if (!Array.isArray(rawList)) return [];
     return rawList.map((it) => {
@@ -45,12 +60,10 @@ export default function SpotIncomeHistoryPage() {
         || {};
       const memberId = fromObj.memberId || fromObj.id || it.fromMemberId || it.senderId || it.sponsorMemberId || it.sponsorId || '-';
       const name = fromObj.name || it.fromName || it.senderName || it.referralName || '-';
-      const note = it.note || it.reason || it.description || it.remark || it.incomeType || '';
       return {
         from: { name, memberId },
         amount: typeof amount === 'number' ? amount : parseFloat(String(amount).replace(/[^0-9.-]/g, '')) || 0,
         date,
-        note,
       };
     }).filter(e => Number.isFinite(e.amount));
   };
@@ -82,8 +95,7 @@ export default function SpotIncomeHistoryPage() {
                 flat.push({
                   from: { name: ref.name || '-', memberId: ref.memberId || '-' },
                   amount: 3, // L1 spot income per purchase (from route reference)
-                  date: src.purchaseDate || src.createdAt || null,
-                  note: 'Spot income from referral NFT purchase'
+                  date: src.purchaseDate || src.createdAt || null
                 });
               }
             }
@@ -153,8 +165,7 @@ export default function SpotIncomeHistoryPage() {
               setEntries([{
                 from: { name: 'Multiple Sources', memberId: '-' },
                 amount: amt,
-                date: null,
-                note: 'Summary from dashboard total. Detailed history endpoint unavailable.'
+                date: null
               }]);
               success = true;
             }
@@ -221,7 +232,7 @@ export default function SpotIncomeHistoryPage() {
                   <th className="px-6 py-4 text-white font-semibold">Member ID</th>
                   <th className="px-6 py-4 text-white font-semibold">Amount</th>
                   <th className="px-6 py-4 text-white font-semibold">Date</th>
-                  <th className="px-6 py-4 text-white font-semibold">Note</th>
+                  <th className="px-6 py-4 text-white font-semibold">Level</th>
                 </tr>
               </thead>
               <tbody>
@@ -235,7 +246,7 @@ export default function SpotIncomeHistoryPage() {
                     <td className="px-6 py-4" style={{color: 'rgba(255, 255, 255, 0.8)'}}>{item?.from?.memberId || "-"}</td>
                     <td className="px-6 py-4 font-medium" style={{color: 'var(--secondary-color)'}}>{formatCurrency(item?.amount)}</td>
                     <td className="px-6 py-4" style={{color: 'rgba(255, 255, 255, 0.8)'}}>{formatDate(item?.date)}</td>
-                    <td className="px-6 py-4" style={{color: 'rgba(255, 255, 255, 0.8)'}}>{item?.note || item?.reason || '-'}</td>
+                    <td className="px-6 py-4 font-medium" style={{color: 'var(--secondary-color)'}}>{getLevel(item?.amount)}</td>
                   </tr>
                 ))}
                 {entries.length === 0 && (

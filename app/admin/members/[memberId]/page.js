@@ -172,10 +172,10 @@ export default function MemberDetail() {
                 </div>
               )}
               <h2 className="text-xl font-semibold text-gray-900">{member.memberName}</h2>
-              <p className="text-gray-600">{member.memberId}</p>
+              {/* <p className="text-gray-600">{member.memberId}</p>
               <div className="mt-4">
                 {getStatusBadge(member.rank === "Basic" ? "Inactive" : member.status)}
-              </div>
+              </div> */}
             </div>
           </div>
         </div>
@@ -273,7 +273,7 @@ export default function MemberDetail() {
           </div>
 
           {/* Financial Information */}
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 mt-6">
+          {/* <div className="bg-white rounded-lg shadow-sm border border-gray-200 mt-6">
             <div className="px-6 py-4 border-b border-gray-200">
               <h3 className="text-lg font-semibold text-gray-900">Financial Information</h3>
             </div>
@@ -329,9 +329,9 @@ export default function MemberDetail() {
                 </div>
               </div>
             </div>
-          </div>
+          </div> */}
 
-          {/* Team Information */}
+          {/* Team Information
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 mt-6">
             <div className="px-6 py-4 border-b border-gray-200">
               <h3 className="text-lg font-semibold text-gray-900">Team Information</h3>
@@ -372,7 +372,7 @@ export default function MemberDetail() {
                 </div>
               </div>
             </div>
-          </div>
+          </div> */}
         </div>
       </div>
     </AdminLayout>
