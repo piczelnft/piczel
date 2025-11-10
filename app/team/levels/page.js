@@ -10,7 +10,8 @@ const TeamLevelsPage = () => {
   const [statistics, setStatistics] = useState({
     totalLevels: 10,
     totalMembers: 0,
-    activeLevels: 0
+    activeLevels: 0,
+    totalNFTPurchases: 0
   });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -53,8 +54,8 @@ const TeamLevelsPage = () => {
 
   const computeLevelTotalAmount = (level) => {
     const perPerson = getPerPersonRate(level?.levelNo);
-    const members = Number(level?.totalMembers) || 0;
-    return perPerson * members;
+    const totalNFTPurchases = level?.totalNFTPurchases || level?.totalMembers || 0;
+    return perPerson * totalNFTPurchases;
   };
 
   const getLevelAmount = (level) => {
@@ -87,7 +88,8 @@ const TeamLevelsPage = () => {
       setLoading(true);
       setError(null);
       
-      const response = await fetch('/api/team/levels', {
+      // Fetch both levels data and NFT purchases data
+      const response = await fetch('/api/team/levels?include=nftPurchases', {
         headers: {
           'Authorization': `Bearer ${token}`,
         },
@@ -98,8 +100,18 @@ const TeamLevelsPage = () => {
       }
 
       const data = await response.json();
-      setLevelsData(data.levels || []);
-      setStatistics(prev => data.statistics || prev);
+      
+      // Process the data to include NFT purchase counts
+      const processedLevels = (data.levels || []).map(level => ({
+        ...level,
+        totalNFTPurchases: level.nftPurchases || level.totalNFTPurchases || level.totalMembers || 0
+      }));
+      
+      setLevelsData(processedLevels);
+      setStatistics(prev => ({
+        ...data.statistics || prev,
+        totalNFTPurchases: processedLevels.reduce((sum, level) => sum + (level.totalNFTPurchases || 0), 0)
+      }));
     } catch (err) {
       console.error('Error fetching team levels:', err);
       setError(err.message);
@@ -212,8 +224,8 @@ const TeamLevelsPage = () => {
                 <tr style={{background: 'linear-gradient(to right, rgba(29, 68, 67, 0.8), rgba(29, 68, 67, 0.8))', borderBottom: '1px solid var(--default-border)'}}>
                   <th className="px-6 py-4 text-white font-semibold">S.No</th>
                   <th className="px-6 py-4 text-white font-semibold">Level No</th>
-                  <th className="px-6 py-4 text-white font-semibold">Total Members</th>
-                  <th className="px-6 py-4 text-white font-semibold">Total Amount</th>
+                  <th className="px-6 py-4 text-white font-semibold">Total Members/NFTs</th>
+                  <th className="px-6 py-4 text-white font-semibold">Total Amount (All NFTs)</th>
                 </tr>
               </thead>
               <tbody>
@@ -224,9 +236,21 @@ const TeamLevelsPage = () => {
                   }}>
                     <td className="px-6 py-4" style={{color: 'rgba(255, 255, 255, 0.8)'}}>{index + 1}</td>
                     <td className="px-6 py-4 text-white font-medium">{level.levelNo}</td>
-                    <td className="px-6 py-4 font-medium" style={{color: 'var(--secondary-color)'}}>{level.totalMembers}</td>
+                    <td className="px-6 py-4 font-medium" style={{color: 'var(--secondary-color)'}}>
+                      {level.totalMembers}
+                      {level.totalNFTPurchases > level.totalMembers && (
+                        <span className="ml-2 text-xs" style={{color: 'var(--success-rgb)'}}>
+                          ({level.totalNFTPurchases} NFTs)
+                        </span>
+                      )}
+                    </td>
                     <td className="px-6 py-4 font-medium" style={{color: 'var(--secondary-color)'}}>
                       {formatCurrency(computeLevelTotalAmount(level))}
+                      {level.totalNFTPurchases > level.totalMembers && (
+                        <div className="text-xs mt-1" style={{color: 'rgba(255, 255, 255, 0.6)'}}>
+                          ({level.totalNFTPurchases} NFTs × ${getPerPersonRate(level.levelNo)})
+                        </div>
+                      )}
                     </td>
                   </tr>
                 ))}
@@ -251,7 +275,14 @@ const TeamLevelsPage = () => {
               border: '1px solid rgba(var(--success-rgb), 0.3)'
             }}>
               <div className="text-center">
-                <div className="text-2xl font-bold mb-2" style={{color: 'rgb(var(--success-rgb))'}}>{statistics.totalMembers}</div>
+                <div className="text-2xl font-bold mb-2" style={{color: 'rgb(var(--success-rgb))'}}>
+                  {statistics.totalMembers}
+                  {statistics.totalNFTPurchases > statistics.totalMembers && (
+                    <div className="text-sm" style={{color: 'rgba(var(--success-rgb), 0.8)'}}>
+                      ({statistics.totalNFTPurchases} NFTs)
+                    </div>
+                  )}
+                </div>
                 <div className="text-sm" style={{color: 'rgba(255, 255, 255, 0.8)'}}>Total Members</div>
               </div>
             </div>

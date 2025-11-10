@@ -121,7 +121,10 @@ export default function NftHistory() {
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {purchases.map((purchase) => (
+            {purchases
+              .slice()
+              .sort((a, b) => new Date(b.purchasedAt) - new Date(a.purchasedAt))
+              .map((purchase) => (
               <div key={purchase._id} className="bg-white/10 backdrop-blur-sm rounded-lg p-6 border border-white/20 hover:bg-white/15 transition-all duration-300">
                 <div className="mb-4">
                   <div className="flex items-center justify-between mb-1">

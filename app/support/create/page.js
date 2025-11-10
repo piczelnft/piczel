@@ -21,6 +21,8 @@ const SupportCreatePage = () => {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+  const [myTickets, setMyTickets] = useState([]);
+  const [loadingReplies, setLoadingReplies] = useState(true);
 
   // Fetch user and admin information on component mount
   useEffect(() => {
@@ -61,6 +63,45 @@ const SupportCreatePage = () => {
 
     fetchUserInfo();
   }, [token]);
+
+  // Fetch user's support tickets with replies
+  useEffect(() => {
+    const fetchMyTickets = async () => {
+      if (!token) {
+        setLoadingReplies(false);
+        return;
+      }
+      try {
+        setLoadingReplies(true);
+        const res = await fetch('/api/support/tickets?include=responses', {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+        });
+        if (res.ok) {
+          const data = await res.json();
+          // Expecting data.tickets with optional replies array on each ticket
+          const tickets = Array.isArray(data.tickets) ? data.tickets : [];
+          // Sort tickets by most recent activity (reply or createdAt)
+          tickets.sort((a, b) => {
+            const aDate = new Date(a.updatedAt || a.lastResponse || a.createdAt).getTime();
+            const bDate = new Date(b.updatedAt || b.lastResponse || b.createdAt).getTime();
+            return bDate - aDate;
+          });
+          setMyTickets(tickets);
+        } else {
+          setMyTickets([]);
+        }
+      } catch (e) {
+        console.error('Error fetching my tickets:', e);
+        setMyTickets([]);
+      } finally {
+        setLoadingReplies(false);
+      }
+    };
+    fetchMyTickets();
+  }, [token, success]);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -159,7 +200,7 @@ const SupportCreatePage = () => {
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Admin Information */}
-          <div className="lg:col-span-1">
+          {/* <div className="lg:col-span-1">
             <div className="bg-gradient-to-br from-slate-800/50 to-purple-800/50 backdrop-blur-sm rounded-2xl p-6 border border-purple-500/20 shadow-lg">
               <h2 className="text-xl font-semibold text-white mb-6 text-center">Admin Information</h2>
               
@@ -188,7 +229,7 @@ const SupportCreatePage = () => {
                 </div>
               </div>
             </div>
-          </div>
+          </div> */}
 
           {/* Message Form */}
           <div className="lg:col-span-2">
@@ -304,6 +345,74 @@ const SupportCreatePage = () => {
         </div>
 
       </div>
+      </div>
+
+      {/* Replies Section */}
+      <div className="flex-1 mt-8">
+        <div className="max-w-4xl mx-auto">
+          <div className="bg-gradient-to-br from-slate-800/50 to-purple-800/50 backdrop-blur-sm rounded-2xl p-6 border border-purple-500/20 shadow-lg">
+            <h2 className="text-xl font-semibold text-white mb-4">Your Support Replies</h2>
+            {loadingReplies ? (
+              <div className="text-center py-8">
+                <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-cyan-400 mx-auto mb-3"></div>
+                <p className="text-gray-300 text-sm">Loading replies...</p>
+              </div>
+            ) : myTickets.length === 0 ? (
+              <div className="text-center py-8">
+                <p className="text-gray-400 text-sm">No tickets found yet. Create a ticket to receive replies from support.</p>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {myTickets.map((t) => {
+                  const replies = Array.isArray(t.responses) ? t.responses.map(r => ({
+                    message: r.message,
+                    by: r.sender === 'admin' ? 'Admin' : 'You',
+                    createdAt: r.createdAt
+                  })) : [];
+                  return (
+                    <div key={t._id} className="p-4 rounded-lg border" style={{borderColor:'rgba(255,255,255,0.15)', backgroundColor:'rgba(255,255,255,0.04)'}}>
+                      <div className="flex items-center justify-between mb-2">
+                        <div className="text-white font-semibold">
+                          #{t.ticketId} • {t.subject || 'No subject'}
+                        </div>
+                        <div className="text-xs text-gray-400">
+                          {new Date(t.updatedAt || t.createdAt).toLocaleString()}
+                        </div>
+                      </div>
+                      <div className="text-gray-300 text-sm mb-3">
+                        {t.message || t.description}
+                      </div>
+                      {replies.length === 0 ? (
+                        <div className="text-xs text-gray-400">No replies yet.</div>
+                      ) : (
+                        <div className="space-y-2">
+                          {replies
+                            .slice()
+                            .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+                            .map((r, idx) => (
+                              <div key={`${t._id}-r-${idx}`} className="p-3 rounded-md bg-slate-700/40 border border-purple-500/20">
+                                <div className="flex items-center justify-between mb-1">
+                                  <div className="text-xs text-cyan-300">
+                                    {r.by || 'Admin'}
+                                  </div>
+                                  <div className="text-[10px] text-gray-400">
+                                    {new Date(r.createdAt).toLocaleString()}
+                                  </div>
+                                </div>
+                                <div className="text-sm text-white whitespace-pre-wrap">
+                                  {r.message}
+                                </div>
+                              </div>
+                            ))}
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        </div>
       </div>
     </div>
   );

@@ -243,9 +243,15 @@ const TeamMembersPage = () => {
                       <td className="px-2 sm:px-6 py-3 sm:py-4 font-medium text-xs sm:text-sm hidden lg:table-cell" style={{color: 'rgb(var(--success-rgb))'}}>{item.package}</td>
                       <td className="px-2 sm:px-6 py-3 sm:py-4 font-medium text-xs sm:text-sm hidden lg:table-cell" style={{color: 'rgb(var(--warning-rgb))'}}>{item.sponsorId}</td>
                       <td className="px-2 sm:px-6 py-3 sm:py-4">
-                        <span className="px-2 sm:px-3 py-1 rounded-full text-xs font-medium" style={getStatusColor(item.status)}>
-                          {item.status}
-                        </span>
+                        {(() => {
+                          const amount = parseFloat((item.package ?? 0).toString().replace(/[^0-9.\-]/g, ''));
+                          const derivedStatus = !isNaN(amount) && amount > 0 ? 'Active' : 'Inactive';
+                          return (
+                            <span className="px-2 sm:px-3 py-1 rounded-full text-xs font-medium" style={getStatusColor(derivedStatus)}>
+                              {derivedStatus}
+                            </span>
+                          );
+                        })()}
                       </td>
                     </tr>
                   ))

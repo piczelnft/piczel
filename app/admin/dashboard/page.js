@@ -124,7 +124,9 @@ export default function AdminDashboard() {
             <div className="flex items-center justify-between">
               <div>
                 <h3 className="text-lg font-medium text-gray-900">Total Inactive</h3>
-                <p className="text-3xl font-bold text-yellow-600 mt-2">{formatNumber(stats?.members?.inactive || 0)}</p>
+                <p className="text-3xl font-bold text-yellow-600 mt-2">
+                  {formatNumber(stats?.members?.inactive || 0)}
+                </p>
               </div>
               <div className="w-12 h-12 bg-yellow-100 rounded-lg flex items-center justify-center">
                 <span className="text-2xl">⏸️</span>
@@ -132,7 +134,7 @@ export default function AdminDashboard() {
             </div>
           </div>
 
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+          {/* <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
             <div className="flex items-center justify-between">
               <div>
                 <h3 className="text-lg font-medium text-gray-900">Total Blocked</h3>
@@ -142,7 +144,7 @@ export default function AdminDashboard() {
                 <span className="text-2xl">🚫</span>
               </div>
             </div>
-          </div>
+          </div> */}
 
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
             <div className="flex items-center justify-between">
@@ -162,7 +164,7 @@ export default function AdminDashboard() {
       <div className="mb-8">
         <h2 className="text-xl font-semibold text-gray-900 mb-6">Financial Overview</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+          {/* <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
             <div className="flex items-center justify-between">
               <div>
                 <h3 className="text-lg font-medium text-gray-900">Today&apos;s Upgrade</h3>
@@ -172,7 +174,7 @@ export default function AdminDashboard() {
                 <span className="text-2xl">⬆️</span>
               </div>
             </div>
-          </div>
+          </div> */}
 
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
             <div className="flex items-center justify-between">
@@ -198,7 +200,7 @@ export default function AdminDashboard() {
             </div>
           </div>
 
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+          {/* <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
             <div className="flex items-center justify-between">
               <div>
                 <h3 className="text-lg font-medium text-gray-900">Total Fund Balance</h3>
@@ -208,18 +210,18 @@ export default function AdminDashboard() {
                 <span className="text-2xl">🏦</span>
               </div>
             </div>
-          </div>
+          </div> */}
         </div>
       </div>
 
       {/* Account Activation & Upgrade */}
       <div className="mb-8">
-        <h2 className="text-xl font-semibold text-gray-900 mb-6">Account & Upgrade Statistics</h2>
+        <h2 className="text-xl font-semibold text-gray-900 mb-6">Account & Purchase Statistics</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
             <div className="flex items-center justify-between">
               <div>
-                <h3 className="text-lg font-medium text-gray-900">Total Amount By Account Activation</h3>
+                <h3 className="text-lg font-medium text-gray-900">Total Amount By Purchase</h3>
                 <p className="text-2xl font-bold text-green-600 mt-2">{formatCurrency(stats?.financial?.totalActivation || 0)}</p>
               </div>
               <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
@@ -231,7 +233,7 @@ export default function AdminDashboard() {
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
             <div className="flex items-center justify-between">
               <div>
-                <h3 className="text-lg font-medium text-gray-900">Total Amount By Upgrade</h3>
+                <h3 className="text-lg font-medium text-gray-900">Today's Purchase</h3>
                 <p className="text-2xl font-bold text-blue-600 mt-2">{formatCurrency(stats?.financial?.totalUpgrade || 0)}</p>
               </div>
               <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
@@ -240,7 +242,7 @@ export default function AdminDashboard() {
             </div>
           </div>
 
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+          {/* <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
             <div className="flex items-center justify-between">
               <div>
                 <h3 className="text-lg font-medium text-gray-900">Total Withdrawal</h3>
@@ -250,7 +252,7 @@ export default function AdminDashboard() {
                 <span className="text-2xl">⬇️</span>
               </div>
             </div>
-          </div>
+          </div> */}
         </div>
       </div>
 
@@ -340,7 +342,7 @@ export default function AdminDashboard() {
             </div>
           </div>
 
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+          {/* <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
             <div className="flex items-center justify-between">
               <div>
                 <h3 className="text-lg font-medium text-gray-900">Total ROI Income</h3>
@@ -350,9 +352,9 @@ export default function AdminDashboard() {
                 <span className="text-2xl">💹</span>
               </div>
             </div>
-          </div>
+          </div> */}
 
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+          {/* <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
             <div className="flex items-center justify-between">
               <div>
                 <h3 className="text-lg font-medium text-gray-900">Total Committee Income</h3>
@@ -362,7 +364,7 @@ export default function AdminDashboard() {
                 <span className="text-2xl">🏛️</span>
               </div>
             </div>
-          </div>
+          </div> */}
         </div>
       </div>
 

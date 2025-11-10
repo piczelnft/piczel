@@ -48,6 +48,7 @@ export async function GET(request) {
     const status = searchParams.get('status') || 'all';
     const sortBy = searchParams.get('sortBy') || 'createdAt';
     const sortOrder = searchParams.get('sortOrder') || 'desc';
+    const include = (searchParams.get('include') || '').toLowerCase();
 
     // Build query
     const query = { userId: new mongoose.Types.ObjectId(decoded.userId) };
@@ -61,12 +62,21 @@ export async function GET(request) {
 
     // Get tickets with pagination
     const skip = (page - 1) * limit;
-    const tickets = await SupportTicket.find(query)
+    // Conditionally include responses
+    const baseQuery = SupportTicket.find(query)
       .sort(sort)
       .skip(skip)
-      .limit(limit)
-      .select('-responses') // Exclude responses for list view
-      .lean();
+      .limit(limit);
+
+    if (include === 'responses') {
+      // include full responses
+      baseQuery.select('-__v');
+    } else {
+      // exclude responses for lightweight list
+      baseQuery.select('-responses -__v');
+    }
+
+    const tickets = await baseQuery.lean();
 
     const totalCount = await SupportTicket.countDocuments(query);
     const totalPages = Math.ceil(totalCount / limit);

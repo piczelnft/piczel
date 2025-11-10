@@ -3,6 +3,7 @@ import { headers } from "next/headers";
 import jwt from "jsonwebtoken";
 import dbConnect from "@/lib/mongodb";
 import User from "@/models/User";
+import NftPurchase from "@/models/NftPurchase";
 import { corsHeaders, handleCors } from "@/lib/cors";
 
 // Handle CORS preflight requests
@@ -62,7 +63,10 @@ export async function GET() {
       // Fetch member statistics
       const totalMembers = await User.countDocuments();
       const activeMembers = await User.countDocuments({ isActivated: true });
-      const inactiveMembers = await User.countDocuments({ isActivated: false });
+
+      // Inactive defined as users with 0 NFT purchases
+      const purchasedUserIds = await NftPurchase.distinct('userId');
+      const inactiveMembers = await User.countDocuments({ _id: { $nin: purchasedUserIds } });
       const blockedMembers = await User.countDocuments({ isBlocked: true });
       const todayActivations = await User.countDocuments({
         activatedAt: { $gte: today, $lt: tomorrow }

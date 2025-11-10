@@ -282,117 +282,117 @@ export default function Home() {
           {/* User Name */}
           <div className="p-6 hover-lift-enhanced animate-fadeInUp glow-border-blue-light rounded-2xl border" style={{animationDelay: '0.2s', backgroundColor: 'rgba(0, 0, 0, 0.1)', backdropFilter: 'blur(10px)', borderColor: 'var(--default-border)'}}>
             <div className="text-center relative">
-              <div className="absolute -top-2 -right-2 w-3 h-3 rounded-full animate-pulse" style={{backgroundColor: 'rgb(74, 222, 255)'}}></div>
+              <div className="absolute -top-2 -right-2 w-3 h-3 rounded-full gradient-text-neon" style={{backgroundColor: 'rgb(74, 222, 255)'}}></div>
               <div className="text-sm mb-2 font-medium" style={{color: 'rgba(255, 255, 255, 0.7)'}}>User Name</div>
-              <div className="font-bold text-lg animate-neonGlow" style={{color: 'rgb(74, 222, 255)'}}>{data.userName}</div>
+              <div className="font-bold text-lg gradient-text-neon" style={{color: 'rgb(74, 222, 255)'}}>{data.userName}</div>
             </div>
           </div>
 
           {/* User Email */}
           <div className="p-6 hover-lift-enhanced animate-fadeInUp glow-border-purple-light rounded-2xl border" style={{animationDelay: '0.3s', backgroundColor: 'rgba(0, 0, 0, 0.1)', backdropFilter: 'blur(10px)', borderColor: 'var(--default-border)'}}>
             <div className="text-center relative">
-              <div className="absolute -top-2 -right-2 w-3 h-3 rounded-full animate-pulse" style={{backgroundColor: 'rgb(192, 132, 252)'}}></div>
+              <div className="absolute -top-2 -right-2 w-3 h-3 rounded-full gradient-text-neon" style={{backgroundColor: 'rgb(192, 132, 252)'}}></div>
               <div className="text-sm mb-2 font-medium" style={{color: 'rgba(255, 255, 255, 0.7)'}}>Email</div>
-              <div className="font-bold text-lg animate-neonGlow" style={{color: 'rgb(192, 132, 252)'}}>{data.userEmail}</div>
+              <div className="font-bold text-lg gradient-text-neon" style={{color: 'rgb(192, 132, 252)'}}>{data.userEmail}</div>
             </div>
           </div>
 
           {/* Status */}
           <div className="p-6 hover-lift-enhanced animate-fadeInUp glow-border-green rounded-2xl border" style={{animationDelay: '0.2s', backgroundColor: 'rgba(0, 0, 0, 0.1)', backdropFilter: 'blur(10px)', borderColor: 'var(--default-border)'}}>
             <div className="text-center relative">
-              <div className="absolute -top-2 -right-2 w-3 h-3 rounded-full animate-pulse" style={{backgroundColor: 'rgb(var(--success-rgb))'}}></div>
+              <div className="absolute -top-2 -right-2 w-3 h-3 rounded-full gradient-text-neon" style={{backgroundColor: 'rgb(var(--success-rgb))'}}></div>
               <div className="text-sm mb-2 font-medium" style={{color: 'rgba(255, 255, 255, 0.7)'}}>Status</div>
-              <div className="font-bold text-lg animate-neonGlow" style={{color: 'rgb(var(--success-rgb))'}}>{data.status}</div>
+              <div className="font-bold text-lg gradient-text-neon" style={{color: 'rgb(var(--success-rgb))'}}>{data.status}</div>
             </div>
           </div>
 
           {/* Total Team */}
           <div className="p-6 hover-lift-enhanced animate-fadeInUp glow-border-blue rounded-2xl border" style={{animationDelay: '0.4s', backgroundColor: 'rgba(0, 0, 0, 0.1)', backdropFilter: 'blur(10px)', borderColor: 'var(--default-border)'}}>
             <div className="text-center relative">
-              <div className="absolute -top-2 -right-2 w-3 h-3 rounded-full animate-pulse" style={{backgroundColor: 'rgb(var(--info-rgb))'}}></div>
+              <div className="absolute -top-2 -right-2 w-3 h-3 rounded-full gradient-text-neon" style={{backgroundColor: 'rgb(var(--info-rgb))'}}></div>
               <div className="text-sm mb-2 font-medium" style={{color: 'rgba(255, 255, 255, 0.7)'}}>Total Members</div>
-              <div className="font-bold text-lg animate-neonGlow" style={{color: 'rgb(var(--info-rgb))'}}>{data.totalTeam}</div>
+              <div className="font-bold text-lg gradient-text-neon" style={{color: 'rgb(var(--info-rgb))'}}>{data.totalTeam}</div>
             </div>
           </div>
 
           {/* My Directs */}
           <div className="p-6 hover-lift-enhanced animate-fadeInUp glow-border-purple rounded-2xl border" style={{animationDelay: '0.5s', backgroundColor: 'rgba(0, 0, 0, 0.1)', backdropFilter: 'blur(10px)', borderColor: 'var(--default-border)'}}>
             <div className="text-center relative">
-              <div className="absolute -top-2 -right-2 w-3 h-3 rounded-full animate-pulse" style={{backgroundColor: 'rgb(143, 0, 255)'}}></div>
+              <div className="absolute -top-2 -right-2 w-3 h-3 rounded-full gradient-text-neon" style={{backgroundColor: 'rgb(143, 0, 255)'}}></div>
               <div className="text-sm mb-2 font-medium" style={{color: 'rgba(255, 255, 255, 0.7)'}}>Direct Members</div>
-              <div className="font-bold text-lg animate-neonGlow" style={{color: 'rgb(143, 0, 255)'}}>{data.myDirects}</div>
+              <div className="font-bold text-lg gradient-text-neon" style={{color: 'rgb(143, 0, 255)'}}>{data.myDirects}</div>
             </div>
           </div>
 
           {/* Wallet */}
           <div className="p-6 hover-lift-enhanced animate-fadeInUp glow-border-green rounded-2xl border" style={{animationDelay: '0.6s', backgroundColor: 'rgba(0, 0, 0, 0.1)', backdropFilter: 'blur(10px)', borderColor: 'var(--default-border)'}}>
             <div className="text-center relative">
-              <div className="absolute -top-2 -right-2 w-3 h-3 rounded-full animate-pulse" style={{backgroundColor: 'rgb(var(--success-rgb))'}}></div>
+              <div className="absolute -top-2 -right-2 w-3 h-3 rounded-full gradient-text-neon" style={{backgroundColor: 'rgb(var(--success-rgb))'}}></div>
               <div className="text-sm mb-2 font-medium" style={{color: 'rgba(255, 255, 255, 0.7)'}}>Total Available Balance</div>
-              <div className="font-bold text-lg animate-neonGlow" style={{color: 'rgb(var(--success-rgb))'}}>${data.wallet}</div>
+              <div className="font-bold text-lg gradient-text-neon" style={{color: 'rgb(var(--success-rgb))'}}>${data.wallet}</div>
             </div>
           </div>
 
           {/* Total NFT Purchases */}
           <div className="p-6 hover-lift-enhanced animate-fadeInUp glow-border-cyan rounded-2xl border" style={{animationDelay: '0.7s', backgroundColor: 'rgba(0, 0, 0, 0.1)', backdropFilter: 'blur(10px)', borderColor: 'var(--default-border)'}}>
             <div className="text-center relative">
-              <div className="absolute -top-2 -right-2 w-3 h-3 rounded-full animate-pulse" style={{backgroundColor: 'rgb(6, 182, 212)'}}></div>
+              <div className="absolute -top-2 -right-2 w-3 h-3 rounded-full gradient-text-neon" style={{backgroundColor: 'rgb(6, 182, 212)'}}></div>
               <div className="text-sm mb-2 font-medium" style={{color: 'rgba(255, 255, 255, 0.7)'}}>Total NFT Purchases</div>
-              <div className="font-bold text-lg animate-neonGlow" style={{color: 'rgb(6, 182, 212)'}}>{data.totalNftPurchases || 0}</div>
+              <div className="font-bold text-lg gradient-text-neon" style={{color: 'rgb(6, 182, 212)'}}>{data.totalNftPurchases || 0}</div>
             </div>
           </div>
 
           {/* Total NFT Purchase Amount */}
           <div className="p-6 hover-lift-enhanced animate-fadeInUp glow-border-indigo rounded-2xl border" style={{animationDelay: '0.75s', backgroundColor: 'rgba(0, 0, 0, 0.1)', backdropFilter: 'blur(10px)', borderColor: 'var(--default-border)'}}>
             <div className="text-center relative">
-              <div className="absolute -top-2 -right-2 w-3 h-3 rounded-full animate-pulse" style={{backgroundColor: 'rgb(99, 102, 241)'}}></div>
+              <div className="absolute -top-2 -right-2 w-3 h-3 rounded-full gradient-text-neon" style={{backgroundColor: 'rgb(99, 102, 241)'}}></div>
               <div className="text-sm mb-2 font-medium" style={{color: 'rgba(255, 255, 255, 0.7)'}}>Total purchased amount</div>
-              <div className="font-bold text-lg animate-neonGlow" style={{color: 'rgb(99, 102, 241)'}}>${data.totalNftPurchaseAmount || 0}</div>
+              <div className="font-bold text-lg gradient-text-neon" style={{color: 'rgb(99, 102, 241)'}}>${data.totalNftPurchaseAmount || 0}</div>
             </div>
           </div>
 
           {/* Total Level Income */}
           <div className="p-6 hover-lift-enhanced animate-fadeInUp glow-border-emerald rounded-2xl border" style={{animationDelay: '0.8s', backgroundColor: 'rgba(0, 0, 0, 0.1)', backdropFilter: 'blur(10px)', borderColor: 'var(--default-border)'}}>
             <div className="text-center relative">
-              <div className="absolute -top-2 -right-2 w-3 h-3 rounded-full animate-pulse" style={{backgroundColor: 'rgb(16, 185, 129)'}}></div>
+              <div className="absolute -top-2 -right-2 w-3 h-3 rounded-full gradient-text-neon" style={{backgroundColor: 'rgb(16, 185, 129)'}}></div>
               <div className="text-sm mb-2 font-medium" style={{color: 'rgba(255, 255, 255, 0.7)'}}>Total Level Income</div>
-              <div className="font-bold text-lg animate-neonGlow" style={{color: 'rgb(16, 185, 129)'}}>${formatFixed5Trunc(data.levelIncome ?? data.totalLevelIncome ?? 0)}</div>
+              <div className="font-bold text-lg gradient-text-neon" style={{color: 'rgb(16, 185, 129)'}}>${formatFixed5Trunc(data.levelIncome ?? data.totalLevelIncome ?? 0)}</div>
             </div>
           </div>
 
           {/* Total Withdrawal Amount */}
           <div className="p-6 hover-lift-enhanced animate-fadeInUp glow-border-orange rounded-2xl border" style={{animationDelay: '0.9s', backgroundColor: 'rgba(0, 0, 0, 0.1)', backdropFilter: 'blur(10px)', borderColor: 'var(--default-border)'}}>
             <div className="text-center relative">
-              <div className="absolute -top-2 -right-2 w-3 h-3 rounded-full animate-pulse" style={{backgroundColor: 'rgb(249, 115, 22)'}}></div>
+              <div className="absolute -top-2 -right-2 w-3 h-3 rounded-full gradient-text-neon" style={{backgroundColor: 'rgb(249, 115, 22)'}}></div>
               <div className="text-sm mb-2 font-medium" style={{color: 'rgba(255, 255, 255, 0.7)'}}>Total Withdrawal Amount</div>
-              <div className="font-bold text-lg animate-neonGlow" style={{color: 'rgb(249, 115, 22)'}}>${data.totalWithdrawalAmount || 0}</div>
+              <div className="font-bold text-lg gradient-text-neon" style={{color: 'rgb(249, 115, 22)'}}>${data.totalWithdrawalAmount || 0}</div>
             </div>
           </div>
 
           {/* Total Spot Income */}
           <div className="p-6 hover-lift-enhanced animate-fadeInUp glow-border-violet rounded-2xl border" style={{animationDelay: '1.0s', backgroundColor: 'rgba(0, 0, 0, 0.1)', backdropFilter: 'blur(10px)', borderColor: 'var(--default-border)'}}>
             <div className="text-center relative">
-              <div className="absolute -top-2 -right-2 w-3 h-3 rounded-full animate-pulse" style={{backgroundColor: 'rgb(139, 69, 19)'}}></div>
+              <div className="absolute -top-2 -right-2 w-3 h-3 rounded-full gradient-text-neon" style={{backgroundColor: 'rgb(139, 69, 19)'}}></div>
               <div className="text-sm mb-2 font-medium" style={{color: 'rgba(255, 255, 255, 0.7)'}}>Total Spot Income</div>
-              <div className="font-bold text-lg animate-neonGlow" style={{color: 'rgb(139, 69, 19)'}}>${data.totalSpotIncome || 0}</div>
+              <div className="font-bold text-lg gradient-text-neon" style={{color: 'rgb(139, 69, 19)'}}>${data.totalSpotIncome || 0}</div>
             </div>
           </div>
 
           {/* Direct Members Volume */}
           <div className="p-6 hover-lift-enhanced animate-fadeInUp glow-border-teal rounded-2xl border" style={{animationDelay: '1.1s', backgroundColor: 'rgba(0, 0, 0, 0.1)', backdropFilter: 'blur(10px)', borderColor: 'var(--default-border)'}}>
             <div className="text-center relative">
-              <div className="absolute -top-2 -right-2 w-3 h-3 rounded-full animate-pulse" style={{backgroundColor: 'rgb(20, 184, 166)'}}></div>
+              <div className="absolute -top-2 -right-2 w-3 h-3 rounded-full gradient-text-neon" style={{backgroundColor: 'rgb(20, 184, 166)'}}></div>
               <div className="text-sm mb-2 font-medium" style={{color: 'rgba(255, 255, 255, 0.7)'}}>Direct Members NFT Volume</div>
-              <div className="font-bold text-lg animate-neonGlow" style={{color: 'rgb(20, 184, 166)'}}>${data.directMembersNftVolume || data.memberVolumes?.directMembersVolume || 0}</div>
+              <div className="font-bold text-lg gradient-text-neon" style={{color: 'rgb(20, 184, 166)'}}>${data.directMembersNftVolume || data.memberVolumes?.directMembersVolume || 0}</div>
             </div>
           </div>
 
           {/* Total Members Volume */}
           <div className="p-6 hover-lift-enhanced animate-fadeInUp glow-border-rose rounded-2xl border" style={{animationDelay: '1.2s', backgroundColor: 'rgba(0, 0, 0, 0.1)', backdropFilter: 'blur(10px)', borderColor: 'var(--default-border)'}}>
             <div className="text-center relative">
-              <div className="absolute -top-2 -right-2 w-3 h-3 rounded-full animate-pulse" style={{backgroundColor: 'rgb(244, 63, 94)'}}></div>
+              <div className="absolute -top-2 -right-2 w-3 h-3 rounded-full gradient-text-neon" style={{backgroundColor: 'rgb(244, 63, 94)'}}></div>
               <div className="text-sm mb-2 font-medium" style={{color: 'rgba(255, 255, 255, 0.7)'}}>Total Members NFT Volume</div>
-              <div className="font-bold text-lg animate-neonGlow" style={{color: 'rgb(244, 63, 94)'}}>${data.totalMembersNftVolume || data.memberVolumes?.totalMembersVolume || 0}</div>
+              <div className="font-bold text-lg gradient-text-neon" style={{color: 'rgb(244, 63, 94)'}}>${data.totalMembersNftVolume || data.memberVolumes?.totalMembersVolume || 0}</div>
             </div>
           </div>
 

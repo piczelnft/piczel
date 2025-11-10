@@ -164,7 +164,7 @@ export default function NFTBuyPage() {
       setNftPurchases(next);
       
       // Display success message
-      const successMessage = `Purchase Successful! ${code}`;
+      const successMessage = `Purchase Successful ${code}`;
       
       alert(successMessage);
       
@@ -270,7 +270,7 @@ export default function NFTBuyPage() {
           {/* Purchase Wallet */}
           <div className="p-4 sm:p-6 rounded-xl sm:rounded-2xl border hover-lift-enhanced" style={{backgroundColor:'rgba(0,0,0,0.1)', backdropFilter:'blur(10px)', borderColor:'var(--default-border)'}}>
             <div className="flex items-center justify-between mb-3">
-              <h3 className="text-lg sm:text-xl font-bold text-white">Purchase Wallet</h3>
+              <h3 className="text-lg sm:text-xl font-bold text-white">Total Purchase Amount</h3>
               <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center" style={{backgroundColor:'rgba(59,130,246,0.2)', border:'1px solid rgba(59,130,246,0.3)'}}>
                 <svg className="w-4 h-4 sm:w-5 sm:h-5 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
@@ -323,8 +323,38 @@ export default function NFTBuyPage() {
               })()}
             </div>
             <p className="text-sm text-gray-400">
-              A1-J1 holding amount ($105 each, unpaid)
+              {(() => {
+                const unpaidA1J1Purchases = nftPurchases.filter(p => {
+                  const number = parseInt(p.code.substring(1));
+                  return number === 1 && (!p.payoutStatus || p.payoutStatus !== 'paid');
+                });
+                return `A1-J1 holding amount  ${unpaidA1J1Purchases.length} NFT${unpaidA1J1Purchases.length === 1 ? '' : 's'}`;
+              })()}
             </p>
+            <div className="mt-3">
+              <div 
+                className="p-3 rounded-lg border"
+                style={{backgroundColor:'rgba(255,255,255,0.03)', borderColor:'var(--default-border)'}}
+              >
+                <div className="flex items-center justify-between">
+                  <div className="text-xs text-gray-400">Unpaid NFTs</div>
+                  <div className="w-6 h-6 rounded-full flex items-center justify-center" style={{backgroundColor:'rgba(34,197,94,0.15)', border:'1px solid rgba(34,197,94,0.3)'}}>
+                    <svg className="w-3.5 h-3.5 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                    </svg>
+                  </div>
+                </div>
+                <div className="mt-1 text-lg font-semibold text-white">
+                  {(() => {
+                    const unpaidA1J1Purchases = nftPurchases.filter(p => {
+                      const number = parseInt(p.code.substring(1));
+                      return number === 1 && (!p.payoutStatus || p.payoutStatus !== 'paid');
+                    });
+                    return unpaidA1J1Purchases.length;
+                  })()}
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>

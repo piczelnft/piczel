@@ -56,14 +56,19 @@ export async function GET(request) {
 
       console.log(`Getting level income details for user: ${user.memberId}`);
 
-      // Get all users who used this user's sponsor ID (direct referrals)
-      const directReferrals = await User.find({ sponsor: user._id }).select('memberId name email avatar');
-      
+      // We'll traverse referrals breadth-first up to 10 levels (L1..L10)
+      // Start with direct referrals (level 1)
+      let currentLevelUsers = await User.find({ sponsor: user._id }).select('memberId name email avatar _id');
+
       // Build level income details showing who is generating commissions FOR this user
       const levelIncomeDetails = [];
-      
-      // For each direct referral, show how much commission they're generating
-      for (const referral of directReferrals) {
+
+      // Traverse up to 10 levels
+      for (let level = 1; level <= 10; level++) {
+        if (!currentLevelUsers || currentLevelUsers.length === 0) break;
+
+        // For each referral in this level, show how much commission they're generating
+        for (const referral of currentLevelUsers) {
         console.log(`Processing referral: ${referral.memberId} (${referral.name})`);
         
         // Get daily commission data where this user is the sponsor (earning from this referral)
@@ -85,11 +90,11 @@ export async function GET(request) {
           });
         }
 
-        // Calculate total commission amounts
-        const totalCommission = dailyCommissions.reduce((sum, comm) => sum + comm.totalCommission, 0);
-        const totalPaid = dailyCommissions.reduce((sum, comm) => sum + comm.totalPaid, 0);
-        const remainingAmount = dailyCommissions.reduce((sum, comm) => sum + comm.remainingAmount, 0);
-        const dailyAmount = dailyCommissions.reduce((sum, comm) => sum + comm.dailyAmount, 0);
+  // Calculate total commission amounts
+  const totalCommission = dailyCommissions.reduce((sum, comm) => sum + (comm.totalCommission || 0), 0);
+  const totalPaid = dailyCommissions.reduce((sum, comm) => sum + (comm.totalPaid || 0), 0);
+  const remainingAmount = dailyCommissions.reduce((sum, comm) => sum + (comm.remainingAmount || 0), 0);
+  const dailyAmount = dailyCommissions.reduce((sum, comm) => sum + (comm.dailyAmount || 0), 0);
 
         console.log(`Calculated amounts for ${referral.memberId}:`, {
           totalCommission,
@@ -98,8 +103,21 @@ export async function GET(request) {
           dailyAmount
         });
 
-        // Get commission rate for level 1 (direct referrals)
-        const commissionRate = 0.10; // 10% for direct referrals
+        // Commission rate: for display only - we don't know exact dynamic rates here.
+        // Use a simple convention: L1 = 10%, L2 = 1% etc. (adjust if your business rules differ)
+        const defaultCommissionRates = {
+          1: 0.10,
+          2: 0.01,
+          3: 0.01,
+          4: 0.005,
+          5: 0.005,
+          6: 0.0025,
+          7: 0.0025,
+          8: 0.001,
+          9: 0.001,
+          10: 0.0005
+        };
+        const commissionRate = defaultCommissionRates[level] || 0;
 
         // Get source information (NFT purchases that generated this income)
         const sourceInfo = dailyCommissions.map(comm => ({
@@ -111,7 +129,7 @@ export async function GET(request) {
 
         // Always add the referral, even if they have no commissions yet
         levelIncomeDetails.push({
-          level: 1, // All direct referrals are level 1
+          level: level,
           referral: { // Changed from 'sponsor' to 'referral'
             memberId: referral.memberId,
             name: referral.name,
@@ -129,8 +147,13 @@ export async function GET(request) {
           sourceInfo: sourceInfo,
           hasPurchases: dailyCommissions.length > 0
         });
+        console.log(`Level ${level} referral ${referral.memberId} (${referral.name}) generating $${totalCommission.toFixed(2)} commission`);
+        }
 
-        console.log(`Direct referral ${referral.memberId} (${referral.name}) generating $${totalCommission.toFixed(2)} commission`);
+        // Find next level users (those sponsored by current level users)
+        const currentLevelIds = currentLevelUsers.map(u => u._id);
+        const nextLevelUsers = await User.find({ sponsor: { $in: currentLevelIds } }).select('memberId name email avatar _id');
+        currentLevelUsers = nextLevelUsers;
       }
 
       // Calculate summary statistics

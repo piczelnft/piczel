@@ -179,8 +179,8 @@ export default function NewWithdrawalRequests() {
             request.requestId
           );
 
-          // Update withdrawal status to approved with demo transaction hash
-          await handleWithdrawalAction(request.requestId, "approve", demoTxHash);
+          // Update withdrawal status directly to completed with demo transaction hash
+          await handleWithdrawalAction(request.requestId, "completed", demoTxHash);
 
           const payoutAmount = calculatePayoutAmount(parseFloat(request.net));
           results.push({
@@ -318,8 +318,8 @@ export default function NewWithdrawalRequests() {
 
       console.log("Processing payment with demo transaction hash:", demoTxHash);
 
-      // Update withdrawal status to approved with demo transaction hash
-      await handleWithdrawalAction(request.requestId, "approve", demoTxHash);
+      // Update withdrawal status directly to completed with demo transaction hash
+      await handleWithdrawalAction(request.requestId, "completed", demoTxHash);
 
       alert(
         `Payment processed successfully!\n\n` +

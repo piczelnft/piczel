@@ -6,7 +6,9 @@ import AdminLayout from '../components/AdminLayout';
 export default function SupportTickets() {
   const [tickets, setTickets] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [loadError, setLoadError] = useState(null);
+  const [actionError, setActionError] = useState('');
+  const [actionSuccess, setActionSuccess] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const [limit, setLimit] = useState(10);
@@ -18,6 +20,11 @@ export default function SupportTickets() {
   const [showModal, setShowModal] = useState(false);
   const [showCloseConfirm, setShowCloseConfirm] = useState(false);
   const [ticketToClose, setTicketToClose] = useState(null);
+  const [replyingTicket, setReplyingTicket] = useState(null);
+  const [replyMessage, setReplyMessage] = useState('');
+  const [sendingReply, setSendingReply] = useState(false);
+  const [success, setSuccess] = useState('');
+  const [error, setError] = useState('');
 
   const fetchTickets = useCallback(async () => {
     try {
@@ -46,15 +53,17 @@ export default function SupportTickets() {
       });
 
       if (!response.ok) {
-        throw new Error('Failed to fetch support tickets');
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to fetch support tickets');
       }
 
       const data = await response.json();
       setTickets(data.tickets);
       setPagination(data.pagination);
+      setLoadError(null); // Clear any previous errors
     } catch (err) {
       console.error('Error fetching support tickets:', err);
-      setError(err.message);
+      setLoadError(err.message);
     } finally {
       setLoading(false);
     }
@@ -102,6 +111,7 @@ export default function SupportTickets() {
       'open': { bg: 'bg-blue-100', text: 'text-blue-800', label: 'Open' },
       'in_progress': { bg: 'bg-yellow-100', text: 'text-yellow-800', label: 'In Progress' },
       'resolved': { bg: 'bg-green-100', text: 'text-green-800', label: 'Resolved' },
+      'replied': { bg: 'bg-purple-100', text: 'text-purple-800', label: 'Replied' },
       'closed': { bg: 'bg-gray-100', text: 'text-gray-800', label: 'Closed' },
       'pending': { bg: 'bg-orange-100', text: 'text-orange-800', label: 'Pending' }
     };
@@ -168,6 +178,72 @@ export default function SupportTickets() {
   const handleCloseTicket = (ticket) => {
     setTicketToClose(ticket);
     setShowCloseConfirm(true);
+  };
+
+  const openReplyModal = (ticket) => {
+    setReplyingTicket(ticket);
+    setReplyMessage('');
+  };
+
+  const closeReplyModal = () => {
+    setReplyingTicket(null);
+    setReplyMessage('');
+  };
+
+  const handleSendReply = async () => {
+    if (!replyingTicket || !replyMessage.trim()) return;
+    
+    // Show confirmation dialog
+    const confirmSend = window.confirm(
+      'This action will send your reply'
+    );
+    if (!confirmSend) return;
+
+    try {
+      setSendingReply(true);
+      setActionError('');
+      setActionSuccess('');
+      
+      const adminToken = localStorage.getItem('adminToken');
+      if (!adminToken) {
+        throw new Error('Admin token not found');
+      }
+
+      const response = await fetch('/api/admin/support-tickets/reply', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${adminToken}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          ticketId: replyingTicket._id,
+          message: replyMessage.trim(),
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to send reply');
+      }
+
+      // After sending the reply, update ticket status to replied
+      await handleStatusUpdate(replyingTicket._id, 'replied');
+      console.log('Ticket marked as replied:', replyingTicket._id);
+
+      // Refresh the tickets list to show the new reply and status
+      await fetchTickets();
+      closeReplyModal();
+      
+      // Show success message
+      setActionSuccess('Reply sent successfully. Ticket has been marked as replied.');
+      setTimeout(() => setActionSuccess(''), 3000);
+    } catch (err) {
+      console.error('Error sending reply:', err);
+      setActionError('Failed to send reply: ' + err.message);
+      setTimeout(() => setActionError(''), 3000);
+    } finally {
+      setSendingReply(false);
+    }
   };
 
   const confirmCloseTicket = async () => {
@@ -294,6 +370,18 @@ export default function SupportTickets() {
         <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Support Tickets</h1>
         <p className="mt-2 text-gray-600 text-sm sm:text-base">Manage and respond to customer support tickets</p>
       </div>
+
+      {/* Action Messages */}
+      {actionSuccess && (
+        <div className="mb-4 p-4 bg-green-50 border border-green-200 rounded-lg">
+          <p className="text-green-700 text-sm">{actionSuccess}</p>
+        </div>
+      )}
+      {actionError && (
+        <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg">
+          <p className="text-red-700 text-sm">{actionError}</p>
+        </div>
+      )}
 
       {/* Stats Cards */}
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4 lg:gap-6 mb-6 sm:mb-8">
@@ -516,6 +604,18 @@ export default function SupportTickets() {
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                       <div className="flex space-x-2">
+                        {ticket.status !== 'replied' && ticket.status !== 'closed' ? (
+                          <button 
+                            onClick={() => openReplyModal(ticket)}
+                            className="text-indigo-600 hover:text-indigo-900 transition-colors"
+                          >
+                            Reply
+                          </button>
+                        ) : (
+                          <span className="text-gray-400 cursor-not-allowed">
+                            {ticket.status === 'replied' ? 'Replied' : 'Closed'}
+                          </span>
+                        )}
                         {ticket.status === 'open' && (
                           <button
                             onClick={() => handleStatusUpdate(ticket._id, 'in_progress')}
@@ -598,6 +698,18 @@ export default function SupportTickets() {
                 </div>
                 
                 <div className="flex flex-wrap gap-2">
+                  {ticket.status !== 'replied' && ticket.status !== 'closed' ? (
+                    <button 
+                      onClick={() => openReplyModal(ticket)}
+                      className="px-3 py-1 text-xs bg-indigo-100 text-indigo-700 rounded-full hover:bg-indigo-200"
+                    >
+                      Reply
+                    </button>
+                  ) : (
+                    <span className="px-3 py-1 text-xs bg-gray-100 text-gray-500 rounded-full">
+                      {ticket.status === 'replied' ? 'Replied' : 'Closed'}
+                    </span>
+                  )}
                   {ticket.status === 'open' && (
                     <button
                       onClick={() => handleStatusUpdate(ticket._id, 'in_progress')}
@@ -675,6 +787,56 @@ export default function SupportTickets() {
           </div>
         )}
       </div>
+
+      {/* Reply Modal */}
+      {replyingTicket && (
+        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+          <div className="relative top-10 mx-auto p-4 sm:p-5 border w-11/12 sm:w-96 shadow-lg rounded-md bg-white">
+            <div className="mb-3">
+              <div className="flex items-center justify-between">
+                <h3 className="text-base sm:text-lg font-medium text-gray-900">
+                  Reply to #{replyingTicket.ticketId}
+                </h3>
+                <button
+                  onClick={closeReplyModal}
+                  className="text-gray-400 hover:text-gray-600"
+                >
+                  <span className="sr-only">Close</span>
+                  <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Message</label>
+              <textarea
+                value={replyMessage}
+                onChange={(e) => setReplyMessage(e.target.value)}
+                rows={5}
+                className="w-full border border-gray-300 rounded-md p-2 text-sm focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                placeholder="Type your reply..."
+              />
+            </div>
+            <div className="mt-4 flex justify-end gap-2">
+              <button
+                onClick={closeReplyModal}
+                className="px-4 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 transition-colors"
+                disabled={sendingReply}
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleSendReply}
+                className={`px-4 py-2 rounded-md text-white transition-colors ${sendingReply ? 'bg-purple-300' : 'bg-purple-600 hover:bg-purple-700'}`}
+                disabled={sendingReply || !replyMessage.trim()}
+              >
+                {sendingReply ? 'Sending...' : 'Send Reply'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* View Ticket Modal */}
       {showModal && selectedTicket && (

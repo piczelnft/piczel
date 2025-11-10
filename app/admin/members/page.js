@@ -15,6 +15,14 @@ export default function MemberManagement() {
   const [limit, setLimit] = useState(20);
   const [pagination, setPagination] = useState({});
   const [searchTimeout, setSearchTimeout] = useState(null);
+  const [selectedMembers, setSelectedMembers] = useState(new Set());
+  const [selectAll, setSelectAll] = useState(false);
+
+  // Reset selection when members data changes
+  useEffect(() => {
+    setSelectedMembers(new Set());
+    setSelectAll(false);
+  }, [members]);
 
   const fetchMembers = useCallback(async () => {
     try {
@@ -73,6 +81,49 @@ export default function MemberManagement() {
     setCurrentPage(1); // Reset to first page when changing limit
   };
 
+  const handleBulkDelete = async () => {
+    if (selectedMembers.size === 0) return;
+    
+    if (!window.confirm(
+      `Are you sure you want to delete ${selectedMembers.size} selected members? This action cannot be undone.`
+    )) {
+      return;
+    }
+
+    try {
+      const adminToken = localStorage.getItem("adminToken");
+      if (!adminToken) {
+        setError("No admin token found");
+        return;
+      }
+
+      const response = await fetch(`/api/admin/members/bulk-delete`, {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${adminToken}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ memberIds: Array.from(selectedMembers) })
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Failed to delete members");
+      }
+
+      // Refresh the members list after successful deletion
+      await fetchMembers();
+      setSelectedMembers(new Set());
+      setSelectAll(false);
+      
+      alert(`${selectedMembers.size} members deleted successfully`);
+    } catch (err) {
+      console.error("Error deleting members:", err);
+      setError(err.message);
+      alert(`Error deleting members: ${err.message}`);
+    }
+  };
+
   const handleDeleteMember = async (memberId) => {
     if (
       !window.confirm(
@@ -114,9 +165,32 @@ export default function MemberManagement() {
     }
   };
 
+  const handleSelectMember = (memberId, event) => {
+    event.stopPropagation();
+    const newSelectedMembers = new Set(selectedMembers);
+    if (newSelectedMembers.has(memberId)) {
+      newSelectedMembers.delete(memberId);
+    } else {
+      newSelectedMembers.add(memberId);
+    }
+    setSelectedMembers(newSelectedMembers);
+    setSelectAll(newSelectedMembers.size === members.length && members.length > 0);
+  };
+
+  const handleSelectAll = (event) => {
+    if (event.target.checked) {
+      const allMemberIds = members.map(member => member.memberId);
+      setSelectedMembers(new Set(allMemberIds));
+      setSelectAll(true);
+    } else {
+      setSelectedMembers(new Set());
+      setSelectAll(false);
+    }
+  };
+
   const handleRowClick = (memberId, event) => {
-    // Prevent navigation if clicking on the delete button
-    if (event.target.closest('button')) {
+    // Prevent navigation if clicking on the delete button or checkbox
+    if (event.target.closest('button') || event.target.type === 'checkbox') {
       return;
     }
     
@@ -254,8 +328,20 @@ export default function MemberManagement() {
               <h2 className="text-xl font-semibold text-gray-900">
                 Member Details
               </h2>
-              <p className="text-sm text-gray-600">Click on any row to view member details</p>
+              <p className="text-sm text-gray-600">
+                {selectedMembers.size > 0 
+                  ? `${selectedMembers.size} member${selectedMembers.size > 1 ? 's' : ''} selected` 
+                  : 'Click on any row to view member details'}
+              </p>
             </div>
+            {selectedMembers.size > 0 && (
+              <button
+                onClick={handleBulkDelete}
+                className="px-4 py-2 bg-red-600 text-white text-sm font-medium rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+              >
+                Delete Selected ({selectedMembers.size})
+              </button>
+            )}
             <div className="flex items-center space-x-4 w-full sm:w-auto">
               <select
                 value={limit}
@@ -292,6 +378,14 @@ export default function MemberManagement() {
           <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-50">
               <tr>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <input
+                    type="checkbox"
+                    checked={selectAll}
+                    onChange={handleSelectAll}
+                    className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                  />
+                </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   S.No
                 </th>
@@ -331,9 +425,18 @@ export default function MemberManagement() {
               {members.map((member) => (
                 <tr 
                   key={member.memberId} 
-                  className="hover:bg-gray-50 cursor-pointer transition-colors"
+                  className={`hover:bg-gray-50 cursor-pointer transition-colors ${selectedMembers.has(member.memberId) ? 'bg-blue-50' : ''}`}
                   onClick={(e) => handleRowClick(member.memberId, e)}
                 >
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <input
+                      type="checkbox"
+                      checked={selectedMembers.has(member.memberId)}
+                      onChange={(e) => handleSelectMember(member.memberId, e)}
+                      className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                      onClick={(e) => e.stopPropagation()}
+                    />
+                  </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                     {member.sNo}
                   </td>

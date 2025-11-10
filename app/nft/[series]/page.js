@@ -245,7 +245,7 @@ export default function NFTDetailPage() {
       setPurchaseData(prev => [...prev, { code: nftCode, payoutStatus: 'pending' }]);
       
       // Display success message
-      const successMessage = `Purchase Successful! ${nftCode}`;
+      const successMessage = `Purchase Successful ${nftCode}`;
       
       alert(successMessage);
       
@@ -407,8 +407,32 @@ export default function NFTDetailPage() {
               })()}
             </div>
             <p className="text-sm text-gray-400">
-              Total profit (full amount)
+              {(() => {
+                const unpaidPurchases = purchaseData.filter(p => !p.payoutStatus || p.payoutStatus !== 'paid');
+                return `Total profit (full amount) — ${unpaidPurchases.length} NFT${unpaidPurchases.length === 1 ? '' : 's'} unpaid`;
+              })()}
             </p>
+            <div className="mt-3">
+              <div 
+                className="p-3 rounded-lg border"
+                style={{backgroundColor:'rgba(255,255,255,0.03)', borderColor:'var(--default-border)'}}
+              >
+                <div className="flex items-center justify-between">
+                  <div className="text-xs text-gray-400">{baseSeries} unpaid NFTs</div>
+                  <div className="w-6 h-6 rounded-full flex items-center justify-center" style={{backgroundColor:'rgba(34,197,94,0.15)', border:'1px solid rgba(34,197,94,0.3)'}}>
+                    <svg className="w-3.5 h-3.5 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                    </svg>
+                  </div>
+                </div>
+                <div className="mt-1 text-lg font-semibold text-white">
+                  {(() => {
+                    const unpaidPurchases = purchaseData.filter(p => !p.payoutStatus || p.payoutStatus !== 'paid');
+                    return unpaidPurchases.length;
+                  })()}
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
