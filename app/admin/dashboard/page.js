@@ -233,7 +233,7 @@ export default function AdminDashboard() {
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
             <div className="flex items-center justify-between">
               <div>
-                <h3 className="text-lg font-medium text-gray-900">Today's Purchase</h3>
+                <h3 className="text-lg font-medium text-gray-900">Today&apos;s Purchase</h3>
                 <p className="text-2xl font-bold text-blue-600 mt-2">{formatCurrency(stats?.financial?.totalUpgrade || 0)}</p>
               </div>
               <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
