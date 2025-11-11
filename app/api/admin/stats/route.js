@@ -103,6 +103,22 @@ export async function GET() {
       const todayUpgrade = 0.00; // This would come from transaction records
       const todayWithdrawalAmount = 0.00; // This would come from transaction records
 
+      // NFT Purchase Statistics
+      const allNftPurchases = await NftPurchase.find({});
+      let totalNftPurchaseAmount = 0;
+      let todayNftPurchaseAmount = 0;
+
+      allNftPurchases.forEach(purchase => {
+        totalNftPurchaseAmount += purchase.price || 0;
+        
+        // Check if purchase was made today
+        const purchaseDate = new Date(purchase.purchasedAt);
+        purchaseDate.setHours(0, 0, 0, 0);
+        if (purchaseDate.getTime() === today.getTime()) {
+          todayNftPurchaseAmount += purchase.price || 0;
+        }
+      });
+
       // Calculate withdrawal deductions (assuming 10% deduction)
       const withdrawalGross = totalWithdrawal;
       const withdrawalDeduction = totalWithdrawal * 0.1;
@@ -130,7 +146,9 @@ export async function GET() {
           totalActivation: totalActivation,
           totalUpgrade: totalUpgrade,
           totalWithdrawal: totalWithdrawal,
-          totalFundBalance: totalFundBalance
+          totalFundBalance: totalFundBalance,
+          totalNftPurchaseAmount: totalNftPurchaseAmount,
+          todayNftPurchaseAmount: todayNftPurchaseAmount
         },
         coins: {
           buyCoin: buyCoin,

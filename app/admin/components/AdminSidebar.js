@@ -95,6 +95,7 @@ export default function AdminSidebar() {
   const [paymentDropdownOpen, setPaymentDropdownOpen] = useState(false);
   const [memberDropdownOpen, setMemberDropdownOpen] = useState(false);
   const [nftDropdownOpen, setNftDropdownOpen] = useState(false);
+  const [isHovered, setIsHovered] = useState(false);
 
   // Check if current path is a payment-related page
   const isPaymentPage =
@@ -111,21 +112,24 @@ export default function AdminSidebar() {
 
   // Auto-open dropdowns if on respective pages
   React.useEffect(() => {
-    if (!isCollapsed) {
+    if (!isCollapsed || isHovered) {
       if (isPaymentPage) setPaymentDropdownOpen(true);
       if (isMemberPage) setMemberDropdownOpen(true);
       if (isNftPage) setNftDropdownOpen(true);
     }
-  }, [isPaymentPage, isMemberPage, isNftPage, isCollapsed]);
+  }, [isPaymentPage, isMemberPage, isNftPage, isCollapsed, isHovered]);
 
-  // Close dropdown when sidebar is collapsed
+  // Close dropdown when sidebar is collapsed (but not when hovered)
   React.useEffect(() => {
-    if (isCollapsed) {
+    if (isCollapsed && !isHovered) {
       setPaymentDropdownOpen(false);
       setMemberDropdownOpen(false);
       setNftDropdownOpen(false);
     }
-  }, [isCollapsed]);
+  }, [isCollapsed, isHovered]);
+
+  // Determine if sidebar content should be visible (expanded or hovered)
+  const isExpanded = !isCollapsed || isHovered;
 
   return (
     <>
@@ -135,13 +139,15 @@ export default function AdminSidebar() {
         onClick={() => setIsMobileOpen(false)}
       />
       <div
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => setIsHovered(false)}
         className={`bg-gray-800 transition-all duration-300 ${
-          isCollapsed ? "w-16" : "w-64"
+          isCollapsed && !isHovered ? "w-16" : "w-64"
         } flex flex-col fixed left-0 top-16 bottom-0 z-50 md:z-30 md:translate-x-0 ${isMobileOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}`}
       >
         {/* Sidebar Header */}
         <div className="flex items-center justify-between p-4 border-b border-gray-700">
-          {!isCollapsed && (
+          {isExpanded && (
             <div className="flex items-center space-x-2">
               <div className="w-8 h-8 bg-gradient-to-br from-purple-600 to-indigo-600 rounded-lg flex items-center justify-center">
                 <span className="text-white font-bold text-sm">👑</span>
@@ -171,7 +177,7 @@ export default function AdminSidebar() {
                 {/* Dropdown Trigger */}
                 <button
                   onClick={() => {
-                    if (isCollapsed) return;
+                    if (isCollapsed && !isHovered) return;
                     if (item.name === "Payment Management") {
                       setPaymentDropdownOpen(!paymentDropdownOpen);
                     } else if (item.name === "Member Management") {
@@ -187,7 +193,7 @@ export default function AdminSidebar() {
                   }`}
                 >
                   <span className="mr-3 text-lg">{item.icon}</span>
-                  {!isCollapsed && (
+                  {isExpanded && (
                     <>
                       <span className="flex-1 text-left">{item.name}</span>
                       {item.name === "Payment Management" && (
@@ -222,7 +228,7 @@ export default function AdminSidebar() {
                 </button>
 
                 {/* Dropdown Menu */}
-                {!isCollapsed && item.name === "Payment Management" && paymentDropdownOpen && (
+                {isExpanded && item.name === "Payment Management" && paymentDropdownOpen && (
                   <div className="ml-4 mt-1 space-y-1">
                     {item.subItems?.map((subItem) => {
                       const isSubItemActive = pathname === subItem.href;
@@ -246,7 +252,7 @@ export default function AdminSidebar() {
                     })}
                   </div>
                 )}
-                {!isCollapsed && item.name === "Member Management" && memberDropdownOpen && (
+                {isExpanded && item.name === "Member Management" && memberDropdownOpen && (
                   <div className="ml-4 mt-1 space-y-1">
                     {item.subItems?.map((subItem) => {
                       const isSubItemActive = pathname === subItem.href;
@@ -270,7 +276,7 @@ export default function AdminSidebar() {
                     })}
                   </div>
                 )}
-                {!isCollapsed && item.name === "NFT Market Withdrawal" && nftDropdownOpen && (
+                {isExpanded && item.name === "NFT Market Withdrawal" && nftDropdownOpen && (
                   <div className="ml-4 mt-1 space-y-1">
                     {item.subItems?.map((subItem) => {
                       const isSubItemActive = pathname === subItem.href;
@@ -310,7 +316,7 @@ export default function AdminSidebar() {
                 }`}
               >
                 <span className="mr-3 text-lg">{item.icon}</span>
-                {!isCollapsed && <span className="flex-1">{item.name}</span>}
+                {isExpanded && <span className="flex-1">{item.name}</span>}
                 {isActive && (
                   <span className="ml-auto w-2 h-2 bg-white rounded-full"></span>
                 )}
@@ -322,7 +328,7 @@ export default function AdminSidebar() {
 
       {/* Sidebar Footer */}
         <div className="p-4 border-t border-gray-700">
-          {!isCollapsed && (
+          {isExpanded && (
             <div className="text-xs text-gray-400 text-center">
               <p>PICZEL Admin Panel</p>
               <p>v1.0.0</p>

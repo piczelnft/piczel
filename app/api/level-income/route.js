@@ -57,97 +57,73 @@ export async function GET(request) {
       console.log(`Getting level income details for user: ${user.memberId}`);
 
       // We'll traverse referrals breadth-first up to 10 levels (L1..L10)
-      // Start with direct referrals (level 1)
-      let currentLevelUsers = await User.find({ sponsor: user._id }).select('memberId name email avatar _id');
-
-      // Build level income details showing who is generating commissions FOR this user
+      // Instead of aggregating by referral, we'll return EACH individual DailyCommission entry
+      // so users can see level income history for every NFT purchase/rebuy
+      
       const levelIncomeDetails = [];
 
-      // Traverse up to 10 levels
+      // Traverse up to 10 levels and collect individual commission records
+      let currentLevelUsers = await User.find({ sponsor: user._id }).select('memberId name email avatar _id');
+
       for (let level = 1; level <= 10; level++) {
         if (!currentLevelUsers || currentLevelUsers.length === 0) break;
 
-        // For each referral in this level, show how much commission they're generating
-        for (const referral of currentLevelUsers) {
-        console.log(`Processing referral: ${referral.memberId} (${referral.name})`);
-        
-        // Get daily commission data where this user is the sponsor (earning from this referral)
+        console.log(`Level ${level}: Processing ${currentLevelUsers.length} users`);
+
+        // Get all DailyCommission records for users in this level
+        const userIds = currentLevelUsers.map(u => u._id);
         const dailyCommissions = await DailyCommission.find({
-          sponsorId: user._id, // Current user is the sponsor (earning)
-          userId: referral._id, // This referral is generating the commission
-          // Removed level and status filters to see all records
-        }).populate('nftPurchaseId').sort({ createdAt: -1 });
+          sponsorId: user._id,
+          userId: { $in: userIds },
+          level: level  // Match the level to ensure consistency
+        })
+          .populate('userId', 'memberId name email avatar')
+          .populate('nftPurchaseId')
+          .sort({ createdAt: -1 });
 
-        console.log(`Found ${dailyCommissions.length} daily commissions for referral ${referral.memberId}`);
-        console.log(`Commission query: sponsorId=${user._id}, userId=${referral._id} (no level/status filter)`);
-        
-        if (dailyCommissions.length > 0) {
-          console.log(`Sample commission data:`, {
-            totalCommission: dailyCommissions[0].totalCommission,
-            totalPaid: dailyCommissions[0].totalPaid,
-            remainingAmount: dailyCommissions[0].remainingAmount,
-            dailyAmount: dailyCommissions[0].dailyAmount
+        console.log(`Found ${dailyCommissions.length} individual commission records for level ${level}`);
+
+        // Create a separate entry for EACH DailyCommission record (each NFT purchase/rebuy)
+        for (const dailyComm of dailyCommissions) {
+          const referralUser = dailyComm.userId;
+          const defaultCommissionRates = {
+            1: 0.10,
+            2: 0.01,
+            3: 0.01,
+            4: 0.005,
+            5: 0.005,
+            6: 0.0025,
+            7: 0.0025,
+            8: 0.001,
+            9: 0.001,
+            10: 0.0005
+          };
+          const commissionRate = defaultCommissionRates[level] || 0;
+
+          levelIncomeDetails.push({
+            level: level,
+            referral: {
+              memberId: referralUser?.memberId || 'Unknown',
+              name: referralUser?.name || 'Unknown',
+              email: referralUser?.email || 'N/A',
+              avatar: referralUser?.avatar || null
+            },
+            commissionRate: `${(commissionRate * 100).toFixed(1)}%`,
+            totalCommission: dailyComm.totalCommission.toFixed(2),
+            totalPaid: dailyComm.totalPaid.toFixed(2),
+            remainingAmount: dailyComm.remainingAmount.toFixed(2),
+            dailyAmount: dailyComm.dailyAmount.toFixed(2),
+            daysRemaining: dailyComm.daysRemaining,
+            daysPaid: dailyComm.daysPaid,
+            lastPayment: dailyComm.lastPaymentDate || null,
+            nextPayment: dailyComm.nextPaymentDate || null,
+            nftPurchaseId: dailyComm.nftPurchaseId?._id || dailyComm.nftPurchaseId,
+            nftPrice: dailyComm.nftPurchaseId?.price || 0,
+            purchaseDate: dailyComm.nftPurchaseId?.createdAt || dailyComm.createdAt,
+            status: dailyComm.status,
+            createdAt: dailyComm.createdAt,
+            hasPurchases: true
           });
-        }
-
-  // Calculate total commission amounts
-  const totalCommission = dailyCommissions.reduce((sum, comm) => sum + (comm.totalCommission || 0), 0);
-  const totalPaid = dailyCommissions.reduce((sum, comm) => sum + (comm.totalPaid || 0), 0);
-  const remainingAmount = dailyCommissions.reduce((sum, comm) => sum + (comm.remainingAmount || 0), 0);
-  const dailyAmount = dailyCommissions.reduce((sum, comm) => sum + (comm.dailyAmount || 0), 0);
-
-        console.log(`Calculated amounts for ${referral.memberId}:`, {
-          totalCommission,
-          totalPaid,
-          remainingAmount,
-          dailyAmount
-        });
-
-        // Commission rate: for display only - we don't know exact dynamic rates here.
-        // Use a simple convention: L1 = 10%, L2 = 1% etc. (adjust if your business rules differ)
-        const defaultCommissionRates = {
-          1: 0.10,
-          2: 0.01,
-          3: 0.01,
-          4: 0.005,
-          5: 0.005,
-          6: 0.0025,
-          7: 0.0025,
-          8: 0.001,
-          9: 0.001,
-          10: 0.0005
-        };
-        const commissionRate = defaultCommissionRates[level] || 0;
-
-        // Get source information (NFT purchases that generated this income)
-        const sourceInfo = dailyCommissions.map(comm => ({
-          nftPurchaseId: comm.nftPurchaseId?._id || comm.nftPurchaseId,
-          purchaseDate: comm.nftPurchaseId?.createdAt || comm.createdAt,
-          nftPrice: comm.nftPurchaseId?.price || 100,
-          commissionAmount: comm.totalCommission
-        }));
-
-        // Always add the referral, even if they have no commissions yet
-        levelIncomeDetails.push({
-          level: level,
-          referral: { // Changed from 'sponsor' to 'referral'
-            memberId: referral.memberId,
-            name: referral.name,
-            email: referral.email,
-            avatar: referral.avatar
-          },
-          commissionRate: `${(commissionRate * 100).toFixed(1)}%`,
-          totalCommission: totalCommission.toFixed(2),
-          totalPaid: totalPaid.toFixed(2),
-          remainingAmount: remainingAmount.toFixed(2),
-          dailyAmount: dailyAmount.toFixed(2),
-          activeCommissions: dailyCommissions.length,
-          lastPayment: dailyCommissions.length > 0 ? dailyCommissions[0].lastPaymentDate : null,
-          nextPayment: dailyCommissions.length > 0 ? dailyCommissions[0].nextPaymentDate : null,
-          sourceInfo: sourceInfo,
-          hasPurchases: dailyCommissions.length > 0
-        });
-        console.log(`Level ${level} referral ${referral.memberId} (${referral.name}) generating $${totalCommission.toFixed(2)} commission`);
         }
 
         // Find next level users (those sponsored by current level users)
@@ -156,10 +132,17 @@ export async function GET(request) {
         currentLevelUsers = nextLevelUsers;
       }
 
-      // Calculate summary statistics
-      const totalLevelIncome = levelIncomeDetails.reduce((sum, level) => sum + parseFloat(level.totalPaid), 0);
-      const totalRemaining = levelIncomeDetails.reduce((sum, level) => sum + parseFloat(level.remainingAmount), 0);
-      const totalDailyAmount = levelIncomeDetails.reduce((sum, level) => sum + parseFloat(level.dailyAmount), 0);
+      // Sort all entries by date (newest first)
+      levelIncomeDetails.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+
+      // Sort all entries by date (newest first)
+      levelIncomeDetails.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+
+      // Calculate summary statistics (summing from individual entries)
+      const totalLevelIncome = levelIncomeDetails.reduce((sum, entry) => sum + parseFloat(entry.totalPaid), 0);
+      const totalRemaining = levelIncomeDetails.reduce((sum, entry) => sum + parseFloat(entry.remainingAmount), 0);
+      const totalDailyAmount = levelIncomeDetails.reduce((sum, entry) => sum + parseFloat(entry.dailyAmount), 0);
+      const totalCommissionGenerated = levelIncomeDetails.reduce((sum, entry) => sum + parseFloat(entry.totalCommission), 0);
 
       return NextResponse.json(
         {
@@ -169,11 +152,12 @@ export async function GET(request) {
           },
           levelIncomeDetails,
           summary: {
-            totalLevels: levelIncomeDetails.length,
+            totalEntries: levelIncomeDetails.length,
             totalLevelIncome: totalLevelIncome.toFixed(2),
             totalRemaining: totalRemaining.toFixed(2),
             totalDailyAmount: totalDailyAmount.toFixed(2),
-            activeCommissions: levelIncomeDetails.reduce((sum, level) => sum + level.activeCommissions, 0)
+            totalCommissionGenerated: totalCommissionGenerated.toFixed(2),
+            activeCommissions: levelIncomeDetails.filter(e => e.status === 'active').length
           }
         },
         {

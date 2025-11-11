@@ -6,17 +6,9 @@ import { useAuth } from '@/contexts/AuthContext';
 const TeamLevelsPage = () => {
   const { user, token, isAuthenticated } = useAuth();
   const [selectedLevel, setSelectedLevel] = useState(null);
-  const [levelsData, setLevelsData] = useState([]);
-  const [statistics, setStatistics] = useState({
-    totalLevels: 10,
-    totalMembers: 0,
-    activeLevels: 0,
-    totalNFTPurchases: 0
-  });
+  const [levelIncomeData, setLevelIncomeData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [levelDetails, setLevelDetails] = useState(null);
-  const [loadingDetails, setLoadingDetails] = useState(false);
 
   const formatCurrency = (amount) => {
     if (amount === null || amount === undefined || Number.isNaN(amount)) return '-';
@@ -25,163 +17,73 @@ const TeamLevelsPage = () => {
     return `$${num.toFixed(2)}`;
   };
 
-  const getLevelIndex = (levelNo) => {
-    if (!levelNo) return null;
-    // Expect formats like "1st Level", "Level 1", or just number
-    const match = String(levelNo).match(/(\d+)/);
-    if (!match) return null;
-    const idx = parseInt(match[1], 10);
-    return Number.isFinite(idx) ? idx : null;
+  const formatDate = (dateString) => {
+    if (!dateString) return "N/A";
+    return new Date(dateString).toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+    });
   };
 
-  const getPerPersonRate = (levelNo) => {
-    const idx = getLevelIndex(levelNo);
-    if (!idx) return 0;
-    switch (idx) {
-      case 1: return 10;
-      case 2: return 3;
-      case 3: return 2;
-      case 4: return 1;
-      case 5: return 1;
-      case 6: return 1;
-      case 7: return 0.5;
-      case 8: return 0.5;
-      case 9: return 0.5;
-      case 10: return 0.5;
-      default: return 0;
-    }
-  };
-
-  const computeLevelTotalAmount = (level) => {
-    const perPerson = getPerPersonRate(level?.levelNo);
-    const totalNFTPurchases = level?.totalNFTPurchases || level?.totalMembers || 0;
-    return perPerson * totalNFTPurchases;
-  };
-
-  const getLevelAmount = (level) => {
-    const candidateKeys = [
-      'amount',
-      'totalAmount',
-      'earnings',
-      'earning',
-      'income',
-      'commission',
-      'levelAmount'
-    ];
-    for (const key of candidateKeys) {
-      const value = level?.[key];
-      if (typeof value === 'number' && !Number.isNaN(value)) return value;
-      if (typeof value === 'string' && value.trim() !== '') {
-        const cleaned = value.replace(/[^0-9.-]/g, '');
-        const parsed = parseFloat(cleaned);
-        if (!Number.isNaN(parsed)) return parsed;
-      }
-    }
-    return null;
-  };
-
-  // Fetch team levels data
-  const fetchLevelsData = useCallback(async () => {
+  // Fetch level income data (shows each NFT purchase commission)
+  const fetchLevelIncomeData = useCallback(async () => {
     if (!isAuthenticated || !token) return;
     
     try {
       setLoading(true);
       setError(null);
       
-      // Fetch both levels data and NFT purchases data
-      const response = await fetch('/api/team/levels?include=nftPurchases', {
+      const response = await fetch('/api/level-income', {
         headers: {
           'Authorization': `Bearer ${token}`,
         },
       });
 
       if (!response.ok) {
-        throw new Error('Failed to fetch team levels');
+        throw new Error('Failed to fetch level income data');
       }
 
       const data = await response.json();
-      
-      // Process the data to include NFT purchase counts
-      const processedLevels = (data.levels || []).map(level => ({
-        ...level,
-        totalNFTPurchases: level.nftPurchases || level.totalNFTPurchases || level.totalMembers || 0
-      }));
-      
-      setLevelsData(processedLevels);
-      setStatistics(prev => ({
-        ...data.statistics || prev,
-        totalNFTPurchases: processedLevels.reduce((sum, level) => sum + (level.totalNFTPurchases || 0), 0)
-      }));
+      setLevelIncomeData(data);
     } catch (err) {
-      console.error('Error fetching team levels:', err);
+      console.error('Error fetching level income data:', err);
       setError(err.message);
-      // Fallback to empty array if API fails
-      setLevelsData([]);
+      setLevelIncomeData(null);
     } finally {
       setLoading(false);
     }
   }, [isAuthenticated, token]);
 
-  // Fetch specific level details
-  const fetchLevelDetails = useCallback(async (levelNumber) => {
-    if (!isAuthenticated || !token) return;
-    
-    try {
-      setLoadingDetails(true);
-      
-      const response = await fetch(`/api/team/levels?level=${levelNumber}`, {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-        },
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to fetch level details');
-      }
-
-      const data = await response.json();
-      setLevelDetails(data.levelDetails || null);
-    } catch (err) {
-      console.error('Error fetching level details:', err);
-      setLevelDetails(null);
-    } finally {
-      setLoadingDetails(false);
-    }
-  }, [isAuthenticated, token]);
-
   // Fetch data when component mounts
   useEffect(() => {
-    fetchLevelsData();
-  }, [fetchLevelsData]);
+    fetchLevelIncomeData();
+  }, [fetchLevelIncomeData]);
 
   const handleLevelAction = (level) => {
     setSelectedLevel(level);
-    setLevelDetails(null); // Clear previous details
-    if (level.totalMembers > 0) {
-      fetchLevelDetails(level.levelNumber);
-    }
   };
 
   // Loading state
-  if (loading && levelsData.length === 0) {
+  if (loading && !levelIncomeData) {
     return (
       <div className="min-h-screen flex items-center justify-center" style={{background: 'linear-gradient(to bottom right, var(--default-body-bg-color) 0%, var(--theme-bg-gradient) 25%, var(--default-body-bg-color) 100%)', fontFamily: 'var(--default-font-family)'}}>
         <div className="text-white text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white mx-auto mb-4"></div>
-          <p>Loading team levels...</p>
+          <p>Loading level income...</p>
         </div>
       </div>
     );
   }
 
   // Error state
-  if (error && levelsData.length === 0) {
+  if (error && !levelIncomeData) {
     return (
       <div className="min-h-screen flex items-center justify-center" style={{background: 'linear-gradient(to bottom right, var(--default-body-bg-color) 0%, var(--theme-bg-gradient) 25%, var(--default-body-bg-color) 100%)', fontFamily: 'var(--default-font-family)'}}>
         <div className="text-white text-center max-w-md">
           <p className="text-red-400 mb-4">Error: {error}</p>
           <button 
-            onClick={fetchLevelsData}
+            onClick={fetchLevelIncomeData}
             className="btn-enhanced px-4 py-2 text-white hover-bounce"
           >
             Retry
@@ -191,19 +93,48 @@ const TeamLevelsPage = () => {
     );
   }
 
-  return (
-    <div className="min-h-screen flex p-8" style={{background: 'linear-gradient(to bottom right, var(--default-body-bg-color) 0%, var(--theme-bg-gradient) 25%, var(--default-body-bg-color) 100%)', fontFamily: 'var(--default-font-family)'}}>
+  // Group level income details by level (L1..L10)
+  // Each entry represents a single NFT purchase commission
+  const groupedLevels = {};
+  for (let i = 1; i <= 10; i++) groupedLevels[i] = [];
+  if (levelIncomeData?.levelIncomeDetails && Array.isArray(levelIncomeData.levelIncomeDetails)) {
+    levelIncomeData.levelIncomeDetails.forEach((d) => {
+      const lvl = Number(d.level) || 1;
+      const useLvl = lvl >= 1 && lvl <= 10 ? lvl : 1;
+      groupedLevels[useLvl].push(d);
+    });
+  }
 
-      {/* Main Content */}
-      <div className="flex-1">
-        <div className="max-w-4xl mx-auto">
-        <div className="text-center mb-12">
-          <h1 className="text-4xl font-bold text-white mb-2 gradient-text-enhanced animate-fadeInUp">Level Table</h1>
-          <p className="text-lg animate-fadeInUp" style={{color: 'rgba(255, 255, 255, 0.7)', animationDelay: '0.2s'}}>Check your Genealogy</p>
+  const levelSummaries = {};
+  for (let i = 1; i <= 10; i++) {
+    const list = groupedLevels[i] || [];
+    const totals = list.reduce(
+      (acc, item) => {
+        acc.totalCommission += parseFloat(item.totalCommission || 0);
+        acc.totalPaid += parseFloat(item.totalPaid || 0);
+        acc.remainingAmount += parseFloat(item.remainingAmount || 0);
+        acc.dailyAmount += parseFloat(item.dailyAmount || 0);
+        acc.entries += 1; // Count individual entries (each NFT purchase)
+        return acc;
+      },
+      { totalCommission: 0, totalPaid: 0, remainingAmount: 0, dailyAmount: 0, entries: 0 }
+    );
+    levelSummaries[i] = totals;
+  }
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-green-900 to-emerald-900">
+      <div className="container mx-auto px-4 py-8">
+        {/* Header */}
+        <div className="mb-8">
+          <h1 className="text-4xl font-bold text-white mb-2">Level Member Table</h1>
+          <p className="text-gray-300">
+            Track your income from users at each level
+          </p>
           <div className="mt-4">
             <button 
-              onClick={fetchLevelsData}
-              className="btn-enhanced px-4 py-2 text-white hover-bounce text-sm flex items-center space-x-2 mx-auto"
+              onClick={fetchLevelIncomeData}
+              className="btn-enhanced px-4 py-2 text-white hover-bounce text-sm flex items-center space-x-2"
               disabled={loading}
             >
               <span className={`text-sm ${loading ? 'animate-spin' : ''}`}>
@@ -214,195 +145,134 @@ const TeamLevelsPage = () => {
           </div>
         </div>
 
-        <div className="card-enhanced rounded-2xl p-8 shadow-lg animate-fadeInUp" style={{animationDelay: '0.4s'}}>
-          <h2 className="text-2xl font-semibold text-white mb-8 text-center">Level Details</h2>
-          
-          {/* Level Table */}
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm text-left">
-              <thead>
-                <tr style={{background: 'linear-gradient(to right, rgba(29, 68, 67, 0.8), rgba(29, 68, 67, 0.8))', borderBottom: '1px solid var(--default-border)'}}>
-                  <th className="px-6 py-4 text-white font-semibold">S.No</th>
-                  <th className="px-6 py-4 text-white font-semibold">Level No</th>
-                  <th className="px-6 py-4 text-white font-semibold">Total Members/NFTs</th>
-                  <th className="px-6 py-4 text-white font-semibold">Total Amount (All NFTs)</th>
+        {/* Summary Cards */}
+        {levelIncomeData?.summary && (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            {/* <div className="bg-white/10 backdrop-blur-lg rounded-xl p-6 border border-white/20">
+              <div className="text-center">
+                <div className="text-2xl font-bold text-green-400 mb-2">
+                  {levelIncomeData.summary.totalEntries}
+                </div>
+                <div className="text-sm text-gray-300">Total NFT Purchases</div>
+              </div>
+            </div> */}
+            
+            {/* <div className="bg-white/10 backdrop-blur-lg rounded-xl p-6 border border-white/20">
+              <div className="text-center">
+                <div className="text-2xl font-bold text-green-400 mb-2">
+                  {formatCurrency(levelIncomeData.summary.totalLevelIncome)}
+                </div>
+                <div className="text-sm text-gray-300">Total Earned</div>
+              </div>
+            </div> */}
+            
+            {/* <div className="bg-white/10 backdrop-blur-lg rounded-xl p-6 border border-white/20">
+              <div className="text-center">
+                <div className="text-2xl font-bold text-green-400 mb-2">
+                  {formatCurrency(levelIncomeData.summary.totalRemaining)}
+                </div>
+                <div className="text-sm text-gray-300">Remaining</div>
+              </div>
+            </div> */}
+            
+            {/* <div className="bg-white/10 backdrop-blur-lg rounded-xl p-6 border border-white/20">
+              <div className="text-center">
+                <div className="text-2xl font-bold text-green-400 mb-2">
+                  {formatCurrency(levelIncomeData.summary.totalDailyAmount)}
+                </div>
+                <div className="text-sm text-gray-300">Daily Amount</div>
+              </div>
+            </div> */}
+          </div>
+        )}
+
+        {/* Level Income Table */}
+        <div className="bg-white/10 backdrop-blur-lg rounded-xl border border-white/20 overflow-hidden">
+          <div className="px-6 py-4 border-b border-white/20">
+            <h2 className="text-xl font-semibold text-white">Level Income Breakdown</h2>
+            <p className="text-gray-300 text-sm mt-1">
+              Individual NFT purchase commissions from each level
+            </p>
+          </div>
+
+          {/* Desktop Table */}
+          <div className="hidden md:block overflow-x-auto">
+            <table className="w-full">
+              <thead className="bg-white/5">
+                <tr>
+                  <th className="px-6 py-4 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">#</th>
+                  <th className="px-6 py-4 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Level</th>
+                  <th className="px-6 py-4 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Referral Details</th>
+                  <th className="px-6 py-4 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Commission Rate</th>
+                  <th className="px-6 py-4 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Commission</th>
+                  <th className="px-6 py-4 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Paid</th>
+                  <th className="px-6 py-4 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Remaining</th>
+                  <th className="px-6 py-4 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Purchase Date</th>
+                  <th className="px-6 py-4 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Status</th>
                 </tr>
               </thead>
-              <tbody>
-                {levelsData.map((level, index) => (
-                  <tr key={level.id} className="transition-colors duration-200 hover:bg-opacity-20" style={{
-                    borderBottom: '1px solid var(--default-border)',
-                    backgroundColor: 'rgba(29, 68, 67, 0.1)'
-                  }}>
-                    <td className="px-6 py-4" style={{color: 'rgba(255, 255, 255, 0.8)'}}>{index + 1}</td>
-                    <td className="px-6 py-4 text-white font-medium">{level.levelNo}</td>
-                    <td className="px-6 py-4 font-medium" style={{color: 'var(--secondary-color)'}}>
-                      {level.totalMembers}
-                      {level.totalNFTPurchases > level.totalMembers && (
-                        <span className="ml-2 text-xs" style={{color: 'var(--success-rgb)'}}>
-                          ({level.totalNFTPurchases} NFTs)
+              {Array.from({ length: 10 }, (_, li) => li + 1).map((lvl) => (
+                <tbody key={`level-${lvl}`} className="divide-y divide-white/10">
+                  <tr className="bg-white/6">
+                    <td colSpan={9} className="px-6 py-3 text-sm font-semibold text-white">
+                      Level {lvl} — {groupedLevels[lvl]?.length || 0} NFT purchase(s)
+                      {groupedLevels[lvl] && groupedLevels[lvl].length > 0 && (
+                        <span className="ml-4 text-sm text-green-300">
+                          Total Commission: {formatCurrency(levelSummaries[lvl].totalCommission)} • Paid: {formatCurrency(levelSummaries[lvl].totalPaid)} • Remaining: {formatCurrency(levelSummaries[lvl].remainingAmount)}
                         </span>
                       )}
                     </td>
-                    <td className="px-6 py-4 font-medium" style={{color: 'var(--secondary-color)'}}>
-                      {formatCurrency(computeLevelTotalAmount(level))}
-                      {level.totalNFTPurchases > level.totalMembers && (
-                        <div className="text-xs mt-1" style={{color: 'rgba(255, 255, 255, 0.6)'}}>
-                          ({level.totalNFTPurchases} NFTs × ${getPerPersonRate(level.levelNo)})
-                        </div>
-                      )}
-                    </td>
                   </tr>
-                ))}
-              </tbody>
+
+                  {groupedLevels[lvl] && groupedLevels[lvl].length > 0 ? (
+                    groupedLevels[lvl].map((entry, idx) => (
+                      <tr key={`${lvl}-${entry.nftPurchaseId}-${idx}`} className="hover:bg-white/5 transition-colors">
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">{idx + 1}</td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-500/20 text-green-400 border border-green-500/30">
+                            L{entry.level}
+                          </span>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="text-sm font-medium text-white">{entry.referral.name}</div>
+                          <div className="text-sm text-gray-300">{entry.referral.memberId}</div>
+                          <div className="text-xs text-gray-400">{entry.referral.email}</div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">{entry.commissionRate}</td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-white font-medium">{formatCurrency(entry.totalCommission)}</td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-green-400">{formatCurrency(entry.totalPaid)}</td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-green-300">{formatCurrency(entry.remainingAmount)}</td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">{formatDate(entry.purchaseDate)}</td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm">
+                          <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
+                            entry.status === 'active' ? 'bg-green-500/20 text-green-400 border border-green-500/30' :
+                            entry.status === 'completed' ? 'bg-blue-500/20 text-blue-400 border border-blue-500/30' :
+                            'bg-yellow-500/20 text-yellow-400 border border-yellow-500/30'
+                          }`}>
+                            {entry.status}
+                          </span>
+                        </td>
+                      </tr>
+                    ))
+                  ) : (
+                    <tr>
+                      <td colSpan={9} className="px-6 py-6 text-center text-xs text-gray-400">No NFT purchases at Level {lvl}</td>
+                    </tr>
+                  )}
+                </tbody>
+              ))}
             </table>
           </div>
 
-          {/* Level Statistics */}
-          <div className="mt-8 grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="rounded-xl p-6 transition-all duration-200" style={{
-              background: 'linear-gradient(to right, rgba(var(--primary-rgb), 0.2), rgba(var(--secondary-rgb), 0.1))',
-              border: '1px solid rgba(var(--primary-rgb), 0.3)'
-            }}>
-              <div className="text-center">
-                <div className="text-2xl font-bold mb-2" style={{color: 'var(--primary-color)'}}>{statistics.totalLevels}</div>
-                <div className="text-sm" style={{color: 'rgba(255, 255, 255, 0.8)'}}>Total Levels</div>
-              </div>
-            </div>
-            
-            <div className="rounded-xl p-6 transition-all duration-200" style={{
-              background: 'linear-gradient(to right, rgba(var(--success-rgb), 0.2), rgba(var(--success-rgb), 0.1))',
-              border: '1px solid rgba(var(--success-rgb), 0.3)'
-            }}>
-              <div className="text-center">
-                <div className="text-2xl font-bold mb-2" style={{color: 'rgb(var(--success-rgb))'}}>
-                  {statistics.totalMembers}
-                  {statistics.totalNFTPurchases > statistics.totalMembers && (
-                    <div className="text-sm" style={{color: 'rgba(var(--success-rgb), 0.8)'}}>
-                      ({statistics.totalNFTPurchases} NFTs)
-                    </div>
-                  )}
-                </div>
-                <div className="text-sm" style={{color: 'rgba(255, 255, 255, 0.8)'}}>Total Members</div>
-              </div>
-            </div>
-            
-            <div className="rounded-xl p-6 transition-all duration-200" style={{
-              background: 'linear-gradient(to right, rgba(var(--info-rgb), 0.2), rgba(var(--info-rgb), 0.1))',
-              border: '1px solid rgba(var(--info-rgb), 0.3)'
-            }}>
-              <div className="text-center">
-                <div className="text-2xl font-bold mb-2" style={{color: 'rgb(var(--info-rgb))'}}>{statistics.activeLevels}</div>
-                <div className="text-sm" style={{color: 'rgba(255, 255, 255, 0.8)'}}>Active Levels</div>
-              </div>
-            </div>
-          </div>
-
-          {/* Selected Level Info */}
-          {selectedLevel && (
-            <div className="mt-8 rounded-xl p-6 transition-all duration-200" style={{
-              background: 'linear-gradient(to right, rgba(var(--body-bg-rgb), 0.2), rgba(var(--primary-rgb), 0.1))',
-              border: '1px solid var(--default-border)'
-            }}>
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="text-xl font-semibold text-white">{selectedLevel.levelNo} Details</h3>
-                <button 
-                  onClick={() => setSelectedLevel(null)}
-                  className="transition-colors" style={{color: 'rgba(255, 255, 255, 0.6)'}} onMouseEnter={(e) => e.target.style.color = 'white'} onMouseLeave={(e) => e.target.style.color = 'rgba(255, 255, 255, 0.6)'}
-                >
-                  ✕
-                </button>
-              </div>
-              
-              <div className="space-y-4">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="rounded-lg p-4 transition-all duration-200" style={{
-                    background: 'linear-gradient(to right, rgba(var(--body-bg-rgb), 0.2), rgba(var(--primary-rgb), 0.1))',
-                    border: '1px solid var(--default-border)'
-                  }}>
-                    <div className="text-sm mb-1" style={{color: 'rgba(255, 255, 255, 0.8)'}}>Level Number</div>
-                    <div className="text-lg font-semibold text-white">{selectedLevel.levelNo}</div>
-                  </div>
-                  <div className="rounded-lg p-4 transition-all duration-200" style={{
-                    background: 'linear-gradient(to right, rgba(var(--body-bg-rgb), 0.2), rgba(var(--primary-rgb), 0.1))',
-                    border: '1px solid var(--default-border)'
-                  }}>
-                    <div className="text-sm mb-1" style={{color: 'rgba(255, 255, 255, 0.8)'}}>Total Members</div>
-                    <div className="text-lg font-semibold" style={{color: 'var(--secondary-color)'}}>{selectedLevel.totalMembers}</div>
-                  </div>
-                </div>
-                
-                <div className="rounded-lg p-4 transition-all duration-200" style={{
-                  background: 'linear-gradient(to right, rgba(var(--body-bg-rgb), 0.2), rgba(var(--primary-rgb), 0.1))',
-                  border: '1px solid var(--default-border)'
-                }}>
-                  <div className="text-sm mb-2" style={{color: 'rgba(255, 255, 255, 0.8)'}}>Level Information</div>
-                  <div className="text-sm" style={{color: 'rgba(255, 255, 255, 0.8)'}}>
-                    This level shows all members who joined through your network at the {selectedLevel.levelNo.toLowerCase()}. 
-                    {selectedLevel.totalMembers > 0 
-                      ? ` Currently, there are ${selectedLevel.totalMembers} members in this level.`
-                      : ' Currently, there are no members in this level.'
-                    }
-                  </div>
-                </div>
-
-                {/* Level Members List */}
-                {levelDetails && levelDetails.members && levelDetails.members.length > 0 && (
-                  <div className="rounded-lg p-4 transition-all duration-200 mt-4" style={{
-                    background: 'linear-gradient(to right, rgba(var(--body-bg-rgb), 0.2), rgba(var(--primary-rgb), 0.1))',
-                    border: '1px solid var(--default-border)'
-                  }}>
-                    <div className="text-sm mb-3" style={{color: 'rgba(255, 255, 255, 0.8)'}}>
-                      Members in {selectedLevel.levelNo} ({levelDetails.totalCount} total)
-                    </div>
-                    <div className="space-y-2 max-h-60 overflow-y-auto">
-                      {levelDetails.members.map((member, index) => (
-                        <div key={member.id} className="flex justify-between items-center p-2 rounded" style={{
-                          backgroundColor: 'rgba(255, 255, 255, 0.05)'
-                        }}>
-                          <div className="flex items-center space-x-3">
-                            <div className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-medium" style={{
-                              background: 'linear-gradient(135deg, var(--primary-color), var(--secondary-color))',
-                              color: 'white'
-                            }}>
-                              {member.name.charAt(0)}
-                            </div>
-                            <div>
-                              <div className="text-sm font-medium text-white">{member.name}</div>
-                              <div className="text-xs" style={{color: 'rgba(255, 255, 255, 0.6)'}}>{member.memberId}</div>
-                            </div>
-                          </div>
-                          <div className="text-right">
-                            <div className="text-xs font-medium" style={{color: 'var(--secondary-color)'}}>{member.package}</div>
-                            <div className="text-xs" style={{
-                              color: member.status === 'Active' ? 'rgb(var(--success-rgb))' : 'rgb(var(--danger-rgb))'
-                            }}>
-                              {member.status}
-                            </div>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                {/* Loading state for level details */}
-                {selectedLevel.totalMembers > 0 && loadingDetails && (
-                  <div className="rounded-lg p-4 transition-all duration-200 mt-4" style={{
-                    background: 'linear-gradient(to right, rgba(var(--body-bg-rgb), 0.2), rgba(var(--primary-rgb), 0.1))',
-                    border: '1px solid var(--default-border)'
-                  }}>
-                    <div className="flex items-center justify-center">
-                      <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-white mr-3"></div>
-                      <span className="text-sm" style={{color: 'rgba(255, 255, 255, 0.8)'}}>Loading level details...</span>
-                    </div>
-                  </div>
-                )}
+          {(!levelIncomeData?.levelIncomeDetails || levelIncomeData.levelIncomeDetails.length === 0) && (
+            <div className="text-center py-12">
+              <div className="text-gray-400 text-lg">No level income history available</div>
+              <div className="text-gray-500 text-sm mt-2">
+                Income will appear here when users sign up using your sponsor ID and purchase NFTs
               </div>
             </div>
           )}
         </div>
-      </div>
       </div>
     </div>
   );

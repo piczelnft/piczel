@@ -53,6 +53,7 @@ export default function LevelIncomePage() {
   };
 
   // Group level income details by level (L1..L10)
+  // Now each entry represents a single NFT purchase/rebuy commission
   const groupedLevels = {};
   for (let i = 1; i <= 10; i++) groupedLevels[i] = [];
   if (levelIncomeData?.levelIncomeDetails && Array.isArray(levelIncomeData.levelIncomeDetails)) {
@@ -72,10 +73,10 @@ export default function LevelIncomePage() {
         acc.totalPaid += parseFloat(item.totalPaid || 0);
         acc.remainingAmount += parseFloat(item.remainingAmount || 0);
         acc.dailyAmount += parseFloat(item.dailyAmount || 0);
-        acc.activeCommissions += Number(item.activeCommissions || 0);
+        acc.entries += 1; // Count individual entries (each NFT purchase)
         return acc;
       },
-      { totalCommission: 0, totalPaid: 0, remainingAmount: 0, dailyAmount: 0, activeCommissions: 0 }
+      { totalCommission: 0, totalPaid: 0, remainingAmount: 0, dailyAmount: 0, entries: 0 }
     );
     levelSummaries[i] = totals;
   }
@@ -113,9 +114,9 @@ export default function LevelIncomePage() {
             <div className="bg-white/10 backdrop-blur-lg rounded-xl p-6 border border-white/20">
               <div className="text-center">
                 <div className="text-2xl font-bold text-green-400 mb-2">
-                  {levelIncomeData.summary.totalLevels}
+                  {levelIncomeData.summary.totalEntries}
                 </div>
-                <div className="text-sm text-gray-300">Active Referrals</div>
+                <div className="text-sm text-gray-300">Total NFT Purchases</div>
               </div>
             </div>
             
@@ -191,12 +192,12 @@ export default function LevelIncomePage() {
                   </th>
                 </tr>
               </thead>
-              {/** Render levels L1..L10 with a header row for each level and its referrals */}
+              {/** Render levels L1..L10 with a header row for each level and its NFT purchase entries */}
               {Array.from({ length: 10 }, (_, li) => li + 1).map((lvl) => (
                 <tbody key={`level-${lvl}`} className="divide-y divide-white/10">
                   <tr className="bg-white/6">
                     <td colSpan={9} className="px-6 py-3 text-sm font-semibold text-white">
-                      Level {lvl} — {groupedLevels[lvl]?.length || 0} referral(s)
+                      Level {lvl} — {groupedLevels[lvl]?.length || 0} NFT purchase(s)
                       {groupedLevels[lvl] && groupedLevels[lvl].length > 0 && (
                         <span className="ml-4 text-sm text-green-300">
                           Total: {formatCurrency(levelSummaries[lvl].totalCommission)} • Paid: {formatCurrency(levelSummaries[lvl].totalPaid)} • Remaining: {formatCurrency(levelSummaries[lvl].remainingAmount)}
@@ -206,8 +207,8 @@ export default function LevelIncomePage() {
                   </tr>
 
                   {groupedLevels[lvl] && groupedLevels[lvl].length > 0 ? (
-                    groupedLevels[lvl].map((referral, idx) => (
-                      <tr key={`${lvl}-${referral.referral.memberId}-${idx}`} className="hover:bg-white/5 transition-colors">
+                    groupedLevels[lvl].map((entry, idx) => (
+                      <tr key={`${lvl}-${entry.nftPurchaseId}-${idx}`} className="hover:bg-white/5 transition-colors">
                         <td className="px-6 py-4 whitespace-nowrap">
                           <div className="flex items-center">
                             <div className="flex-shrink-0 h-8 w-8 bg-gradient-to-r from-green-500 to-emerald-500 rounded-full flex items-center justify-center">
@@ -221,44 +222,42 @@ export default function LevelIncomePage() {
                         <td className="px-6 py-4 whitespace-nowrap">
                           <div className="flex items-center">
                             <div className="flex-shrink-0 h-10 w-10">
-                              {referral.referral.avatar ? (
-                                <Image className="h-10 w-10 rounded-full" src={referral.referral.avatar} alt={referral.referral.name} width={40} height={40} />
+                              {entry.referral.avatar ? (
+                                <Image className="h-10 w-10 rounded-full" src={entry.referral.avatar} alt={entry.referral.name} width={40} height={40} />
                               ) : (
                                 <div className="h-10 w-10 rounded-full bg-gradient-to-r from-gray-400 to-gray-600 flex items-center justify-center">
-                                  <span className="text-white text-sm font-medium">{referral.referral.name.charAt(0).toUpperCase()}</span>
+                                  <span className="text-white text-sm font-medium">{entry.referral.name.charAt(0).toUpperCase()}</span>
                                 </div>
                               )}
                             </div>
                             <div className="ml-4">
-                              <div className="text-sm font-medium text-white">{referral.referral.name}</div>
-                              <div className="text-sm text-gray-300">{referral.referral.memberId}</div>
-                              <div className="text-xs text-gray-400">{referral.referral.email}</div>
+                              <div className="text-sm font-medium text-white">{entry.referral.name}</div>
+                              <div className="text-sm text-gray-300">{entry.referral.memberId}</div>
+                              <div className="text-xs text-gray-400">{entry.referral.email}</div>
                             </div>
                           </div>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
-                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-500/20 text-green-400 border border-green-500/30">{referral.commissionRate}</span>
+                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-500/20 text-green-400 border border-green-500/30">{entry.commissionRate}</span>
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-white">{formatCurrency(referral.totalCommission)}</td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-green-400">{formatCurrency(referral.totalPaid)}</td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-green-300">{formatCurrency(referral.remainingAmount)}</td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-green-400">{formatCurrency(referral.dailyAmount)}</td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">{formatDate(referral.lastPayment)}</td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-white">{formatCurrency(entry.totalCommission)}</td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-green-400">{formatCurrency(entry.totalPaid)}</td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-green-300">{formatCurrency(entry.remainingAmount)}</td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-green-400">{formatCurrency(entry.dailyAmount)}</td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">{formatDate(entry.lastPayment)}</td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
                           <div className="max-w-xs">
-                            {referral.sourceInfo && referral.sourceInfo.length > 0 ? (
+                            {entry.nftPurchaseId ? (
                               <div className="space-y-1">
-                                {referral.sourceInfo.slice(0, 2).map((source, sidx) => (
-                                  <div key={sidx} className="text-xs">
-                                    <div className="text-green-400">NFT #{source.nftPurchaseId?.toString().slice(-6) || 'N/A'}</div>
-                                    <div className="text-green-300">${source.commissionAmount.toFixed(2)} commission</div>
-                                    <div className="text-gray-400">{formatDate(source.purchaseDate)}</div>
-                                  </div>
-                                ))}
-                                {referral.sourceInfo.length > 2 && (<div className="text-xs text-gray-500">+{referral.sourceInfo.length - 2} more...</div>)}
+                                <div className="text-xs">
+                                  <div className="text-green-400">NFT #{entry.nftPurchaseId?.toString().slice(-6) || 'N/A'}</div>
+                                  <div className="text-green-300">${entry.totalCommission} commission</div>
+                                  <div className="text-gray-400">{formatDate(entry.purchaseDate)}</div>
+                                  <div className="text-gray-500 text-xs mt-1">Status: <span className={entry.status === 'active' ? 'text-green-400' : 'text-yellow-400'}>{entry.status}</span></div>
+                                </div>
                               </div>
                             ) : (
-                              <div className="text-xs text-gray-400"><div className="text-gray-500">No NFT purchases yet</div><div className="text-gray-600">Commission will appear when they buy NFTs</div></div>
+                              <div className="text-xs text-gray-400">No NFT info</div>
                             )}
                           </div>
                         </td>
@@ -266,7 +265,7 @@ export default function LevelIncomePage() {
                     ))
                   ) : (
                     <tr>
-                      <td colSpan={9} className="px-6 py-6 text-center text-xs text-gray-400">No referrals at Level {lvl}</td>
+                      <td colSpan={9} className="px-6 py-6 text-center text-xs text-gray-400">No NFT purchases at Level {lvl}</td>
                     </tr>
                   )}
                 </tbody>
