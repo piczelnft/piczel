@@ -353,7 +353,7 @@ export default function NFTDetailPage() {
 
       {/* Wallet Cards */}
       <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-6 sm:mb-8">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
           {/* Purchase Wallet */}
           <div className="p-4 sm:p-6 rounded-xl sm:rounded-2xl border hover-lift-enhanced" style={{backgroundColor:'rgba(0,0,0,0.1)', backdropFilter:'blur(10px)', borderColor:'var(--default-border)'}}>
             <div className="flex items-center justify-between mb-3">
@@ -429,6 +429,73 @@ export default function NFTDetailPage() {
                   {(() => {
                     const unpaidPurchases = purchaseData.filter(p => !p.payoutStatus || p.payoutStatus !== 'paid');
                     return unpaidPurchases.length;
+                  })()}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Total NFT Profit */}
+          <div className="p-4 sm:p-6 rounded-xl sm:rounded-2xl border hover-lift-enhanced" style={{backgroundColor:'rgba(0,0,0,0.1)', backdropFilter:'blur(10px)', borderColor:'var(--default-border)'}}>
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="text-lg sm:text-xl font-bold text-white">Total NFT Profit</h3>
+              <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center" style={{backgroundColor:'rgba(168,85,247,0.2)', border:'1px solid rgba(168,85,247,0.3)'}}>
+                <svg className="w-4 h-4 sm:w-5 sm:h-5 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+                </svg>
+              </div>
+            </div>
+            <div className="text-2xl sm:text-3xl font-bold text-purple-400 mb-2">
+              ${(() => {
+                // Calculate total profit from paid out NFTs
+                // For A1: Purchase = $100, Holding = $105, Profit = $5 per NFT
+                // For A2: Purchase = $100, Holding = $110, Profit = $10 per NFT
+                // For A3: Purchase = $100, Holding = $115, Profit = $15 per NFT  
+                // For A4-A100: Purchase = $100, Holding = $120, Profit = $20 per NFT
+                const paidPurchases = purchaseData.filter(p => p.payoutStatus === 'paid');
+                let totalProfit = 0;
+                paidPurchases.forEach(purchase => {
+                  const nftCode = purchase.code;
+                  const number = parseInt(nftCode.substring(1));
+                  // Calculate actual profit based on NFT number
+                  let profit = 0;
+                  if (number === 1) {
+                    profit = 5; // A1-J1 profit
+                  } else if (number === 2) {
+                    profit = 10; // A2-J2 profit
+                  } else if (number === 3) {
+                    profit = 15; // A3-J3 profit
+                  } else if (number >= 4 && number <= 100) {
+                    profit = 20; // A4-A100 profit
+                  }
+                  totalProfit += profit;
+                });
+                return totalProfit.toFixed(2);
+              })()}
+            </div>
+            <p className="text-sm text-gray-400">
+              {(() => {
+                const paidPurchases = purchaseData.filter(p => p.payoutStatus === 'paid');
+                return `NFT (${paidPurchases.length} paid out)`;
+              })()}
+            </p>
+            <div className="mt-3">
+              <div 
+                className="p-3 rounded-lg border"
+                style={{backgroundColor:'rgba(255,255,255,0.03)', borderColor:'var(--default-border)'}}
+              >
+                <div className="flex items-center justify-between">
+                  <div className="text-xs text-gray-400">Paid Out NFTs</div>
+                  <div className="w-6 h-6 rounded-full flex items-center justify-center" style={{backgroundColor:'rgba(168,85,247,0.15)', border:'1px solid rgba(168,85,247,0.3)'}}>
+                    <svg className="w-3.5 h-3.5 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
+                    </svg>
+                  </div>
+                </div>
+                <div className="mt-1 text-lg font-semibold text-white">
+                  {(() => {
+                    const paidPurchases = purchaseData.filter(p => p.payoutStatus === 'paid');
+                    return paidPurchases.length;
                   })()}
                 </div>
               </div>

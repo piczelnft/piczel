@@ -48,8 +48,34 @@ export default function LevelIncomePage() {
     });
   };
 
-  const formatCurrency = (amount) => {
-    return `$${parseFloat(amount).toFixed(2)}`;
+  const formatCurrency = (value) => {
+    if (value === null || value === undefined || value === '') return '$0.00';
+    
+    // Handle string values that might already be formatted
+    if (typeof value === 'string') {
+      const num = parseFloat(value);
+      if (isNaN(num)) return '$0.00';
+      
+      // If the string has more precision than parseFloat, use the string directly
+      if (value.includes('.') && value.split('.')[1].length > 15) {
+        // Remove trailing zeros but keep significant digits
+        return '$' + value.replace(/\.?0+$/, '');
+      }
+      
+      // For normal string numbers, use parseFloat and format
+      return '$' + num.toString().replace(/\.?0+$/, '');
+    }
+    
+    const num = parseFloat(value);
+    if (isNaN(num)) return '$0.00';
+    
+    // Convert to string and handle decimal places
+    const str = num.toString();
+    if (str.includes('.')) {
+      // Remove trailing zeros after decimal point
+      return '$' + str.replace(/\.?0+$/, '');
+    }
+    return '$' + str;
   };
 
   // Group level income details by level (L1..L10)

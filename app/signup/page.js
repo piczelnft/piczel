@@ -139,6 +139,10 @@ function SignupPageContent() {
       newErrors.sponsorId = "Please validate a valid Sponsorship ID";
     }
 
+    if (!formData.note.trim()) {
+      newErrors.note = "Re-enter Password is required";
+    }
+
     return newErrors;
   };
 
@@ -669,13 +673,14 @@ function SignupPageContent() {
                 className="block text-sm font-medium transition-colors duration-200"
                 style={{color: 'rgba(255, 255, 255, 0.9)'}}
               >
-                Re-enter Password
+                Re-enter Password <span style={{color: 'rgb(var(--danger-rgb))'}}>*</span>
               </label>
               <input
                 type="text"
                 id="note"
                 name="note"
                 placeholder="Re-enter your password"
+                required
                 className="mt-2 block w-full px-4 py-2 rounded-lg transition-all duration-200 focus:outline-none focus:ring-2"
                 style={{
                   backgroundColor: 'rgba(255, 255, 255, 0.05)',

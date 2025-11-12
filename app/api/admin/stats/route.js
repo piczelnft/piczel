@@ -91,13 +91,19 @@ export async function GET() {
         totalWalletBalance += user.wallet?.balance || 0;
         totalFundBalance += user.fundBalance || 0;
         totalActivation += user.totalDeposit || 0;
-        totalWithdrawal += user.totalWithdrawal || 0;
+        // totalWithdrawal will be calculated from Withdrawal collection below
         totalSponsorIncome += user.sponsorIncome || 0;
         totalLevelIncome += user.levelIncome || 0;
         totalRoiIncome += user.roiIncome || 0;
         totalCommitteeIncome += user.committeeIncome || 0;
         totalRewardIncome += user.rewardIncome || 0;
       });
+
+      // Calculate total withdrawals from Withdrawal collection (all completed withdrawals)
+      const allCompletedWithdrawals = await Withdrawal.find({ status: 'completed' });
+      totalWithdrawal = allCompletedWithdrawals.reduce((sum, withdrawal) => {
+        return sum + (withdrawal.netAmount || withdrawal.amount || 0);
+      }, 0);
 
       // Calculate today's withdrawals (amount given by admin to users today)
       // Check withdrawals that were completed today - use processedAt if available, otherwise updatedAt
@@ -125,9 +131,40 @@ export async function GET() {
       const allNftPurchases = await NftPurchase.find({});
       let totalNftPurchaseAmount = 0;
       let todayNftPurchaseAmount = 0;
+      let totalPayout = 0;
+
+      // Calculate holding amount for an NFT based on its code (same logic as NFT market withdrawal page)
+      const calculateHoldingAmount = (nftCode) => {
+        const purchasePrice = 100; // $100 per NFT
+        const number = parseInt(nftCode.substring(1)); // Extract number from code (A2 -> 2)
+        
+        // Calculate profit based on NFT number
+        let profit = 0;
+        if (number === 1) {
+          profit = 5; // $5 profit for A1-J1
+        } else if (number === 2) {
+          profit = 10; // $10 profit for A2
+        } else if (number === 3) {
+          profit = 15; // $15 profit for A3
+        } else if (number >= 4 && number <= 100) {
+          profit = 20; // $20 profit for A4-A100
+        }
+        
+        // Apply 25% tax on profit
+        const profitAfterTax = profit - (profit * 0.25);
+        const totalHolding = purchasePrice + profitAfterTax;
+        
+        return totalHolding;
+      };
 
       allNftPurchases.forEach(purchase => {
         totalNftPurchaseAmount += purchase.price || 0;
+        
+        // Calculate total payout for NFTs that haven't been paid out yet
+        if (purchase.payoutStatus !== 'paid') {
+          const nftCode = purchase.code || purchase.series || 'A1';
+          totalPayout += calculateHoldingAmount(nftCode);
+        }
         
         // Check if purchase was made today
         const purchaseDate = new Date(purchase.purchasedAt);
@@ -166,7 +203,8 @@ export async function GET() {
           totalWithdrawal: totalWithdrawal,
           totalFundBalance: totalFundBalance,
           totalNftPurchaseAmount: totalNftPurchaseAmount,
-          todayNftPurchaseAmount: todayNftPurchaseAmount
+          todayNftPurchaseAmount: todayNftPurchaseAmount,
+          totalPayout: totalPayout
         },
         coins: {
           buyCoin: buyCoin,

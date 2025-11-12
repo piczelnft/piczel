@@ -29,12 +29,12 @@ const navigation = [
       },
     ],
   },
-  {
-    name: "Create User",
-    href: "/admin/create-user",
-    icon: "➕",
-    current: false,
-  },
+  // {
+  //   name: "Create User",
+  //   href: "/admin/create-user",
+  //   icon: "➕",
+  //   current: false,
+  // },
   {
     name: "Fund Management",
     href: "/admin/funds",

@@ -29,6 +29,55 @@ export default function Home() {
     return `${sign}${intPart}.${truncated}`;
   };
 
+  // Format currency to show exact value without unnecessary trailing zeros
+  const formatCurrency = (value) => {
+    if (value === null || value === undefined || value === '') return '0.00';
+    
+    // Handle string values that might already be formatted
+    if (typeof value === 'string') {
+      const num = parseFloat(value);
+      if (isNaN(num)) return '0.00';
+      
+      // If the string has more precision than parseFloat, use the string directly
+      if (value.includes('.') && value.split('.')[1].length > 15) {
+        // Remove trailing zeros but keep significant digits
+        return value.replace(/\.?0+$/, '');
+      }
+      
+      // For normal string numbers, use parseFloat and format
+      return num.toString().replace(/\.?0+$/, '');
+    }
+    
+    const num = parseFloat(value);
+    if (isNaN(num)) return '0.00';
+    
+    // Convert to string and handle decimal places
+    const str = num.toString();
+    if (str.includes('.')) {
+      // Remove trailing zeros after decimal point
+      return str.replace(/\.?0+$/, '');
+    }
+    return str;
+  };
+
+  // Format currency to show exact value without rounding
+  const formatCurrency4Digits = (value) => {
+    if (value === null || value === undefined || value === '') return '0.00';
+    
+    const num = parseFloat(value);
+    if (isNaN(num)) return '0.00';
+    
+    // Convert to string to preserve exact precision without rounding
+    let str = num.toString();
+    
+    // If it's in scientific notation, convert it properly
+    if (str.includes('e')) {
+      str = num.toFixed(20).replace(/\.?0+$/, '');
+    }
+    
+    return str;
+  };
+
   const fetchDashboardData = useCallback(async () => {
     try {
       setLoading(true);
@@ -356,7 +405,7 @@ export default function Home() {
             <div className="text-center relative">
               <div className="absolute -top-2 -right-2 w-3 h-3 rounded-full gradient-text-neon" style={{backgroundColor: 'rgb(16, 185, 129)'}}></div>
               <div className="text-sm mb-2 font-medium" style={{color: 'rgba(255, 255, 255, 0.7)'}}>Total Level Income</div>
-              <div className="font-bold text-lg gradient-text-neon" style={{color: 'rgb(16, 185, 129)'}}>${formatFixed5Trunc(data.levelIncome ?? data.totalLevelIncome ?? 0)}</div>
+              <div className="font-bold text-lg gradient-text-neon" style={{color: 'rgb(16, 185, 129)'}}>${formatCurrency4Digits(data.levelIncome ?? data.totalLevelIncome ?? 0)}</div>
             </div>
           </div>
 
@@ -396,6 +445,62 @@ export default function Home() {
             </div>
           </div>
 
+          {/* Sponsor Information - Unique Design */}
+          {data.sponsorInfo && (
+            <div className="col-span-1 sm:col-span-2 md:col-span-2 lg:col-span-2">
+              <div className="relative p-3 rounded-xl border border-dashed hover-lift-enhanced animate-fadeInUp" 
+                   style={{
+                     animationDelay: '1.3s', 
+                     backgroundColor: 'rgba(0, 0, 0, 0.1)', 
+                     backdropFilter: 'blur(10px)', 
+                     borderColor: 'var(--primary-color)'
+                   }}>
+                {/* Crown Icon */}
+                <div className="absolute -top-2 left-3">
+                  <div className="px-2 py-0.5 rounded-full text-xs font-bold flex items-center space-x-1"
+                       style={{
+                         background: 'linear-gradient(135deg, var(--primary-color), var(--secondary-color))',
+                         color: 'white'
+                       }}>
+                    <span>👑</span>
+                    <span>SPONSOR</span>
+                  </div>
+                </div>
+                
+                {/* Content */}
+                <div className="pt-3 flex items-center space-x-2">
+                  {/* Avatar */}
+                  <div className="w-8 h-8 rounded-full flex items-center justify-center text-white font-bold text-xs"
+                       style={{background: 'linear-gradient(135deg, var(--primary-color), var(--secondary-color))'}}>
+                    {data.sponsorInfo.name ? data.sponsorInfo.name.charAt(0).toUpperCase() : 'S'}
+                  </div>
+                  
+                  {/* Sponsor Details */}
+                  <div className="flex-1 min-w-0">
+                    <div className="font-medium text-xs gradient-text-neon truncate" 
+                         style={{color: 'var(--primary-color)'}}>
+                      Sponsored by: {data.sponsorInfo.name || 'Unknown'}
+                    </div>
+                    <div className="text-xs truncate" 
+                         style={{color: 'rgba(255, 255, 255, 0.5)'}}>
+                      ID: {data.sponsorInfo.memberId || 'N/A'}
+                    </div>
+                  </div>
+                  
+                  {/* Decorative Elements */}
+                  <div className="flex space-x-1">
+                    <div className="w-1.5 h-1.5 rounded-full animate-pulse" style={{backgroundColor: 'var(--primary-color)'}}></div>
+                    <div className="w-1.5 h-1.5 rounded-full animate-pulse" style={{backgroundColor: 'var(--secondary-color)', animationDelay: '0.2s'}}></div>
+                    <div className="w-1.5 h-1.5 rounded-full animate-pulse" style={{backgroundColor: 'var(--primary-color)', animationDelay: '0.4s'}}></div>
+                  </div>
+                </div>
+                
+                {/* Bottom Border Effect */}
+                <div className="absolute bottom-0 left-0 right-0 h-0.5 opacity-50"
+                     style={{background: 'linear-gradient(90deg, transparent, var(--primary-color), transparent)'}}></div>
+              </div>
+            </div>
+          )}
           
         </div>
 

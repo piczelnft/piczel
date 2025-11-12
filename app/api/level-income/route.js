@@ -112,7 +112,7 @@ export async function GET(request) {
             totalCommission: dailyComm.totalCommission.toFixed(2),
             totalPaid: dailyComm.totalPaid.toFixed(2),
             remainingAmount: dailyComm.remainingAmount.toFixed(2),
-            dailyAmount: dailyComm.dailyAmount.toFixed(2),
+            dailyAmount: dailyComm.dailyAmount.toString(),
             daysRemaining: dailyComm.daysRemaining,
             daysPaid: dailyComm.daysPaid,
             lastPayment: dailyComm.lastPaymentDate || null,

@@ -100,7 +100,24 @@ export async function GET() {
 
       // Get user data
       console.log("Fetching user data for userId:", userId);
-      const user = await User.findById(userId).select('memberId name email sponsorIncome levelIncome rewardIncome wallet.balance walletBalance isActivated package sponsoredMembersVolume');
+      const user = await User.findById(userId).select('memberId name email sponsorIncome levelIncome rewardIncome wallet.balance walletBalance isActivated package sponsoredMembersVolume sponsor');
+      
+      // Get sponsor information
+      let sponsorInfo = null;
+      if (user && user.sponsor) {
+        try {
+          const sponsor = await User.findById(user.sponsor).select('name email memberId');
+          if (sponsor) {
+            sponsorInfo = {
+              name: sponsor.name,
+              email: sponsor.email,
+              memberId: sponsor.memberId
+            };
+          }
+        } catch (sponsorError) {
+          console.error("Error fetching sponsor info:", sponsorError);
+        }
+      }
       
       // Combine sponsorIncome and levelIncome
       const combinedLevelIncome = (user.sponsorIncome || 0) + (user.levelIncome || 0);
@@ -281,7 +298,8 @@ export async function GET() {
           sponsoredMembersVolume: user.sponsoredMembersVolume || 0,
           directMembersVolume: await calculateDirectMembersNftVolume(userId),
           totalMembersVolume: await calculateTotalMembersNftVolume(userId)
-        }
+        },
+        sponsorInfo: sponsorInfo
       };
 
       console.log("Dashboard API - Final response data:", {

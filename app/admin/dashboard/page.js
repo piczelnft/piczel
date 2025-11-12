@@ -163,7 +163,7 @@ export default function AdminDashboard() {
       {/* Financial Statistics */}
       <div className="mb-8">
         <h2 className="text-xl font-semibold text-gray-900 mb-6">Financial Overview</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
           {/* <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
             <div className="flex items-center justify-between">
               <div>
@@ -191,16 +191,40 @@ export default function AdminDashboard() {
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
             <div className="flex items-center justify-between">
               <div>
+                <h3 className="text-lg font-medium text-gray-900">Total Withdrawal Amount</h3>
+                <p className="text-2xl font-bold text-orange-600 mt-2">{formatCurrency(stats?.financial?.totalWithdrawal || 0)}</p>
+              </div>
+              <div className="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center">
+                <span className="text-2xl">💸</span>
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+            <div className="flex items-center justify-between">
+              <div>
                 <h3 className="text-lg font-medium text-gray-900">Total Wallet Balance</h3>
                 <p className="text-2xl font-bold text-blue-600 mt-2">
                   {formatCurrency(
                     (stats?.financial?.totalNftPurchaseAmount || 0) - 
-                    ((stats?.income?.spotIncome || 0) + (stats?.income?.levelIncome || 0))
+                    ((stats?.financial?.totalWithdrawal || 0) - ((stats?.financial?.totalWithdrawal || 0) * 0.10))
                   )}
                 </p>
               </div>
               <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
                 <span className="text-2xl">💰</span>
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="text-lg font-medium text-gray-900">Total Payout</h3>
+                <p className="text-2xl font-bold text-purple-600 mt-2">{formatCurrency(stats?.financial?.totalPayout || 0)}</p>
+              </div>
+              <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
+                <span className="text-2xl">🎯</span>
               </div>
             </div>
           </div>

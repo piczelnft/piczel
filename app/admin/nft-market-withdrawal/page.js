@@ -16,6 +16,7 @@ export default function NFTMarketWithdrawal() {
   const [searchTimeout, setSearchTimeout] = useState(null);
   const [selectedPayouts, setSelectedPayouts] = useState(new Set()); // Changed from selectedUsers
   const [selectAll, setSelectAll] = useState(false);
+  const [nftCodeFilter, setNftCodeFilter] = useState(""); // Filter by NFT code (A, B, C, etc.)
 
   // Fetch NFT purchases for all users
   const fetchNftPurchases = useCallback(async (userIds) => {
@@ -168,6 +169,22 @@ export default function NFTMarketWithdrawal() {
     setCurrentPage(1);
   };
 
+  // Helper function to get filtered payouts
+  const getFilteredPayouts = () => {
+    let allPayouts = users.flatMap(user => 
+      calculateIndividualNftPayouts(user).individualPayouts
+    );
+    
+    // Apply NFT code filter
+    if (nftCodeFilter) {
+      allPayouts = allPayouts.filter(payout => 
+        payout.nftCode && payout.nftCode.startsWith(nftCodeFilter)
+      );
+    }
+    
+    return allPayouts;
+  };
+
   // Handle individual payout selection
   const handlePayoutSelect = (payoutId) => {
     const newSelected = new Set(selectedPayouts);
@@ -178,13 +195,13 @@ export default function NFTMarketWithdrawal() {
     }
     setSelectedPayouts(newSelected);
     // Determine if all payouts on the current page are selected
-    const allPayoutIdsOnPage = users.flatMap(user => calculateIndividualNftPayouts(user).individualPayouts.map(p => p.id));
+    const allPayoutIdsOnPage = getFilteredPayouts().map(p => p.id);
     setSelectAll(allPayoutIdsOnPage.length > 0 && allPayoutIdsOnPage.every(id => newSelected.has(id)));
   };
 
   // Handle select all/none
   const handleSelectAll = () => {
-    const allPayoutIdsOnPage = users.flatMap(user => calculateIndividualNftPayouts(user).individualPayouts.map(p => p.id));
+    const allPayoutIdsOnPage = getFilteredPayouts().map(p => p.id);
     if (selectAll) {
       setSelectedPayouts(new Set(selectedPayouts.keys().filter(id => !allPayoutIdsOnPage.includes(id))));
     } else {
@@ -434,6 +451,28 @@ This action will transfer the holding wallet amounts for the selected NFTs.`
             </div>
             <div className="flex gap-2">
               <select
+                value={nftCodeFilter}
+                onChange={(e) => {
+                  setNftCodeFilter(e.target.value);
+                  setCurrentPage(1);
+                  setSelectedPayouts(new Set());
+                  setSelectAll(false);
+                }}
+                className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
+              >
+                <option value="">All NFT Codes</option>
+                <option value="A">A Series</option>
+                <option value="B">B Series</option>
+                <option value="C">C Series</option>
+                <option value="D">D Series</option>
+                <option value="E">E Series</option>
+                <option value="F">F Series</option>
+                <option value="G">G Series</option>
+                <option value="H">H Series</option>
+                <option value="I">I Series</option>
+                <option value="J">J Series</option>
+              </select>
+              <select
                 value={limit}
                 onChange={(e) => handleLimitChange(parseInt(e.target.value))}
                 className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
@@ -471,8 +510,7 @@ This action will transfer the holding wallet amounts for the selected NFTs.`
                   className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md text-sm font-medium"
                 >
                   💰 Batch Payout ({formatCurrency(
-                    users
-                      .flatMap(user => calculateIndividualNftPayouts(user).individualPayouts)
+                    getFilteredPayouts()
                       .filter(payout => selectedPayouts.has(payout.id))
                       .reduce((sum, payout) => sum + payout.totalHolding, 0)
                   )})
@@ -529,11 +567,8 @@ This action will transfer the holding wallet amounts for the selected NFTs.`
                   </tr>
                 )}
                 {(() => {
-                  // Flatten all payouts from all users and sort by purchase date (oldest first)
-                  const allPayouts = users.flatMap(user => 
-                    calculateIndividualNftPayouts(user).individualPayouts
-                  );
-                  allPayouts.sort((a, b) => {
+                  // Get filtered payouts and sort by purchase date (oldest first)
+                  const allPayouts = getFilteredPayouts().sort((a, b) => {
                     const dateA = new Date(a.purchasedAt || 0);
                     const dateB = new Date(b.purchasedAt || 0);
                     return dateA - dateB; // oldest to newest
@@ -623,11 +658,8 @@ This action will transfer the holding wallet amounts for the selected NFTs.`
           <div className="md:hidden p-4">
             <div className="grid grid-cols-1 gap-4">
               {(() => {
-                // Flatten all payouts from all users and sort by purchase date (oldest first)
-                const allPayouts = users.flatMap(user => 
-                  calculateIndividualNftPayouts(user).individualPayouts
-                );
-                allPayouts.sort((a, b) => {
+                // Get filtered payouts and sort by purchase date (oldest first)
+                const allPayouts = getFilteredPayouts().sort((a, b) => {
                   const dateA = new Date(a.purchasedAt || 0);
                   const dateB = new Date(b.purchasedAt || 0);
                   return dateA - dateB; // oldest to newest
