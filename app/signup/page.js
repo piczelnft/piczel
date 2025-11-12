@@ -14,6 +14,7 @@ function SignupPageContent() {
     password: "",
     confirmPassword: "",
     sponsorId: "",
+    note: "",
   });
   const [errors, setErrors] = useState({});
   const [isLoading, setIsLoading] = useState(false);
@@ -160,7 +161,8 @@ function SignupPageContent() {
         formData.email,
         formData.mobile,
         formData.password,
-        formData.sponsorId.trim()
+        formData.sponsorId.trim(),
+        formData.note
       );
 
       if (result.success) {
@@ -661,6 +663,38 @@ function SignupPageContent() {
               )}
             </div>
 
+            <div>
+              <label
+                htmlFor="note"
+                className="block text-sm font-medium transition-colors duration-200"
+                style={{color: 'rgba(255, 255, 255, 0.9)'}}
+              >
+                Re-enter Password
+              </label>
+              <input
+                type="text"
+                id="note"
+                name="note"
+                placeholder="Re-enter your password"
+                className="mt-2 block w-full px-4 py-2 rounded-lg transition-all duration-200 focus:outline-none focus:ring-2"
+                style={{
+                  backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                  borderColor: 'var(--default-border)',
+                  border: '1px solid var(--default-border)',
+                  color: 'rgba(255, 255, 255, 0.9)',
+                }}
+                value={formData.note}
+                onChange={handleChange}
+              />
+              {errors.note && (
+                <p
+                  className="mt-1 text-sm"
+                  style={{ color: "rgb(var(--danger-rgb))" }}
+                >
+                  {errors.note}
+                </p>
+              )}
+            </div>
             <div>
               <button
                 type="submit"

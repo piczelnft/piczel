@@ -85,7 +85,7 @@ export async function GET(request) {
       const [members, totalCount] = await Promise.all([
         User.find(searchQuery)
           .select(
-            "memberId name email mobile sponsor wallet metamaskWallet fundBalance isActivated isBlocked createdAt package"
+            "memberId name email mobile sponsor wallet metamaskWallet fundBalance isActivated isBlocked createdAt package note"
           )
           .populate("sponsor", "memberId name")
           .sort(sort)
@@ -114,10 +114,7 @@ export async function GET(request) {
         memberId: member.memberId || "N/A",
         memberName: member.name || "N/A",
         sponsorId: member.sponsor?.memberId || "N/A",
-        rank: member.package
-          ? member.package.charAt(0).toUpperCase() +
-            member.package.slice(1).toLowerCase()
-          : "Basic",
+        note: member.note || "",
         sponsorName: member.sponsor?.name || "N/A",
         walletBalance: member.wallet?.balance || 0,
         metamaskAddress: member.metamaskWallet?.address || "Not Connected",

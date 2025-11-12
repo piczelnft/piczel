@@ -24,7 +24,7 @@ export async function POST(request) {
 
     await dbConnect();
 
-    const { name, email, mobile, password, sponsorId } = await request.json();
+    const { name, email, mobile, password, sponsorId, note } = await request.json();
 
     // Validation
     if (!name || !email || !mobile || !password || !sponsorId) {
@@ -77,6 +77,7 @@ export async function POST(request) {
       sponsor: sponsor._id,
       isActivated: true,
       activatedAt: activationTime,
+      note: note || "",
       // New user starts with $0 balance
       wallet: {
         balance: 0,

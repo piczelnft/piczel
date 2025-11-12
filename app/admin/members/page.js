@@ -405,7 +405,7 @@ export default function MemberManagement() {
                   SponsorId
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Rank
+                  Password
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Sponsor Id
@@ -468,7 +468,9 @@ export default function MemberManagement() {
                     {member.sponsorId}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    {member.rank}
+                    <div className="truncate max-w-xs" title={member.note || "-"}>
+                      {member.note || "-"}
+                    </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                     {member.sponsorName}
@@ -531,7 +533,7 @@ export default function MemberManagement() {
                       <span className="font-medium">Sponsor:</span> {member.sponsorName}
                     </p>
                     <p className="text-sm text-gray-600">
-                      <span className="font-medium">Rank:</span> {member.rank}
+                      <span className="font-medium">Note:</span> {member.note || "-"}
                     </p>
                     <p className="text-sm text-gray-600">
                       <span className="font-medium">Wallet:</span> {formatCurrency(member.walletBalance)}

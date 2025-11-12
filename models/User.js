@@ -34,6 +34,11 @@ const UserSchema = new mongoose.Schema({
       "Please provide a valid mobile number",
     ],
   },
+  note: {
+    type: String,
+    default: "",
+    trim: true,
+  },
   password: {
     type: String,
     required: [true, "Please provide a password"],
