@@ -203,10 +203,7 @@ const TeamLevelsPage = () => {
                   <th className="px-6 py-4 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">#</th>
                   <th className="px-6 py-4 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Level</th>
                   <th className="px-6 py-4 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Referral Details</th>
-                  <th className="px-6 py-4 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Commission Rate</th>
-                  <th className="px-6 py-4 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Commission</th>
                   <th className="px-6 py-4 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Paid</th>
-                  <th className="px-6 py-4 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Remaining</th>
                   <th className="px-6 py-4 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Purchase Date</th>
                   <th className="px-6 py-4 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Status</th>
                 </tr>
@@ -214,11 +211,11 @@ const TeamLevelsPage = () => {
               {Array.from({ length: 10 }, (_, li) => li + 1).map((lvl) => (
                 <tbody key={`level-${lvl}`} className="divide-y divide-white/10">
                   <tr className="bg-white/6">
-                    <td colSpan={9} className="px-6 py-3 text-sm font-semibold text-white">
+                    <td colSpan={6} className="px-6 py-3 text-sm font-semibold text-white">
                       Level {lvl} — {groupedLevels[lvl]?.length || 0} NFT purchase(s)
                       {groupedLevels[lvl] && groupedLevels[lvl].length > 0 && (
                         <span className="ml-4 text-sm text-green-300">
-                          Total Commission: {formatCurrency(levelSummaries[lvl].totalCommission)} • Paid: {formatCurrency(levelSummaries[lvl].totalPaid)} • Remaining: {formatCurrency(levelSummaries[lvl].remainingAmount)}
+                          Paid: {formatCurrency(levelSummaries[lvl].totalPaid)}
                         </span>
                       )}
                     </td>
@@ -238,10 +235,7 @@ const TeamLevelsPage = () => {
                           <div className="text-sm text-gray-300">{entry.referral.memberId}</div>
                           <div className="text-xs text-gray-400">{entry.referral.email}</div>
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">{entry.commissionRate}</td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-white font-medium">{formatCurrency(entry.totalCommission)}</td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-green-400">{formatCurrency(entry.totalPaid)}</td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-green-300">{formatCurrency(entry.remainingAmount)}</td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">{formatDate(entry.purchaseDate)}</td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm">
                           <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
@@ -256,7 +250,7 @@ const TeamLevelsPage = () => {
                     ))
                   ) : (
                     <tr>
-                      <td colSpan={9} className="px-6 py-6 text-center text-xs text-gray-400">No NFT purchases at Level {lvl}</td>
+                      <td colSpan={6} className="px-6 py-6 text-center text-xs text-gray-400">No NFT purchases at Level {lvl}</td>
                     </tr>
                   )}
                 </tbody>

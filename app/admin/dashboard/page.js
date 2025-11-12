@@ -112,7 +112,7 @@ export default function AdminDashboard() {
             <div className="flex items-center justify-between">
               <div>
                 <h3 className="text-lg font-medium text-gray-900">Total Active</h3>
-                <p className="text-3xl font-bold text-green-600 mt-2">{formatNumber(stats?.members?.active || 0)}</p>
+                <p className="text-3xl font-bold text-green-600 mt-2">{formatNumber((stats?.members?.total || 0) - (stats?.members?.inactive || 0))}</p>
               </div>
               <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
                 <span className="text-2xl">✅</span>
@@ -192,7 +192,12 @@ export default function AdminDashboard() {
             <div className="flex items-center justify-between">
               <div>
                 <h3 className="text-lg font-medium text-gray-900">Total Wallet Balance</h3>
-                <p className="text-2xl font-bold text-blue-600 mt-2">{formatCurrency(stats?.financial?.totalWalletBalance || 0)}</p>
+                <p className="text-2xl font-bold text-blue-600 mt-2">
+                  {formatCurrency(
+                    (stats?.financial?.totalNftPurchaseAmount || 0) - 
+                    ((stats?.income?.spotIncome || 0) + (stats?.income?.levelIncome || 0))
+                  )}
+                </p>
               </div>
               <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
                 <span className="text-2xl">💰</span>
@@ -321,8 +326,8 @@ export default function AdminDashboard() {
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
             <div className="flex items-center justify-between">
               <div>
-                <h3 className="text-lg font-medium text-gray-900">Total Sponsor Income</h3>
-                <p className="text-2xl font-bold text-green-600 mt-2">{formatCurrency(stats?.income?.sponsorIncome || 0)}</p>
+                <h3 className="text-lg font-medium text-gray-900">Total Spot Income</h3>
+                <p className="text-2xl font-bold text-green-600 mt-2">{formatCurrency(stats?.income?.spotIncome || 0)}</p>
               </div>
               <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
                 <span className="text-2xl">👥</span>

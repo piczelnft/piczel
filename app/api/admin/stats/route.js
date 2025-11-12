@@ -4,6 +4,7 @@ import jwt from "jsonwebtoken";
 import dbConnect from "@/lib/mongodb";
 import User from "@/models/User";
 import NftPurchase from "@/models/NftPurchase";
+import Withdrawal from "@/models/Withdrawal";
 import { corsHeaders, handleCors } from "@/lib/cors";
 
 // Handle CORS preflight requests
@@ -98,10 +99,27 @@ export async function GET() {
         totalRewardIncome += user.rewardIncome || 0;
       });
 
+      // Calculate today's withdrawals (amount given by admin to users today)
+      // Check withdrawals that were completed today - use processedAt if available, otherwise updatedAt
+      const todayWithdrawals = await Withdrawal.find({
+        status: 'completed',
+        $or: [
+          { processedAt: { $gte: today, $lt: tomorrow } },
+          { 
+            $and: [
+              { $or: [{ processedAt: null }, { processedAt: { $exists: false } }] },
+              { updatedAt: { $gte: today, $lt: tomorrow } }
+            ]
+          }
+        ]
+      });
+      
+      const todayWithdrawalAmount = todayWithdrawals.reduce((sum, withdrawal) => {
+        return sum + (withdrawal.netAmount || withdrawal.amount || 0);
+      }, 0);
+
       // For today's transactions, we'll need to implement transaction tracking
-      // For now, using mock data for today's specific transactions
       const todayUpgrade = 0.00; // This would come from transaction records
-      const todayWithdrawalAmount = 0.00; // This would come from transaction records
 
       // NFT Purchase Statistics
       const allNftPurchases = await NftPurchase.find({});
@@ -158,6 +176,7 @@ export async function GET() {
         },
         income: {
           sponsorIncome: totalSponsorIncome,
+          spotIncome: totalRewardIncome, // Spot income is stored in rewardIncome
           levelIncome: totalLevelIncome,
           roiIncome: totalRoiIncome,
           committeeIncome: totalCommitteeIncome,

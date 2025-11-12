@@ -58,7 +58,7 @@ export default function NFTMarketWithdrawal() {
         limit: "1000", // Fetch a large number to get all users
         search: searchTerm,
         sortBy: "createdAt",
-        sortOrder: "desc",
+        sortOrder: "asc",
       });
 
       const response = await fetch(`/api/admin/nft-purchases?${params}`, {
@@ -105,6 +105,16 @@ export default function NFTMarketWithdrawal() {
       });
       
       const allUsers = Array.from(userMap.values());
+      
+      // Sort NFT purchases within each user from oldest to newest
+      allUsers.forEach(user => {
+        user.nftPurchases.sort((a, b) => {
+          const dateA = new Date(a.purchasedAt || 0);
+          const dateB = new Date(b.purchasedAt || 0);
+          return dateA - dateB; // oldest to newest
+        });
+      });
+      
       console.log("Processed users:", allUsers); // Debug log
       
       // Apply pagination to the processed users
@@ -518,9 +528,18 @@ This action will transfer the holding wallet amounts for the selected NFTs.`
                     </td>
                   </tr>
                 )}
-                {users.map((user, userIndex) => {
-                  const payoutData = calculateIndividualNftPayouts(user);
-                  return payoutData.individualPayouts.map((payout, payoutIndex) => (
+                {(() => {
+                  // Flatten all payouts from all users and sort by purchase date (oldest first)
+                  const allPayouts = users.flatMap(user => 
+                    calculateIndividualNftPayouts(user).individualPayouts
+                  );
+                  allPayouts.sort((a, b) => {
+                    const dateA = new Date(a.purchasedAt || 0);
+                    const dateB = new Date(b.purchasedAt || 0);
+                    return dateA - dateB; // oldest to newest
+                  });
+                  
+                  return allPayouts.map((payout, payoutIndex) => (
                     <tr key={payout.id} className="hover:bg-gray-50">
                       <td className="px-6 py-4 whitespace-nowrap">
                         <input
@@ -535,16 +554,16 @@ This action will transfer the holding wallet amounts for the selected NFTs.`
                           <div className="flex-shrink-0 h-10 w-10">
                             <div className="h-10 w-10 rounded-full bg-purple-100 flex items-center justify-center">
                               <span className="text-sm font-medium text-purple-600">
-                                {user.name?.charAt(0)?.toUpperCase() || user.email?.charAt(0)?.toUpperCase() || 'U'}
+                                {payout.user?.name?.charAt(0)?.toUpperCase() || payout.user?.email?.charAt(0)?.toUpperCase() || 'U'}
                               </span>
                             </div>
                           </div>
                           <div className="ml-4">
                             <div className="text-sm font-medium text-gray-900">
-                              {user.name || 'User'}
+                              {payout.user?.name || 'User'}
                             </div>
-                            <div className="text-sm text-gray-500">{user.email || 'No email'}</div>
-                            <div className="text-xs text-gray-400">ID: {user.memberId || user._id?.substring(0, 8) || 'N/A'}</div>
+                            <div className="text-sm text-gray-500">{payout.user?.email || 'No email'}</div>
+                            <div className="text-xs text-gray-400">ID: {payout.user?.memberId || payout.user?._id?.substring(0, 8) || 'N/A'}</div>
                           </div>
                         </div>
                       </td>
@@ -583,10 +602,10 @@ This action will transfer the holding wallet amounts for the selected NFTs.`
                           className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed"
                           onClick={() => {
                             const confirmed = window.confirm(
-                              `Process payout of ${formatCurrency(payout.totalHolding)} for ${payout.nftCode} to ${user.name || user.email || 'User'}?\n\nThis action will transfer the holding wallet amount for this specific NFT to the user.`
+                              `Process payout of ${formatCurrency(payout.totalHolding)} for ${payout.nftCode} to ${payout.user?.name || payout.user?.email || 'User'}?\n\nThis action will transfer the holding wallet amount for this specific NFT to the user.`
                             );
                             if (confirmed) {
-                              handleIndividualPayout(user._id, payout.nftCode, payout.totalHolding, user.name || user.email);
+                              handleIndividualPayout(payout.user?._id, payout.nftCode, payout.totalHolding, payout.user?.name || payout.user?.email);
                             }
                           }}
                         >
@@ -595,7 +614,7 @@ This action will transfer the holding wallet amounts for the selected NFTs.`
                       </td>
                     </tr>
                   ));
-                })}
+                })()}
               </tbody>
             </table>
           </div>
@@ -603,9 +622,18 @@ This action will transfer the holding wallet amounts for the selected NFTs.`
           {/* Mobile Grid */}
           <div className="md:hidden p-4">
             <div className="grid grid-cols-1 gap-4">
-              {users.map((user, userIndex) => {
-                const payoutData = calculateIndividualNftPayouts(user);
-                return payoutData.individualPayouts.map((payout, payoutIndex) => (
+              {(() => {
+                // Flatten all payouts from all users and sort by purchase date (oldest first)
+                const allPayouts = users.flatMap(user => 
+                  calculateIndividualNftPayouts(user).individualPayouts
+                );
+                allPayouts.sort((a, b) => {
+                  const dateA = new Date(a.purchasedAt || 0);
+                  const dateB = new Date(b.purchasedAt || 0);
+                  return dateA - dateB; // oldest to newest
+                });
+                
+                return allPayouts.map((payout, payoutIndex) => (
                   <div key={payout.id} className="bg-gray-50 rounded-lg p-4 border">
                     <div className="flex items-start justify-between mb-3">
                       <div className="flex items-center space-x-3">
@@ -617,18 +645,17 @@ This action will transfer the holding wallet amounts for the selected NFTs.`
                         />
                         <div>
                           <h3 className="text-lg font-medium text-gray-900">
-                            {user.name || user.email || 'User'}
+                            {payout.user?.name || payout.user?.email || 'User'}
                           </h3>
                           <p className="text-sm text-gray-500">
-                            {user.email || 'No email'}
+                            {payout.user?.email || 'No email'}
                           </p>
                           <p className="text-xs text-gray-400">
-                            ID: {user._id?.substring(0, 8) || 'N/A'}
+                            ID: {payout.user?._id?.substring(0, 8) || 'N/A'}
                           </p>
                         </div>
                       </div>
                     </div>
-                    
                     <div className="mb-3 p-3 bg-white rounded-lg border">
                       <div className="flex justify-between items-center mb-2">
                         <span className="text-sm font-medium text-gray-900">{payout.nftCode}</span>
@@ -659,10 +686,10 @@ This action will transfer the holding wallet amounts for the selected NFTs.`
                         className="w-full bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                         onClick={() => {
                           const confirmed = window.confirm(
-                            `Process payout of ${formatCurrency(payout.totalHolding)} for ${payout.nftCode} to ${user.name || user.email || 'User'}?\n\nThis action will transfer the holding wallet amount for this specific NFT to the user.`
+                            `Process payout of ${formatCurrency(payout.totalHolding)} for ${payout.nftCode} to ${payout.user?.name || payout.user?.email || 'User'}?\n\nThis action will transfer the holding wallet amount for this specific NFT to the user.`
                           );
                           if (confirmed) {
-                            handleIndividualPayout(user._id, payout.nftCode, payout.totalHolding, user.name || user.email);
+                            handleIndividualPayout(payout.user?._id, payout.nftCode, payout.totalHolding, payout.user?.name || payout.user?.email);
                           }
                         }}
                       >
@@ -671,7 +698,7 @@ This action will transfer the holding wallet amounts for the selected NFTs.`
                     </div>
                   </div>
                 ));
-              })}
+              })()}
             </div>
           </div>
 

@@ -266,7 +266,7 @@ export default function Home() {
               <div className="text-white font-bold text-lg gradient-text-neon">{data.memberId}</div>
             </div>
             {/* Floating PICZEL SWAP Button */}
-            <div className="absolute -top-3 -left-3 z-10">
+            {/* <div className="absolute -top-3 -left-3 z-10">
               <Link href="/swap">
                 <div className="btn-enhanced text-white font-bold text-xs px-3 py-1.5 shadow-2xl hover-bounce hover-glow cursor-pointer relative overflow-hidden group">
                   <span className="relative z-10 flex items-center space-x-1">
@@ -276,7 +276,7 @@ export default function Home() {
                   <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/20 to-teal-500/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                 </div>
               </Link>
-            </div>
+            </div> */}
           </div>
 
           {/* User Name */}

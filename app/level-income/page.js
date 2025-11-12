@@ -170,16 +170,7 @@ export default function LevelIncomePage() {
                     Referral Details
                   </th>
                   <th className="px-6 py-4 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
-                    Commission Rate
-                  </th>
-                  <th className="px-6 py-4 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
-                    Total Commission
-                  </th>
-                  <th className="px-6 py-4 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
                     Total Paid
-                  </th>
-                  <th className="px-6 py-4 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
-                    Remaining
                   </th>
                   <th className="px-6 py-4 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
                     Daily Amount
@@ -196,11 +187,11 @@ export default function LevelIncomePage() {
               {Array.from({ length: 10 }, (_, li) => li + 1).map((lvl) => (
                 <tbody key={`level-${lvl}`} className="divide-y divide-white/10">
                   <tr className="bg-white/6">
-                    <td colSpan={9} className="px-6 py-3 text-sm font-semibold text-white">
+                    <td colSpan={6} className="px-6 py-3 text-sm font-semibold text-white">
                       Level {lvl} — {groupedLevels[lvl]?.length || 0} NFT purchase(s)
                       {groupedLevels[lvl] && groupedLevels[lvl].length > 0 && (
                         <span className="ml-4 text-sm text-green-300">
-                          Total: {formatCurrency(levelSummaries[lvl].totalCommission)} • Paid: {formatCurrency(levelSummaries[lvl].totalPaid)} • Remaining: {formatCurrency(levelSummaries[lvl].remainingAmount)}
+                          Paid: {formatCurrency(levelSummaries[lvl].totalPaid)}
                         </span>
                       )}
                     </td>
@@ -237,12 +228,7 @@ export default function LevelIncomePage() {
                             </div>
                           </div>
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-500/20 text-green-400 border border-green-500/30">{entry.commissionRate}</span>
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-white">{formatCurrency(entry.totalCommission)}</td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-green-400">{formatCurrency(entry.totalPaid)}</td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-green-300">{formatCurrency(entry.remainingAmount)}</td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-green-400">{formatCurrency(entry.dailyAmount)}</td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">{formatDate(entry.lastPayment)}</td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
@@ -251,7 +237,6 @@ export default function LevelIncomePage() {
                               <div className="space-y-1">
                                 <div className="text-xs">
                                   <div className="text-green-400">NFT #{entry.nftPurchaseId?.toString().slice(-6) || 'N/A'}</div>
-                                  <div className="text-green-300">${entry.totalCommission} commission</div>
                                   <div className="text-gray-400">{formatDate(entry.purchaseDate)}</div>
                                   <div className="text-gray-500 text-xs mt-1">Status: <span className={entry.status === 'active' ? 'text-green-400' : 'text-yellow-400'}>{entry.status}</span></div>
                                 </div>
@@ -265,7 +250,7 @@ export default function LevelIncomePage() {
                     ))
                   ) : (
                     <tr>
-                      <td colSpan={9} className="px-6 py-6 text-center text-xs text-gray-400">No NFT purchases at Level {lvl}</td>
+                      <td colSpan={6} className="px-6 py-6 text-center text-xs text-gray-400">No NFT purchases at Level {lvl}</td>
                     </tr>
                   )}
                 </tbody>
@@ -304,21 +289,12 @@ export default function LevelIncomePage() {
                                 <p className="text-sm text-gray-300">{referral.referral.memberId}</p>
                                 <p className="text-xs text-gray-400 truncate">{referral.referral.email}</p>
                               </div>
-                              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-500/20 text-green-400 border border-green-500/30">{referral.commissionRate}</span>
                             </div>
 
                             <div className="grid grid-cols-2 gap-3 mb-4">
                               <div className="bg-white/5 rounded-lg p-3">
-                                <div className="text-xs text-gray-400 mb-1">Total Commission</div>
-                                <div className="text-sm font-semibold text-white">{formatCurrency(referral.totalCommission)}</div>
-                              </div>
-                              <div className="bg-white/5 rounded-lg p-3">
                                 <div className="text-xs text-gray-400 mb-1">Total Paid</div>
                                 <div className="text-sm font-semibold text-green-400">{formatCurrency(referral.totalPaid)}</div>
-                              </div>
-                              <div className="bg-white/5 rounded-lg p-3">
-                                <div className="text-xs text-gray-400 mb-1">Remaining</div>
-                                <div className="text-sm font-semibold text-green-300">{formatCurrency(referral.remainingAmount)}</div>
                               </div>
                               <div className="bg-white/5 rounded-lg p-3">
                                 <div className="text-xs text-gray-400 mb-1">Daily Amount</div>
@@ -339,7 +315,6 @@ export default function LevelIncomePage() {
                                     {referral.sourceInfo.slice(0, 2).map((source, sidx) => (
                                       <div key={sidx} className="bg-white/5 rounded p-2">
                                         <div className="text-xs text-green-400">NFT #{source.nftPurchaseId?.toString().slice(-6) || 'N/A'}</div>
-                                        <div className="text-xs text-green-300">${source.commissionAmount.toFixed(2)} commission</div>
                                         <div className="text-xs text-gray-400">{formatDate(source.purchaseDate)}</div>
                                       </div>
                                     ))}
