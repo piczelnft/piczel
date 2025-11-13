@@ -78,16 +78,28 @@ export default function LevelIncomePage() {
     return '$' + str;
   };
 
-  // Group level income details by level (L1..L10)
-  // Now each entry represents a single NFT purchase/rebuy commission
+  // Group level income details by level (L1..L10), but only show one row per user per level
   const groupedLevels = {};
   for (let i = 1; i <= 10; i++) groupedLevels[i] = [];
   if (levelIncomeData?.levelIncomeDetails && Array.isArray(levelIncomeData.levelIncomeDetails)) {
+    // Map to keep only one entry per user per level
+    const userMapByLevel = {};
+    for (let i = 1; i <= 10; i++) userMapByLevel[i] = {};
     levelIncomeData.levelIncomeDetails.forEach((d) => {
       const lvl = Number(d.level) || 1;
       const useLvl = lvl >= 1 && lvl <= 10 ? lvl : 1;
-      groupedLevels[useLvl].push(d);
+      const userId = d.referral?.memberId || d.referral?.email || d.referral?.name || Math.random();
+      // If not already present, add this entry for the user at this level
+      if (!userMapByLevel[useLvl][userId]) {
+        userMapByLevel[useLvl][userId] = { ...d };
+      } else {
+        // Optionally, aggregate spot income or NFT purchases if needed
+        // For now, just keep the first occurrence
+      }
     });
+    for (let i = 1; i <= 10; i++) {
+      groupedLevels[i] = Object.values(userMapByLevel[i]);
+    }
   }
 
   const levelSummaries = {};
@@ -155,14 +167,14 @@ export default function LevelIncomePage() {
               </div>
             </div>
             
-            <div className="bg-white/10 backdrop-blur-lg rounded-xl p-6 border border-white/20">
+            {/* <div className="bg-white/10 backdrop-blur-lg rounded-xl p-6 border border-white/20">
               <div className="text-center">
                 <div className="text-2xl font-bold text-green-400 mb-2">
                   {formatCurrency(levelIncomeData.summary.totalRemaining)}
                 </div>
                 <div className="text-sm text-gray-300">Remaining</div>
               </div>
-            </div>
+            </div> */}
             
             <div className="bg-white/10 backdrop-blur-lg rounded-xl p-6 border border-white/20">
               <div className="text-center">
@@ -184,183 +196,45 @@ export default function LevelIncomePage() {
             </p>
           </div>
 
-          {/* Desktop Table */}
-          <div className="hidden md:block overflow-x-auto">
-            <table className="w-full">
+
+          {/* Responsive Table for all devices */}
+          <div className="overflow-x-auto">
+            <table className="w-full min-w-[500px] text-sm text-left">
               <thead className="bg-white/5">
                 <tr>
-                  <th className="px-6 py-4 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
-                    #
-                  </th>
-                  <th className="px-6 py-4 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
-                    Referral Details
-                  </th>
-                  <th className="px-6 py-4 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
-                    Total Paid
-                  </th>
-                  <th className="px-6 py-4 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
-                    Daily Amount
-                  </th>
-                  <th className="px-6 py-4 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
-                    Last Payment
-                  </th>
-                  <th className="px-6 py-4 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
-                    NFT Purchases
-                  </th>
+                  <th className="px-6 py-4 text-white font-semibold">S.No</th>
+                  <th className="px-6 py-4 text-white font-semibold">Level</th>
+                  <th className="px-6 py-4 text-white font-semibold">Referral Name</th>
+                  <th className="px-6 py-4 text-white font-semibold">Member ID</th>
+                  <th className="px-6 py-4 text-white font-semibold">Email</th>
+                  <th className="px-6 py-4 text-white font-semibold">Last Payment</th>
                 </tr>
               </thead>
-              {/** Render levels L1..L10 with a header row for each level and its NFT purchase entries */}
-              {Array.from({ length: 10 }, (_, li) => li + 1).map((lvl) => (
-                <tbody key={`level-${lvl}`} className="divide-y divide-white/10">
-                  <tr className="bg-white/6">
-                    <td colSpan={6} className="px-6 py-3 text-sm font-semibold text-white">
-                      Level {lvl} — {groupedLevels[lvl]?.length || 0} NFT purchase(s)
-                      {groupedLevels[lvl] && groupedLevels[lvl].length > 0 && (
-                        <span className="ml-4 text-sm text-green-300">
-                          Paid: {formatCurrency(levelSummaries[lvl].totalPaid)}
-                        </span>
-                      )}
-                    </td>
-                  </tr>
-
-                  {groupedLevels[lvl] && groupedLevels[lvl].length > 0 ? (
-                    groupedLevels[lvl].map((entry, idx) => (
-                      <tr key={`${lvl}-${entry.nftPurchaseId}-${idx}`} className="hover:bg-white/5 transition-colors">
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="flex items-center">
-                            <div className="flex-shrink-0 h-8 w-8 bg-gradient-to-r from-green-500 to-emerald-500 rounded-full flex items-center justify-center">
-                              <span className="text-white text-sm font-bold">{idx + 1}</span>
-                            </div>
-                            <div className="ml-3">
-                              <div className="text-sm font-medium text-white">#{idx + 1}</div>
-                            </div>
-                          </div>
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="flex items-center">
-                            <div className="flex-shrink-0 h-10 w-10">
-                              {entry.referral.avatar ? (
-                                <Image className="h-10 w-10 rounded-full" src={entry.referral.avatar} alt={entry.referral.name} width={40} height={40} />
-                              ) : (
-                                <div className="h-10 w-10 rounded-full bg-gradient-to-r from-gray-400 to-gray-600 flex items-center justify-center">
-                                  <span className="text-white text-sm font-medium">{entry.referral.name.charAt(0).toUpperCase()}</span>
-                                </div>
-                              )}
-                            </div>
-                            <div className="ml-4">
-                              <div className="text-sm font-medium text-white">{entry.referral.name}</div>
-                              <div className="text-sm text-gray-300">{entry.referral.memberId}</div>
-                              <div className="text-xs text-gray-400">{entry.referral.email}</div>
-                            </div>
-                          </div>
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-green-400">{formatCurrency(entry.totalPaid)}</td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-green-400">{formatCurrency(entry.dailyAmount)}</td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">{formatDate(entry.lastPayment)}</td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
-                          <div className="max-w-xs">
-                            {entry.nftPurchaseId ? (
-                              <div className="space-y-1">
-                                <div className="text-xs">
-                                  <div className="text-green-400">NFT #{entry.nftPurchaseId?.toString().slice(-6) || 'N/A'}</div>
-                                  <div className="text-gray-400">{formatDate(entry.purchaseDate)}</div>
-                                  <div className="text-gray-500 text-xs mt-1">Status: <span className={entry.status === 'active' ? 'text-green-400' : 'text-yellow-400'}>{entry.status}</span></div>
-                                </div>
-                              </div>
-                            ) : (
-                              <div className="text-xs text-gray-400">No NFT info</div>
-                            )}
-                          </div>
-                        </td>
-                      </tr>
-                    ))
-                  ) : (
-                    <tr>
-                      <td colSpan={6} className="px-6 py-6 text-center text-xs text-gray-400">No NFT purchases at Level {lvl}</td>
-                    </tr>
-                  )}
-                </tbody>
-              ))}
+              <tbody>
+                {Array.from({ length: 10 }, (_, li) => li + 1).flatMap((lvl) => (
+                  groupedLevels[lvl] && groupedLevels[lvl].length > 0
+                    ? groupedLevels[lvl].map((entry, idx) => (
+                        <tr key={`${lvl}-${entry.referral?.memberId || entry.referral?.email || idx}`} className="hover:bg-white/5 transition-colors">
+                          <td className="px-6 py-4" style={{color: 'rgba(255,255,255,0.8)'}}>{idx + 1}</td>
+                          <td className="px-6 py-4 font-semibold">
+                            <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-green-500/20 text-green-400 border border-green-500/30`}>L{lvl}</span>
+                          </td>
+                          <td className="px-6 py-4 text-white font-medium">{entry.referral?.name || "Unknown"}</td>
+                          <td className="px-6 py-4" style={{color: 'rgba(255,255,255,0.8)'}}>{entry.referral?.memberId || "-"}</td>
+                          <td className="px-6 py-4" style={{color: 'rgba(255,255,255,0.8)'}}>{entry.referral?.email || "-"}</td>
+                          <td className="px-6 py-4" style={{color: 'rgba(255,255,255,0.8)'}}>{formatDate(entry.lastPayment)}</td>
+                        </tr>
+                      ))
+                    : [
+                        <tr key={`empty-${lvl}`}>
+                          <td className="px-6 py-4 text-center" colSpan={6} style={{color: 'rgba(255,255,255,0.8)'}}>
+                            No referrals at Level {lvl}
+                          </td>
+                        </tr>
+                      ]
+                ))}
+              </tbody>
             </table>
-          </div>
-
-          {/* Mobile Grid */}
-          <div className="md:hidden p-4">
-            <div className="grid grid-cols-1 gap-4">
-              {Array.from({ length: 10 }, (_, li) => li + 1).map((lvl) => (
-                <div key={`m-level-${lvl}`}>
-                  <div className="text-sm font-semibold text-white mb-2">Level {lvl} — {groupedLevels[lvl]?.length || 0} referral(s)</div>
-                  {groupedLevels[lvl] && groupedLevels[lvl].length > 0 ? (
-                    groupedLevels[lvl].map((referral, idx) => (
-                      <div key={`m-${lvl}-${referral.referral.memberId}-${idx}`} className="bg-white/5 backdrop-blur-lg rounded-lg p-4 border border-white/10">
-                        <div className="flex items-start space-x-4">
-                          <div className="flex-shrink-0">
-                            <div className="h-12 w-12 bg-gradient-to-r from-green-500 to-emerald-500 rounded-full flex items-center justify-center">
-                              <span className="text-white text-lg font-bold">{idx + 1}</span>
-                            </div>
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <div className="flex items-center space-x-3 mb-3">
-                              <div className="flex-shrink-0">
-                                {referral.referral.avatar ? (
-                                  <Image className="h-10 w-10 rounded-full" src={referral.referral.avatar} alt={referral.referral.name} width={40} height={40} />
-                                ) : (
-                                  <div className="h-10 w-10 rounded-full bg-gradient-to-r from-gray-400 to-gray-600 flex items-center justify-center">
-                                    <span className="text-white text-sm font-medium">{referral.referral.name.charAt(0).toUpperCase()}</span>
-                                  </div>
-                                )}
-                              </div>
-                              <div className="flex-1 min-w-0">
-                                <h3 className="text-lg font-medium text-white truncate">{referral.referral.name}</h3>
-                                <p className="text-sm text-gray-300">{referral.referral.memberId}</p>
-                                <p className="text-xs text-gray-400 truncate">{referral.referral.email}</p>
-                              </div>
-                            </div>
-
-                            <div className="grid grid-cols-2 gap-3 mb-4">
-                              <div className="bg-white/5 rounded-lg p-3">
-                                <div className="text-xs text-gray-400 mb-1">Total Paid</div>
-                                <div className="text-sm font-semibold text-green-400">{formatCurrency(referral.totalPaid)}</div>
-                              </div>
-                              <div className="bg-white/5 rounded-lg p-3">
-                                <div className="text-xs text-gray-400 mb-1">Daily Amount</div>
-                                <div className="text-sm font-semibold text-green-400">{formatCurrency(referral.dailyAmount)}</div>
-                              </div>
-                            </div>
-
-                            <div className="space-y-2">
-                              <div className="flex justify-between text-sm">
-                                <span className="text-gray-400">Last Payment:</span>
-                                <span className="text-gray-300">{formatDate(referral.lastPayment)}</span>
-                              </div>
-
-                              <div className="text-sm">
-                                <div className="text-gray-400 mb-2">NFT Purchases:</div>
-                                {referral.sourceInfo && referral.sourceInfo.length > 0 ? (
-                                  <div className="space-y-2">
-                                    {referral.sourceInfo.slice(0, 2).map((source, sidx) => (
-                                      <div key={sidx} className="bg-white/5 rounded p-2">
-                                        <div className="text-xs text-green-400">NFT #{source.nftPurchaseId?.toString().slice(-6) || 'N/A'}</div>
-                                        <div className="text-xs text-gray-400">{formatDate(source.purchaseDate)}</div>
-                                      </div>
-                                    ))}
-                                    {referral.sourceInfo.length > 2 && (<div className="text-xs text-gray-500 text-center">+{referral.sourceInfo.length - 2} more purchases</div>)}
-                                  </div>
-                                ) : (
-                                  <div className="text-xs text-gray-400 bg-white/5 rounded p-2"><div className="text-gray-500">No NFT purchases yet</div><div className="text-gray-600">Commission will appear when they buy NFTs</div></div>
-                                )}
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    ))
-                  ) : (
-                    <div className="text-xs text-gray-400 mb-4">No referrals at Level {lvl}</div>
-                  )}
-                </div>
-              ))}
-            </div>
           </div>
 
           {(!levelIncomeData?.levelIncomeDetails || levelIncomeData.levelIncomeDetails.length === 0) && (

@@ -224,7 +224,8 @@ export default function NFTBuyPage() {
   const data = dashboardData;
 
   return (
-    <div className="relative overflow-hidden min-h-screen pt-20 lg:pt-0">
+    <div>
+      <div className="relative overflow-hidden min-h-screen pt-20 lg:pt-0">
       {/* Animated Background */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="particle" style={{top: '10%', left: '10%'}}></div>
@@ -264,9 +265,138 @@ export default function NFTBuyPage() {
         </div>
       </div>
 
-      {/* Wallet Cards */}
+      {/* Global Summary Cards for A1-A100, B1-B100, ..., J1-J100 */}
       <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-6 sm:mb-8">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mb-6">
+          {/* Total NFT Purchased Amount (A1-A100, B1-B100, ..., J1-J100) */}
+          <div className="p-4 sm:p-6 rounded-xl sm:rounded-2xl border hover-lift-enhanced" style={{backgroundColor:'rgba(0,0,0,0.15)', backdropFilter:'blur(10px)', borderColor:'var(--default-border)'}}>
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="text-lg sm:text-xl font-bold text-white">Total NFT Purchased Amount</h3>
+              <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center" style={{backgroundColor:'rgba(59,130,246,0.2)', border:'1px solid rgba(59,130,246,0.3)'}}>
+                <svg className="w-4 h-4 sm:w-5 sm:h-5 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
+                </svg>
+              </div>
+            </div>
+            <div className="text-2xl sm:text-3xl font-bold text-blue-400 mb-2">
+              ${(() => {
+                // All A1-A100, B1-B100, ..., J1-J100
+                const allSeriesPurchases = nftPurchases.filter(p => {
+                  const code = p.code;
+                  const series = code.charAt(0);
+                  const number = parseInt(code.substring(1));
+                  return (series >= 'A' && series <= 'J' && number >= 1 && number <= 100);
+                });
+                return (allSeriesPurchases.length * 100).toFixed(2);
+              })()}
+            </div>
+            <p className="text-sm text-gray-400">
+              $100 per NFT purchased ({(() => {
+                const allSeriesPurchases = nftPurchases.filter(p => {
+                  const code = p.code;
+                  const series = code.charAt(0);
+                  const number = parseInt(code.substring(1));
+                  return (series >= 'A' && series <= 'J' && number >= 1 && number <= 100);
+                });
+                return allSeriesPurchases.length;
+              })()} NFTs A1-A100, B1-B100, ..., J1-J100)
+            </p>
+          </div>
+          {/* Total Holding Wallet (A1-A100, ..., J1-J100) */}
+          <div className="p-4 sm:p-6 rounded-xl sm:rounded-2xl border hover-lift-enhanced" style={{backgroundColor:'rgba(0,0,0,0.15)', backdropFilter:'blur(10px)', borderColor:'var(--default-border)'}}>
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="text-lg sm:text-xl font-bold text-white">Total Holding Wallet</h3>
+              <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center" style={{backgroundColor:'rgba(34,197,94,0.2)', border:'1px solid rgba(34,197,94,0.3)'}}>
+                <svg className="w-4 h-4 sm:w-5 sm:h-5 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+                </svg>
+              </div>
+            </div>
+            <div className="text-2xl sm:text-3xl font-bold text-green-400 mb-2">
+              ${(() => {
+                // All A1-A100, ..., J1-J100, not paid
+                const unpaid = nftPurchases.filter(p => {
+                  const code = p.code;
+                  const series = code.charAt(0);
+                  const number = parseInt(code.substring(1));
+                  return (series >= 'A' && series <= 'J' && number >= 1 && number <= 100 && (!p.payoutStatus || p.payoutStatus !== 'paid'));
+                });
+                // Use profit logic from series page
+                function getProfitAmount(n) {
+                  if (n === 1) return 105; // A1-J1 holding
+                  if (n === 2) return 110;
+                  if (n === 3) return 115;
+                  if (n >= 4 && n <= 100) return 120;
+                  return 0;
+                }
+                let total = 0;
+                unpaid.forEach(p => {
+                  const n = parseInt(p.code.substring(1));
+                  total += getProfitAmount(n);
+                });
+                return total.toFixed(2);
+              })()}
+            </div>
+            <p className="text-sm text-gray-400">
+              {(() => {
+                const unpaid = nftPurchases.filter(p => {
+                  const code = p.code;
+                  const series = code.charAt(0);
+                  const number = parseInt(code.substring(1));
+                  return (series >= 'A' && series <= 'J' && number >= 1 && number <= 100 && (!p.payoutStatus || p.payoutStatus !== 'paid'));
+                });
+                return `A1-A100, B1-B100, ..., J1-J100 holding amount  ${unpaid.length} NFT${unpaid.length === 1 ? '' : 's'}`;
+              })()}
+            </p>
+          </div>
+          {/* Total Profit Value (A1-A100, ..., J1-J100) */}
+          <div className="p-4 sm:p-6 rounded-xl sm:rounded-2xl border hover-lift-enhanced" style={{backgroundColor:'rgba(0,0,0,0.15)', backdropFilter:'blur(10px)', borderColor:'var(--default-border)'}}>
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="text-lg sm:text-xl font-bold text-white">Total Profit Value</h3>
+              <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center" style={{backgroundColor:'rgba(168,85,247,0.2)', border:'1px solid rgba(168,85,247,0.3)'}}>
+                <svg className="w-4 h-4 sm:w-5 sm:h-5 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+                </svg>
+              </div>
+            </div>
+            <div className="text-2xl sm:text-3xl font-bold text-purple-400 mb-2">
+              ${(() => {
+                // All A1-A100, ..., J1-J100, paid
+                const paid = nftPurchases.filter(p => {
+                  const code = p.code;
+                  const series = code.charAt(0);
+                  const number = parseInt(code.substring(1));
+                  return (series >= 'A' && series <= 'J' && number >= 1 && number <= 100 && p.payoutStatus === 'paid');
+                });
+                // Use profit logic from series page
+                function getProfit(n) {
+                  if (n === 1) return 5;
+                  if (n === 2) return 10;
+                  if (n === 3) return 15;
+                  if (n >= 4 && n <= 100) return 20;
+                  return 0;
+                }
+                let total = 0;
+                paid.forEach(p => {
+                  const n = parseInt(p.code.substring(1));
+                  total += getProfit(n);
+                });
+                return total.toFixed(2);
+              })()}
+            </div>
+            <p className="text-sm text-gray-400">
+              {(() => {
+                const paid = nftPurchases.filter(p => {
+                  const code = p.code;
+                  const series = code.charAt(0);
+                  const number = parseInt(code.substring(1));
+                  return (series >= 'A' && series <= 'J' && number >= 1 && number <= 100 && p.payoutStatus === 'paid');
+                });
+                return `NFT (${paid.length} paid out)`;
+              })()}
+            </p>
+          </div>
+        </div>
           {/* Purchase Wallet */}
           <div className="p-4 sm:p-6 rounded-xl sm:rounded-2xl border hover-lift-enhanced" style={{backgroundColor:'rgba(0,0,0,0.1)', backdropFilter:'blur(10px)', borderColor:'var(--default-border)'}}>
             <div className="flex items-center justify-between mb-3">
@@ -417,7 +547,7 @@ export default function NFTBuyPage() {
         </div>
       </div>
 
-      {/* NFT Grid */}
+      
       <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-6 sm:pb-8">
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 sm:gap-6">
           {NFT_SERIES.map((code) => {
@@ -505,7 +635,7 @@ export default function NFTBuyPage() {
         </div>
 
         {/* NFT Purchase History */}
-        <div className="mt-6 sm:mt-8 p-4 sm:p-6 rounded-xl sm:rounded-2xl border" style={{backgroundColor: 'rgba(0,0,0,0.1)', backdropFilter: 'blur(10px)', borderColor: 'var(--default-border)'}}>
+        {/* <div className="mt-6 sm:mt-8 p-4 sm:p-6 rounded-xl sm:rounded-2xl border" style={{backgroundColor: 'rgba(0,0,0,0.1)', backdropFilter: 'blur(10px)', borderColor: 'var(--default-border)'}}>
           <h3 className="text-lg sm:text-xl font-bold text-white mb-4 sm:mb-6">Purchase History</h3>
           {nftPurchases.length === 0 ? (
             <div className="text-center py-8">
@@ -554,7 +684,7 @@ export default function NFTBuyPage() {
               ))}
             </div>
           )}
-        </div>
+        </div> */}
       </div>
     </div>
   );

@@ -211,7 +211,7 @@ export default function Sidebar({ isOpen, onClose }) {
       dropdownItems: [
         // { name: 'Geneology', icon: 'tree', href: '/team/geneology' },
         { name: 'Direct Members', icon: 'user', href: '/team/members' },
-        { name: 'Level Member Table', icon: 'bar-chart', href: '/team/levels' },
+        // { name: 'Level Member Table', icon: 'bar-chart', href: '/team/levels' },
         { name: 'Level Income Details', icon: 'dollar-sign', href: '/level-income' },
         { name: 'Spot Income History', icon: 'clock', href: '/team/spot-income-history' }
       ]
