@@ -217,7 +217,7 @@ export default function AdminDashboard() {
             </div>
           </div>
 
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+          {/* <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
             <div className="flex items-center justify-between">
               <div>
                 <h3 className="text-lg font-medium text-gray-900">Total Payout</h3>
@@ -227,7 +227,7 @@ export default function AdminDashboard() {
                 <span className="text-2xl">🎯</span>
               </div>
             </div>
-          </div>
+          </div> */}
 
           {/* <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
             <div className="flex items-center justify-between">
@@ -267,6 +267,18 @@ export default function AdminDashboard() {
               </div>
               <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
                 <span className="text-2xl">⬆️</span>
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="text-lg font-medium text-gray-900">Total Payout</h3>
+                <p className="text-2xl font-bold text-purple-600 mt-2">{formatCurrency(stats?.financial?.totalPayout || 0)}</p>
+              </div>
+              <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
+                <span className="text-2xl">💰</span>
               </div>
             </div>
           </div>

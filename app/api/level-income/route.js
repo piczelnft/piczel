@@ -109,9 +109,9 @@ export async function GET(request) {
               avatar: referralUser?.avatar || null
             },
             commissionRate: `${(commissionRate * 100).toFixed(1)}%`,
-            totalCommission: dailyComm.totalCommission.toFixed(2),
-            totalPaid: dailyComm.totalPaid.toFixed(2),
-            remainingAmount: dailyComm.remainingAmount.toFixed(2),
+            totalCommission: dailyComm.totalCommission.toFixed(4),
+            totalPaid: dailyComm.totalPaid.toFixed(4),
+            remainingAmount: dailyComm.remainingAmount.toFixed(4),
             dailyAmount: dailyComm.dailyAmount.toString(),
             daysRemaining: dailyComm.daysRemaining,
             daysPaid: dailyComm.daysPaid,
@@ -153,10 +153,10 @@ export async function GET(request) {
           levelIncomeDetails,
           summary: {
             totalEntries: levelIncomeDetails.length,
-            totalLevelIncome: totalLevelIncome.toFixed(2),
-            totalRemaining: totalRemaining.toFixed(2),
-            totalDailyAmount: totalDailyAmount.toFixed(2),
-            totalCommissionGenerated: totalCommissionGenerated.toFixed(2),
+            totalLevelIncome: totalLevelIncome.toFixed(4),
+            totalRemaining: totalRemaining.toFixed(4),
+            totalDailyAmount: totalDailyAmount.toFixed(4),
+            totalCommissionGenerated: totalCommissionGenerated.toFixed(4),
             activeCommissions: levelIncomeDetails.filter(e => e.status === 'active').length
           }
         },

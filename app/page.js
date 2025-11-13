@@ -60,20 +60,24 @@ export default function Home() {
     return str;
   };
 
-  // Format currency to show exact value without rounding
+  // Format currency to show 4 decimal places without unnecessary trailing zeros
   const formatCurrency4Digits = (value) => {
-    if (value === null || value === undefined || value === '') return '0.00';
+    if (value === null || value === undefined || value === '') return '0.0000';
     
-    const num = parseFloat(value);
-    if (isNaN(num)) return '0.00';
+    // If it's a string, parse it
+    let num = typeof value === 'string' ? parseFloat(value) : value;
+    if (isNaN(num)) return '0.0000';
     
-    // Convert to string to preserve exact precision without rounding
-    let str = num.toString();
+    // Use toFixed(4) to get exactly 4 decimal places
+    let str = num.toFixed(4);
     
-    // If it's in scientific notation, convert it properly
-    if (str.includes('e')) {
-      str = num.toFixed(20).replace(/\.?0+$/, '');
-    }
+    // Remove trailing zeros AFTER the decimal, but keep meaningful digits
+    // Match: decimal point followed by any trailing zeros at the end
+    // This will keep like 1.2300 as 1.23, but 1.2345 stays 1.2345
+    str = str.replace(/(\.\d*?)0+$/, '$1');
+    
+    // If we end up with just a decimal point, remove it
+    str = str.replace(/\.$/, '');
     
     return str;
   };
@@ -445,62 +449,107 @@ export default function Home() {
             </div>
           </div>
 
-          {/* Sponsor Information - Unique Design */}
-          {data.sponsorInfo && (
-            <div className="col-span-1 sm:col-span-2 md:col-span-2 lg:col-span-2">
-              <div className="relative p-3 rounded-xl border border-dashed hover-lift-enhanced animate-fadeInUp" 
-                   style={{
-                     animationDelay: '1.3s', 
-                     backgroundColor: 'rgba(0, 0, 0, 0.1)', 
-                     backdropFilter: 'blur(10px)', 
-                     borderColor: 'var(--primary-color)'
-                   }}>
-                {/* Crown Icon */}
-                <div className="absolute -top-2 left-3">
-                  <div className="px-2 py-0.5 rounded-full text-xs font-bold flex items-center space-x-1"
-                       style={{
-                         background: 'linear-gradient(135deg, var(--primary-color), var(--secondary-color))',
-                         color: 'white'
-                       }}>
-                    <span>👑</span>
-                    <span>SPONSOR</span>
-                  </div>
-                </div>
-                
-                {/* Content */}
-                <div className="pt-3 flex items-center space-x-2">
-                  {/* Avatar */}
-                  <div className="w-8 h-8 rounded-full flex items-center justify-center text-white font-bold text-xs"
-                       style={{background: 'linear-gradient(135deg, var(--primary-color), var(--secondary-color))'}}>
-                    {data.sponsorInfo.name ? data.sponsorInfo.name.charAt(0).toUpperCase() : 'S'}
-                  </div>
-                  
-                  {/* Sponsor Details */}
-                  <div className="flex-1 min-w-0">
-                    <div className="font-medium text-xs gradient-text-neon truncate" 
-                         style={{color: 'var(--primary-color)'}}>
-                      Sponsored by: {data.sponsorInfo.name || 'Unknown'}
-                    </div>
-                    <div className="text-xs truncate" 
-                         style={{color: 'rgba(255, 255, 255, 0.5)'}}>
-                      ID: {data.sponsorInfo.memberId || 'N/A'}
+          {/* Sponsor Information & Referral Card - Same Row */}
+          <div className="col-span-1 sm:col-span-2 md:col-span-2 lg:col-span-2 flex flex-col lg:flex-row gap-4">
+            {/* Sponsor Card */}
+            {data.sponsorInfo && (
+              <div className="flex-1">
+                <div className="relative p-3 rounded-xl border border-dashed hover-lift-enhanced animate-fadeInUp" 
+                     style={{
+                       animationDelay: '1.3s', 
+                       backgroundColor: 'rgba(0, 0, 0, 0.1)', 
+                       backdropFilter: 'blur(10px)', 
+                       borderColor: 'var(--primary-color)'
+                     }}>
+                  {/* Crown Icon */}
+                  <div className="absolute -top-2 left-3">
+                    <div className="px-2 py-0.5 rounded-full text-xs font-bold flex items-center space-x-1"
+                         style={{
+                           background: 'linear-gradient(135deg, var(--primary-color), var(--secondary-color))',
+                           color: 'white'
+                         }}>
+                      <span>👑</span>
+                      <span>SPONSOR</span>
                     </div>
                   </div>
                   
-                  {/* Decorative Elements */}
-                  <div className="flex space-x-1">
-                    <div className="w-1.5 h-1.5 rounded-full animate-pulse" style={{backgroundColor: 'var(--primary-color)'}}></div>
-                    <div className="w-1.5 h-1.5 rounded-full animate-pulse" style={{backgroundColor: 'var(--secondary-color)', animationDelay: '0.2s'}}></div>
-                    <div className="w-1.5 h-1.5 rounded-full animate-pulse" style={{backgroundColor: 'var(--primary-color)', animationDelay: '0.4s'}}></div>
+                  {/* Content */}
+                  <div className="pt-3 flex items-center space-x-2">
+                    {/* Avatar */}
+                    <div className="w-8 h-8 rounded-full flex items-center justify-center text-white font-bold text-xs"
+                         style={{background: 'linear-gradient(135deg, var(--primary-color), var(--secondary-color))'}}>
+                      {data.sponsorInfo.name ? data.sponsorInfo.name.charAt(0).toUpperCase() : 'S'}
+                    </div>
+                    
+                    {/* Sponsor Details */}
+                    <div className="flex-1 min-w-0">
+                      <div className="font-medium text-xs gradient-text-neon truncate" 
+                           style={{color: 'var(--primary-color)'}}>
+                        Sponsored by: {data.sponsorInfo.name || 'Unknown'}
+                      </div>
+                      <div className="text-xs truncate" 
+                           style={{color: 'rgba(255, 255, 255, 0.5)'}}>
+                        ID: {data.sponsorInfo.memberId || 'N/A'}
+                      </div>
+                    </div>
+                    
+                    {/* Decorative Elements */}
+                    <div className="flex space-x-1">
+                      <div className="w-1.5 h-1.5 rounded-full animate-pulse" style={{backgroundColor: 'var(--primary-color)'}}></div>
+                      <div className="w-1.5 h-1.5 rounded-full animate-pulse" style={{backgroundColor: 'var(--secondary-color)', animationDelay: '0.2s'}}></div>
+                      <div className="w-1.5 h-1.5 rounded-full animate-pulse" style={{backgroundColor: 'var(--primary-color)', animationDelay: '0.4s'}}></div>
+                    </div>
                   </div>
+                  
+                  {/* Bottom Border Effect */}
+                  <div className="absolute bottom-0 left-0 right-0 h-0.5 opacity-50"
+                       style={{background: 'linear-gradient(90deg, transparent, var(--primary-color), transparent)'}}></div>
+                </div>
+              </div>
+            )}
+
+            {/* Referral Card - Responsive Size */}
+            <div className="w-full lg:w-56">
+              <div className="p-4 rounded-xl border hover-lift-enhanced" style={{backgroundColor: 'rgba(0,0,0,0.1)', backdropFilter: 'blur(10px)', borderColor: 'var(--default-border)'}}>
+                <div className="flex items-center justify-between mb-3">
+                  <h3 className="text-sm font-semibold text-white">Your Referral Link</h3>
+                  <span className="px-2 py-0.5 rounded-full text-xs font-medium whitespace-nowrap ml-2" style={{backgroundColor: 'rgba(34,197,94,0.15)', color: 'rgb(34,197,94)', border: '1px solid rgba(34,197,94,0.3)'}}>
+                    Active
+                  </span>
                 </div>
                 
-                {/* Bottom Border Effect */}
-                <div className="absolute bottom-0 left-0 right-0 h-0.5 opacity-50"
-                     style={{background: 'linear-gradient(90deg, transparent, var(--primary-color), transparent)'}}></div>
+                <div className="space-y-3">
+                  <div>
+                    <div className="flex flex-col sm:flex-row gap-2 items-center">
+                      <input
+                        type="text"
+                        value={`https://www.piczelnft.com/signup?sponsor=${data.memberId}`}
+                        readOnly
+                        className="flex-1 w-full px-2 py-1.5 rounded-lg text-xs bg-gray-800 border text-white"
+                        style={{borderColor: 'var(--default-border)'}}
+                      />
+                      <button
+                        onClick={() => {
+                          const link = `https://www.piczelnft.com/signup?sponsor=${data.memberId}`;
+                          navigator.clipboard.writeText(link);
+                          alert('Referral link copied to clipboard!');
+                        }}
+                        className="px-3 py-1.5 rounded-lg text-xs font-medium text-white transition-all duration-200 hover:scale-105 w-full sm:w-auto"
+                        style={{backgroundColor: 'rgba(59,130,246,0.8)', border: '1px solid rgba(59,130,246,0.3)'}}
+                      >
+                        Copy
+                      </button>
+                    </div>
+                  </div>
+                  
+                  <div className="flex items-center justify-between text-xs">
+                    <span style={{color: 'rgba(255,255,255,0.6)'}}>Member ID:</span>
+                    <span className="font-semibold text-white truncate ml-2">{data.memberId}</span>
+                  </div>
+                </div>
               </div>
             </div>
-          )}
+          </div>
           
         </div>
 
@@ -528,70 +577,6 @@ export default function Home() {
 </button>
 
             </Link>
-          </div>
-        </div>
-
-        {/* Referral Links Section */}
-        <div className="mt-10">
-          <h2 className="text-xl font-semibold mb-4 text-white">Referral Link</h2>
-          <p className="text-sm mb-6" style={{color:'rgba(255,255,255,0.7)'}}>
-            Share your referral link to invite new members. When they sign up using your link, you&apos;ll be their sponsor.
-          </p>
-          
-          <div className="max-w-2xl mx-auto">
-            {/* Single Referral Link */}
-            <div className="p-6 rounded-2xl border hover-lift-enhanced" style={{backgroundColor: 'rgba(0,0,0,0.1)', backdropFilter: 'blur(10px)', borderColor: 'var(--default-border)'}}>
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="text-lg font-semibold text-white">Your Referral Link</h3>
-                <span className="px-3 py-1 rounded-full text-xs font-medium" style={{backgroundColor: 'rgba(34,197,94,0.15)', color: 'rgb(34,197,94)', border: '1px solid rgba(34,197,94,0.3)'}}>
-                  Active
-                </span>
-              </div>
-              
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium mb-2" style={{color: 'rgba(255,255,255,0.7)'}}>
-                    Referral Link:
-                  </label>
-                  <div className="flex items-center space-x-2">
-                    <input
-                      type="text"
-                      value={`https://www.piczelnft.com/signup?sponsor=${data.memberId}`}
-                      readOnly
-                      className="flex-1 px-3 py-2 rounded-lg text-sm bg-gray-800 border text-white"
-                      style={{borderColor: 'var(--default-border)'}}
-                    />
-                    <button
-                      onClick={() => {
-                        const link = `https://www.piczelnft.com/signup?sponsor=${data.memberId}`;
-                        navigator.clipboard.writeText(link);
-                        alert('Referral link copied to clipboard!');
-                      }}
-                      className="px-4 py-2 rounded-lg text-sm font-medium text-white transition-all duration-200 hover:scale-105"
-                      style={{backgroundColor: 'rgba(59,130,246,0.8)', border: '1px solid rgba(59,130,246,0.3)'}}
-                    >
-                      Copy
-                    </button>
-                  </div>
-                </div>
-                
-                <div className="flex items-center justify-between text-sm">
-                  <span style={{color: 'rgba(255,255,255,0.6)'}}>Your Member ID:</span>
-                  <span className="font-semibold text-white">{data.memberId}</span>
-                </div>
-              </div>
-            </div>
-
-            {/* Referral Instructions */}
-            {/* <div className="mt-6 p-4 rounded-xl border" style={{backgroundColor: 'rgba(59,130,246,0.1)', borderColor: 'rgba(59,130,246,0.3)'}}>
-              <h4 className="text-sm font-semibold text-white mb-2">How to use your referral link:</h4>
-              <ul className="text-sm space-y-1" style={{color: 'rgba(255,255,255,0.8)'}}>
-                <li>• Copy your referral link and share it with potential new members</li>
-                <li>• When someone clicks your link and signs up, you become their sponsor</li>
-                <li>• You&apos;ll earn commissions from their NFT purchases and activities</li>
-                <li>• The sponsor ID will be automatically filled in the signup form</li>
-              </ul>
-            </div> */}
           </div>
         </div>
       </div>

@@ -254,7 +254,7 @@ export async function GET() {
         rank: user.package || "Basic",
         totalTeam,
         myDirects: directTeam,
-        wallet: walletBalance.toFixed(2),
+        wallet: walletBalance.toFixed(4),
         depositWallet: "0.00", // This would come from a separate deposits collection
         capping: {
           total: 40800,
@@ -289,9 +289,9 @@ export async function GET() {
         totalNftPurchases: await calculateTotalNftPurchases(userId),
         totalNftPurchaseAmount: await calculateTotalNftPurchaseAmount(userId),
         totalSponsorsIncome: await calculateTotalSponsorsIncome(userId),
-        totalLevelIncome: combinedLevelIncome.toFixed(2), // Combined sponsorIncome + levelIncome
+        totalLevelIncome: combinedLevelIncome.toFixed(4), // Combined sponsorIncome + levelIncome
         totalWithdrawalAmount: await calculateTotalWithdrawalAmount(userId),
-        totalSpotIncome: (user.rewardIncome || 0).toFixed(2),
+        totalSpotIncome: (user.rewardIncome || 0).toFixed(4),
         directMembersNftVolume: await calculateDirectMembersNftVolume(userId),
         totalMembersNftVolume: await calculateTotalMembersNftVolume(userId),
         memberVolumes: {

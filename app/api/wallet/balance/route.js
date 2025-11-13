@@ -66,9 +66,9 @@ export async function GET(request) {
     return NextResponse.json(
       { 
         balance: balance,
-        withdrawalBalance: Number(withdrawalBalance.toFixed(2)),
-        spotIncome: Number(rewardIncome.toFixed(2)),
-        levelIncome: Number(combinedLevelIncome.toFixed(2)), // Combined sponsorIncome + levelIncome
+        withdrawalBalance: Number(withdrawalBalance.toFixed(4)),
+        spotIncome: Number(rewardIncome.toFixed(4)),
+        levelIncome: Number(combinedLevelIncome.toFixed(4)), // Combined sponsorIncome + levelIncome
         user: {
           name: user.name,
           email: user.email

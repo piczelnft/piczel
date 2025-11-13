@@ -3,6 +3,28 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 
+// Format currency to show 4 decimal places without unnecessary trailing zeros
+const formatCurrency4Digits = (value) => {
+  if (value === null || value === undefined || value === '') return '0.0000';
+  
+  // If it's a string, parse it
+  let num = typeof value === 'string' ? parseFloat(value) : value;
+  if (isNaN(num)) return '0.0000';
+  
+  // Use toFixed(4) to get exactly 4 decimal places
+  let str = num.toFixed(4);
+  
+  // Remove trailing zeros AFTER the decimal, but keep meaningful digits
+  // Match: decimal point followed by any trailing zeros at the end
+  // This will keep like 1.2300 as 1.23, but 1.2345 stays 1.2345
+  str = str.replace(/(\.\d*?)0+$/, '$1');
+  
+  // If we end up with just a decimal point, remove it
+  str = str.replace(/\.$/, '');
+  
+  return str;
+};
+
 export default function WithdrawalRequestPage() {
   const [formData, setFormData] = useState({
     amount: "",
@@ -201,7 +223,7 @@ export default function WithdrawalRequestPage() {
               <div className="flex items-center justify-between">
                 <div>
                   <h3 className="text-white font-semibold mb-1 text-sm sm:text-base">Total Balance</h3>
-                  <p className="text-xl sm:text-2xl font-bold text-green-400">${userBalance.toFixed(2)}</p>
+                  <p className="text-xl sm:text-2xl font-bold text-green-400">${formatCurrency4Digits(userBalance)}</p>
                 </div>
                 <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full flex items-center justify-center" style={{backgroundColor: 'rgba(34, 197, 94, 0.2)'}}>
                   <svg className="w-5 h-5 sm:w-6 sm:h-6 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -216,7 +238,7 @@ export default function WithdrawalRequestPage() {
               <div className="flex items-center justify-between">
                 <div>
                   <h3 className="text-white font-semibold mb-1 text-sm sm:text-base">Withdrawal Balance</h3>
-                  <p className="text-xl sm:text-2xl font-bold" style={{color: 'rgb(var(--primary-rgb))'}}>${withdrawalBalance.toFixed(2)}</p>
+                  <p className="text-xl sm:text-2xl font-bold" style={{color: 'rgb(var(--primary-rgb))'}}>${formatCurrency4Digits(withdrawalBalance)}</p>
                 </div>
                 <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full flex items-center justify-center" style={{backgroundColor: 'rgba(0, 255, 190, 0.15)'}}>
                   <svg className="w-5 h-5 sm:w-6 sm:h-6" style={{color: 'var(--primary-color)'}} fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -231,7 +253,7 @@ export default function WithdrawalRequestPage() {
               <div className="flex items-center justify-between">
                 <div>
                   <h3 className="text-white font-semibold mb-1 text-sm sm:text-base">Level Income</h3>
-                  <p className="text-xl sm:text-2xl font-bold text-blue-400">${levelIncome.toFixed(2)}</p>
+                  <p className="text-xl sm:text-2xl font-bold text-blue-400">${formatCurrency4Digits(levelIncome)}</p>
                 </div>
                 <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full flex items-center justify-center" style={{backgroundColor: 'rgba(59, 130, 246, 0.2)'}}>
                   <svg className="w-5 h-5 sm:w-6 sm:h-6 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -246,7 +268,7 @@ export default function WithdrawalRequestPage() {
               <div className="flex items-center justify-between">
                 <div>
                   <h3 className="text-white font-semibold mb-1 text-sm sm:text-base">Spot Income</h3>
-                  <p className="text-xl sm:text-2xl font-bold text-purple-400">${spotIncome.toFixed(2)}</p>
+                  <p className="text-xl sm:text-2xl font-bold text-purple-400">${formatCurrency4Digits(spotIncome)}</p>
                 </div>
                 <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full flex items-center justify-center" style={{backgroundColor: 'rgba(168, 85, 247, 0.2)'}}>
                   <svg className="w-5 h-5 sm:w-6 sm:h-6 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -395,7 +417,7 @@ export default function WithdrawalRequestPage() {
                       </div>
                       <div>
                         <h3 className="text-white font-semibold text-sm">Spot Income</h3>
-                        <p className="text-purple-400 font-bold text-lg">${spotIncome.toFixed(2)}</p>
+                        <p className="text-purple-400 font-bold text-lg">${formatCurrency4Digits(spotIncome)}</p>
                         <p className="text-gray-400 text-xs">Available for withdrawal</p>
                       </div>
                     </div>
@@ -422,7 +444,7 @@ export default function WithdrawalRequestPage() {
                       </div>
                       <div>
                   <h3 className="text-white font-semibold text-sm">Level Income</h3>
-                  <p className="text-blue-400 font-bold text-lg">${levelIncome.toFixed(2)}</p>
+                  <p className="text-blue-400 font-bold text-lg">${formatCurrency4Digits(levelIncome)}</p>
                         <p className="text-gray-400 text-xs">Available for withdrawal</p>
                       </div>
                     </div>
