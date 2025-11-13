@@ -91,10 +91,10 @@ export default function LevelIncomePage() {
       const userId = d.referral?.memberId || d.referral?.email || d.referral?.name || Math.random();
       // If not already present, add this entry for the user at this level
       if (!userMapByLevel[useLvl][userId]) {
-        userMapByLevel[useLvl][userId] = { ...d };
+        userMapByLevel[useLvl][userId] = { ...d, nftPurchaseCount: 1 };
       } else {
-        // Optionally, aggregate spot income or NFT purchases if needed
-        // For now, just keep the first occurrence
+        // Aggregate NFT purchases count
+        userMapByLevel[useLvl][userId].nftPurchaseCount = (userMapByLevel[useLvl][userId].nftPurchaseCount || 1) + 1;
       }
     });
     for (let i = 1; i <= 10; i++) {
@@ -205,8 +205,7 @@ export default function LevelIncomePage() {
                   <th className="px-6 py-4 text-white font-semibold">S.No</th>
                   <th className="px-6 py-4 text-white font-semibold">Level</th>
                   <th className="px-6 py-4 text-white font-semibold">Referral Name</th>
-                  <th className="px-6 py-4 text-white font-semibold">Member ID</th>
-                  <th className="px-6 py-4 text-white font-semibold">Email</th>
+                  <th className="px-6 py-4 text-white font-semibold">Number of NFT Purchase</th>
                   <th className="px-6 py-4 text-white font-semibold">Last Payment</th>
                 </tr>
               </thead>
@@ -220,14 +219,17 @@ export default function LevelIncomePage() {
                             <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-green-500/20 text-green-400 border border-green-500/30`}>L{lvl}</span>
                           </td>
                           <td className="px-6 py-4 text-white font-medium">{entry.referral?.name || "Unknown"}</td>
-                          <td className="px-6 py-4" style={{color: 'rgba(255,255,255,0.8)'}}>{entry.referral?.memberId || "-"}</td>
-                          <td className="px-6 py-4" style={{color: 'rgba(255,255,255,0.8)'}}>{entry.referral?.email || "-"}</td>
+                          <td className="px-6 py-4 text-center">
+                            <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-blue-500/20 text-blue-400 border border-blue-500/30">
+                              {entry.nftPurchaseCount || 1}
+                            </span>
+                          </td>
                           <td className="px-6 py-4" style={{color: 'rgba(255,255,255,0.8)'}}>{formatDate(entry.lastPayment)}</td>
                         </tr>
                       ))
                     : [
                         <tr key={`empty-${lvl}`}>
-                          <td className="px-6 py-4 text-center" colSpan={6} style={{color: 'rgba(255,255,255,0.8)'}}>
+                          <td className="px-6 py-4 text-center" colSpan={5} style={{color: 'rgba(255,255,255,0.8)'}}>
                             No referrals at Level {lvl}
                           </td>
                         </tr>
