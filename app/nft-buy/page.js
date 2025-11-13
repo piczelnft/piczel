@@ -397,17 +397,19 @@ export default function NFTBuyPage() {
             </p>
           </div>
         </div>
-          {/* Purchase Wallet */}
-          <div className="p-4 sm:p-6 rounded-xl sm:rounded-2xl border hover-lift-enhanced" style={{backgroundColor:'rgba(0,0,0,0.1)', backdropFilter:'blur(10px)', borderColor:'var(--default-border)'}}>
-            <div className="flex items-center justify-between mb-3">
-              <h3 className="text-lg sm:text-xl font-bold text-white">Total Purchase Amount</h3>
-              <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center" style={{backgroundColor:'rgba(59,130,246,0.2)', border:'1px solid rgba(59,130,246,0.3)'}}>
-                <svg className="w-4 h-4 sm:w-5 sm:h-5 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          {/* Bottom Summary Cards Row */}
+          <div className="flex flex-col sm:flex-row gap-3 mb-6">
+            {/* Purchase Wallet */}
+            <div className="flex-1 p-2 sm:p-3 rounded-lg sm:rounded-xl border hover-lift-enhanced" style={{backgroundColor:'rgba(0,0,0,0.07)', backdropFilter:'blur(6px)', borderColor:'var(--default-border)'}}>
+            <div className="flex items-center justify-between mb-2">
+              <h3 className="text-base sm:text-lg font-semibold text-white">Total Purchase Amount</h3>
+              <div className="w-6 h-6 sm:w-8 sm:h-8 rounded-full flex items-center justify-center" style={{backgroundColor:'rgba(59,130,246,0.15)', border:'1px solid rgba(59,130,246,0.2)'}}>
+                <svg className="w-3 h-3 sm:w-4 sm:h-4 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
                 </svg>
               </div>
             </div>
-            <div className="text-2xl sm:text-3xl font-bold text-blue-400 mb-2">
+            <div className="text-xl sm:text-2xl font-bold text-blue-400 mb-1">
               ${(() => {
                 // Only count A1-J1 NFTs (number = 1)
                 const a1J1Purchases = nftPurchases.filter(p => {
@@ -429,17 +431,17 @@ export default function NFTBuyPage() {
             </p>
           </div>
 
-          {/* Holding Wallet */}
-          <div className="p-4 sm:p-6 rounded-xl sm:rounded-2xl border hover-lift-enhanced" style={{backgroundColor:'rgba(0,0,0,0.1)', backdropFilter:'blur(10px)', borderColor:'var(--default-border)'}}>
-            <div className="flex items-center justify-between mb-3">
-              <h3 className="text-lg sm:text-xl font-bold text-white">Holding Wallet</h3>
-              <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center" style={{backgroundColor:'rgba(34,197,94,0.2)', border:'1px solid rgba(34,197,94,0.3)'}}>
-                <svg className="w-4 h-4 sm:w-5 sm:h-5 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            {/* Holding Wallet */}
+            <div className="flex-1 p-2 sm:p-3 rounded-lg sm:rounded-xl border hover-lift-enhanced" style={{backgroundColor:'rgba(0,0,0,0.07)', backdropFilter:'blur(6px)', borderColor:'var(--default-border)'}}>
+            <div className="flex items-center justify-between mb-2">
+              <h3 className="text-base sm:text-lg font-semibold text-white">Holding Wallet</h3>
+              <div className="w-6 h-6 sm:w-8 sm:h-8 rounded-full flex items-center justify-center" style={{backgroundColor:'rgba(34,197,94,0.15)', border:'1px solid rgba(34,197,94,0.2)'}}>
+                <svg className="w-3 h-3 sm:w-4 sm:h-4 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
                 </svg>
               </div>
             </div>
-            <div className="text-2xl sm:text-3xl font-bold text-green-400 mb-2">
+            <div className="text-xl sm:text-2xl font-bold text-green-400 mb-1">
               ${(() => {
                 // Only count A1-J1 NFTs (number = 1) and filter out paid ones
                 const unpaidA1J1Purchases = nftPurchases.filter(p => {
@@ -487,17 +489,17 @@ export default function NFTBuyPage() {
             </div>
           </div>
 
-          {/* Total NFT Profit */}
-          <div className="p-4 sm:p-6 rounded-xl sm:rounded-2xl border hover-lift-enhanced" style={{backgroundColor:'rgba(0,0,0,0.1)', backdropFilter:'blur(10px)', borderColor:'var(--default-border)'}}>
-            <div className="flex items-center justify-between mb-3">
-              <h3 className="text-lg sm:text-xl font-bold text-white">Total NFT Profit</h3>
-              <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center" style={{backgroundColor:'rgba(168,85,247,0.2)', border:'1px solid rgba(168,85,247,0.3)'}}>
-                <svg className="w-4 h-4 sm:w-5 sm:h-5 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            {/* Total NFT Profit */}
+            <div className="flex-1 p-2 sm:p-3 rounded-lg sm:rounded-xl border hover-lift-enhanced" style={{backgroundColor:'rgba(0,0,0,0.07)', backdropFilter:'blur(6px)', borderColor:'var(--default-border)'}}>
+            <div className="flex items-center justify-between mb-2">
+              <h3 className="text-base sm:text-lg font-semibold text-white">Total NFT Profit</h3>
+              <div className="w-6 h-6 sm:w-8 sm:h-8 rounded-full flex items-center justify-center" style={{backgroundColor:'rgba(168,85,247,0.15)', border:'1px solid rgba(168,85,247,0.2)'}}>
+                <svg className="w-3 h-3 sm:w-4 sm:h-4 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
                 </svg>
               </div>
             </div>
-            <div className="text-2xl sm:text-3xl font-bold text-purple-400 mb-2">
+            <div className="text-xl sm:text-2xl font-bold text-purple-400 mb-1">
               ${(() => {
                 // Calculate total profit from paid out NFTs
                 // For A1-J1 NFTs: Purchase = $100, Holding = $105, Profit = $5 per NFT
@@ -542,6 +544,7 @@ export default function NFTBuyPage() {
                   })()}
                 </div>
               </div>
+            </div>
             </div>
           </div>
         </div>
