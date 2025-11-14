@@ -27,7 +27,7 @@ export default function ConditionalLayout({ children }) {
       <Navbar />
       {/* <CryptoPriceTicker /> */}
       <LayoutWithSidebar>
-        <main className="pt-28">{children}</main>
+        <main className="pt-16">{children}</main>
       </LayoutWithSidebar>
     </>
   );

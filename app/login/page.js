@@ -135,7 +135,7 @@ function LoginForm() {
   // Show loading while checking authentication
   if (authLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#1565c0] via-[#1976d2] to-[#2196f3]">
         <div className="text-white text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white mx-auto mb-4"></div>
           <p>Loading...</p>
@@ -154,7 +154,7 @@ function LoginForm() {
       className="min-h-screen flex"
       style={{
         background:
-          "linear-gradient(to bottom right, var(--default-body-bg-color) 0%, var(--theme-bg-gradient) 25%, var(--default-body-bg-color) 100%)",
+          "linear-gradient(135deg, #1565c0 0%, #1976d2 50%, #2196f3 100%)",
         fontFamily: "var(--default-font-family)",
       }}
     >
@@ -169,23 +169,23 @@ function LoginForm() {
           <div className="particle" style={{ top: "80%", left: "70%" }}></div>
           <div className="particle" style={{ top: "40%", left: "90%" }}></div>
 
-          {/* Gradient orbs */}
-          <div className="absolute -top-40 -right-40 w-80 h-80 bg-gradient-to-br from-cyan-500/10 to-teal-500/10 rounded-full blur-3xl animate-pulse"></div>
-          <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-gradient-to-br from-teal-500/10 to-cyan-400/10 rounded-full blur-3xl animate-pulse delay-1000"></div>
-          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-gradient-to-br from-emerald-700/5 to-teal-600/5 rounded-full blur-3xl animate-float"></div>
+          {/* Gradient orbs (blue theme) */}
+          <div className="absolute -top-40 -right-40 w-80 h-80 bg-gradient-to-br from-[#1976d2]/20 to-[#2196f3]/20 rounded-full blur-3xl animate-pulse"></div>
+          <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-gradient-to-br from-[#2196f3]/20 to-[#1565c0]/20 rounded-full blur-3xl animate-pulse delay-1000"></div>
+          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-gradient-to-br from-[#1565c0]/10 to-[#1976d2]/10 rounded-full blur-3xl animate-float"></div>
         </div>
 
         {/* Trading Visualization */}
         <div className="relative z-10 flex flex-col justify-center items-center w-full px-8">
           <div className="text-center mb-12">
-            <h1 className="text-5xl font-bold text-white gradient-text-enhanced mb-4 animate-fadeInUp">
+            <h1 className="text-5xl font-bold text-white mb-4 animate-fadeInUp">
               PICZEL
             </h1>
             <p
               className="text-xl text-white/80 animate-fadeInUp"
               style={{ animationDelay: "0.2s" }}
             >
-              Professional Crypto Trading Platform
+              Professional NFT Trading Platform
             </p>
           </div>
 
@@ -196,15 +196,15 @@ function LoginForm() {
               className="card-enhanced rounded-xl p-6 animate-fadeInUp"
               style={{
                 animationDelay: "0.4s",
-                backgroundColor: "rgba(0, 0, 0, 0.1)",
+                backgroundColor: "rgba(21, 101, 192, 0.15)",
                 backdropFilter: "blur(10px)",
-                borderColor: "var(--default-border)",
+                borderColor: "#1565c0",
               }}
             >
               <div className="flex justify-between items-center mb-4">
                 <div>
                   <div className="text-white font-semibold">BTC/USD</div>
-                  <div className="text-green-400 text-sm">+2.45%</div>
+                  <div className="text-blue-400 text-sm">+2.45%</div>
                 </div>
                 <div className="text-white font-bold text-xl">$67,234.56</div>
               </div>
@@ -216,22 +216,22 @@ function LoginForm() {
                 >
                   <path
                     d="M0,70 L20,50 L40,80 L60,30 L80,90 L100,40 L120,85 L140,20 L160,70 L180,45 L200,65"
-                    stroke="url(#tradingGradient)"
+                    stroke="url(#tradingGradientBlue)"
                     strokeWidth="3"
                     fill="none"
                     className="animate-zigzag"
                   />
                   <defs>
                     <linearGradient
-                      id="tradingGradient"
+                      id="tradingGradientBlue"
                       x1="0%"
                       y1="0%"
                       x2="100%"
                       y2="0%"
                     >
-                      <stop offset="0%" stopColor="rgb(34, 197, 94)" />
-                      <stop offset="50%" stopColor="rgb(59, 130, 246)" />
-                      <stop offset="100%" stopColor="rgb(34, 197, 94)" />
+                      <stop offset="0%" stopColor="#2196f3" />
+                      <stop offset="50%" stopColor="#1565c0" />
+                      <stop offset="100%" stopColor="#1976d2" />
                     </linearGradient>
                   </defs>
                 </svg>
@@ -246,24 +246,24 @@ function LoginForm() {
               <div
                 className="card-enhanced rounded-lg p-4 text-center"
                 style={{
-                  backgroundColor: "rgba(0, 0, 0, 0.1)",
+                  backgroundColor: "rgba(21, 101, 192, 0.15)",
                   backdropFilter: "blur(10px)",
-                  borderColor: "var(--default-border)",
+                  borderColor: "#1565c0",
                 }}
               >
                 <div className="text-white font-bold text-lg">24h Volume</div>
-                <div className="text-green-400 font-semibold">$2.4B</div>
+                <div className="text-blue-400 font-semibold">$2.4B</div>
               </div>
               <div
                 className="card-enhanced rounded-lg p-4 text-center"
                 style={{
-                  backgroundColor: "rgba(0, 0, 0, 0.1)",
+                  backgroundColor: "rgba(21, 101, 192, 0.15)",
                   backdropFilter: "blur(10px)",
-                  borderColor: "var(--default-border)",
+                  borderColor: "#1565c0",
                 }}
               >
                 <div className="text-white font-bold text-lg">Active Users</div>
-                <div className="text-blue-400 font-semibold">125K+</div>
+                <div className="text-blue-200 font-semibold">125K+</div>
               </div>
             </div>
 
@@ -273,15 +273,15 @@ function LoginForm() {
               style={{ animationDelay: "0.8s" }}
             >
               <div className="flex items-center space-x-3 text-white/80">
-                <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
+                <div className="w-2 h-2 bg-blue-400 rounded-full animate-pulse"></div>
                 <span>Real-time Market Data</span>
               </div>
               <div className="flex items-center space-x-3 text-white/80">
-                <div className="w-2 h-2 bg-blue-400 rounded-full animate-pulse"></div>
+                <div className="w-2 h-2 bg-blue-200 rounded-full animate-pulse"></div>
                 <span>Advanced Trading Tools</span>
               </div>
               <div className="flex items-center space-x-3 text-white/80">
-                <div className="w-2 h-2 bg-purple-400 rounded-full animate-pulse"></div>
+                <div className="w-2 h-2 bg-white rounded-full animate-pulse"></div>
                 <span>Secure & Fast Execution</span>
               </div>
             </div>
@@ -293,25 +293,22 @@ function LoginForm() {
       <div className="w-full lg:w-1/2 flex items-center justify-center px-4 py-12">
         <div className="max-w-md w-full space-y-8">
           <div className="text-center">
-            <h2 className="mt-6 text-3xl font-bold text-white gradient-text-enhanced animate-fadeInUp">
+            <h2 className="mt-6 text-3xl font-bold text-white animate-fadeInUp">
               {prefilledInfo
                 ? `Welcome ${prefilledInfo.name}!`
                 : "Welcome Back"}
             </h2>
             <p
-              className="mt-2 text-sm animate-fadeInUp"
-              style={{
-                color: "rgba(255, 255, 255, 0.7)",
-                animationDelay: "0.2s",
-              }}
+              className="mt-2 text-sm animate-fadeInUp text-white"
+              style={{ animationDelay: "0.2s" }}
             >
               {prefilledInfo
                 ? "Your account has been created by an admin"
-                : "Sign in to your PICZEL account"}
+                : "Sign in to your PICZEL account, PICZEL"}
             </p>
             {prefilledInfo && (
-              <div className="mt-3 px-4 py-2 bg-blue-500/20 border border-blue-500/30 rounded-lg">
-                <p className="text-sm text-blue-300">
+              <div className="mt-3 px-4 py-2 bg-blue-50 border border-blue-200 rounded-lg">
+                <p className="text-sm text-blue-800">
                   ✨ Your account is ready! Just enter your password below.
                 </p>
               </div>
@@ -319,7 +316,7 @@ function LoginForm() {
           </div>
 
           <div
-            className="card-enhanced rounded-xl shadow-2xl p-8 animate-fadeInUp"
+            className="rounded-xl shadow-2xl p-8 animate-fadeInUp bg-white border border-blue-200"
             style={{ animationDelay: "0.4s" }}
           >
             {/* Wallet Connect Optional */}
@@ -328,8 +325,8 @@ function LoginForm() {
                 <button
                   type="button"
                   onClick={connectWallet}
-                  className="w-full flex items-center justify-center px-6 py-3 rounded-lg text-sm font-medium text-white transition-all duration-200 hover-lift-enhanced"
-                  style={{ backgroundColor: "rgba(29, 68, 67, 0.8)", border: "1px solid var(--default-border)" }}
+                  className="w-full flex items-center justify-center px-6 py-3 rounded-lg text-sm font-medium text-white transition-all duration-200"
+                  style={{ backgroundColor: "#1565c0", border: "1px solid #1976d2" }}
                 >
                   <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
@@ -337,16 +334,16 @@ function LoginForm() {
                   Connect Wallet (optional)   
                 </button>
               ) : (
-                <div className="flex items-center justify-between px-4 py-3 rounded-lg" style={{ backgroundColor: "rgba(0,0,0,0.1)", border: "1px solid var(--default-border)" }}>
-                  <div className="text-sm" style={{ color: "rgba(255,255,255,0.9)" }}>
+                <div className="flex items-center justify-between px-4 py-3 rounded-lg" style={{ backgroundColor: "#e3f2fd", border: "1px solid #1976d2" }}>
+                  <div className="text-sm text-[#1565c0]">
                     Wallet connected
                   </div>
-                  <div className="text-xs font-mono" style={{ color: "rgba(255,255,255,0.7)" }}>
+                  <div className="text-xs font-mono text-[#1976d2]">
                     {walletAddress.slice(0,6)}...{walletAddress.slice(-4)}
                   </div>
                 </div>
               )}
-              <p className="mt-2 text-xs" style={{ color: "rgba(255,255,255,0.6)" }}>
+              <p className="mt-2 text-xs text-[#1976d2]">
                 Wallet connection is optional. You can sign in without connecting a wallet.
               </p>
             </div>
@@ -381,8 +378,7 @@ function LoginForm() {
               <div>
                 <label
                   htmlFor="email"
-                  className="block text-sm font-medium mb-2"
-                  style={{ color: "rgba(255, 255, 255, 0.8)" }}
+                  className="block text-sm font-medium mb-2 text-blue-900"
                 >
                   Email Address
                 </label>
@@ -393,13 +389,7 @@ function LoginForm() {
                   required
                   value={formData.email}
                   onChange={handleChange}
-                  className="w-full px-4 py-3 rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:border-transparent"
-                  style={{
-                    backgroundColor: "rgba(29, 68, 67, 0.8)",
-                    border: "1px solid var(--default-border)",
-                    color: "rgb(var(--default-text-color-rgb))",
-                    focusRingColor: "var(--primary-color)",
-                  }}
+                  className="w-full px-4 py-3 rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:border-blue-400 bg-white border border-blue-200 text-blue-900 placeholder-blue-400"
                   placeholder="Enter your email"
                 />
                 {errors.email && (
@@ -415,8 +405,7 @@ function LoginForm() {
               <div>
                 <label
                   htmlFor="password"
-                  className="block text-sm font-medium mb-2"
-                  style={{ color: "rgba(255, 255, 255, 0.8)" }}
+                  className="block text-sm font-medium mb-2 text-blue-900"
                 >
                   Password
                 </label>
@@ -428,13 +417,7 @@ function LoginForm() {
                     required
                     value={formData.password}
                     onChange={handleChange}
-                    className="w-full px-4 py-3 pr-12 rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:border-transparent"
-                    style={{
-                      backgroundColor: "rgba(29, 68, 67, 0.8)",
-                      border: "1px solid var(--default-border)",
-                      color: "rgb(var(--default-text-color-rgb))",
-                      focusRingColor: "var(--primary-color)",
-                    }}
+                    className="w-full px-4 py-3 pr-12 rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:border-blue-400 bg-white border border-blue-200 text-blue-900 placeholder-blue-400"
                     placeholder="Enter your password"
                   />
                   <button
@@ -499,14 +482,13 @@ function LoginForm() {
                   />
                   <label
                     htmlFor="remember-me"
-                    className="ml-2 block text-sm"
-                    style={{ color: "rgba(255, 255, 255, 0.7)" }}
+                    className="ml-2 block text-sm text-black"
                   >
                     Remember me
                   </label>
                 </div>
 
-                <div className="text-sm">
+                {/* <div className="text-sm">
                   <Link
                     href="/forgot-password"
                     className="transition-colors duration-200"
@@ -514,14 +496,14 @@ function LoginForm() {
                   >
                     Forgot your password?
                   </Link>
-                </div>
+                </div> */}
               </div>
 
               <div>
                 <button
                   type="submit"
                   disabled={isLoading}
-                  className="btn-enhanced w-full flex justify-center py-3 px-4 rounded-lg text-sm font-medium text-white transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="w-full flex justify-center py-3 px-4 rounded-lg text-sm font-medium text-white transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed bg-[#1565c0] hover:bg-[#1976d2] shadow"
                 >
                   {isLoading ? (
                     <div className="flex items-center">
@@ -535,16 +517,12 @@ function LoginForm() {
               </div>
 
               <div className="text-center">
-                <span
-                  className="transition-colors duration-200"
-                  style={{ color: "rgba(255, 255, 255, 0.7)" }}
-                >
+                <span className="transition-colors duration-200 text-[#1565c0]">
                   Don&apos;t have an account?{" "}
                 </span>
                 <Link
                   href="/signup"
-                  className="font-medium transition-colors duration-200"
-                  style={{ color: "var(--primary-color)" }}
+                  className="font-medium transition-colors duration-200 text-[#1565c0]"
                 >
                   Create one here
                 </Link>
@@ -561,7 +539,7 @@ function LoginForm() {
 export default function LoginPage() {
   return (
     <Suspense fallback={
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#1565c0] via-[#1976d2] to-[#2196f3]">
         <div className="text-white text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white mx-auto mb-4"></div>
           <p>Loading...</p>

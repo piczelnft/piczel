@@ -145,8 +145,8 @@ export default function Home() {
   // Show loading while checking authentication
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
-        <div className="text-white text-center">
+      <div className="min-h-screen flex items-center justify-center bg-white">
+        <div className="text-black text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white mx-auto mb-4"></div>
           <p>Loading...</p>
         </div>
@@ -161,8 +161,8 @@ export default function Home() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
-        <div className="text-white text-center">
+      <div className="min-h-screen flex items-center justify-center bg-white">
+        <div className="text-black text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white mx-auto mb-4"></div>
           <p>Loading Dashboard...</p>
         </div>
@@ -172,8 +172,8 @@ export default function Home() {
 
   if (error) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
-        <div className="text-white text-center max-w-md">
+      <div className="min-h-screen flex items-center justify-center bg-white">
+        <div className="text-black text-center max-w-md">
           <p className="text-red-400 mb-4">Error: {error}</p>
           <div className="space-y-2 mb-4">
             <button 
@@ -259,21 +259,9 @@ export default function Home() {
     userEmail: user?.email || "john.doe@example.com", // Fallback for user email
   };
   return (
-    <div className="relative overflow-hidden">
+    <div className="relative overflow-hidden bg-white min-h-screen">
         {/* Animated Background */}
-        <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          {/* Floating particles */}
-          <div className="particle" style={{top: '10%', left: '10%'}}></div>
-          <div className="particle" style={{top: '20%', left: '80%'}}></div>
-          <div className="particle" style={{top: '60%', left: '20%'}}></div>
-          <div className="particle" style={{top: '80%', left: '70%'}}></div>
-          <div className="particle" style={{top: '40%', left: '90%'}}></div>
-          
-          {/* Gradient orbs */}
-          <div className="absolute -top-40 -right-40 w-80 h-80 bg-gradient-to-br from-cyan-500/10 to-teal-500/10 rounded-full blur-3xl animate-pulse"></div>
-          <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-gradient-to-br from-teal-500/10 to-cyan-400/10 rounded-full blur-3xl animate-pulse delay-1000"></div>
-          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-gradient-to-br from-emerald-700/5 to-teal-600/5 rounded-full blur-3xl animate-float"></div>
-        </div>
+        {/* Removed animated background for clean white look */}
 
         {/* Hero Section */}
         <div className="relative z-10 pt-4 pb-2">
@@ -303,9 +291,9 @@ export default function Home() {
             {/* Sponsor Card */}
             {data.sponsorInfo && (
               <div className="lg:col-span-2">
-                <div className="p-6 hover-lift-enhanced animate-fadeInUp glow-border-default rounded-2xl border" style={{animationDelay: '1.2s', backgroundColor: 'rgba(0,0,0,0.06)', borderColor: 'var(--default-border)'}}>
+                <div className="p-6 rounded-2xl border" style={{backgroundColor: '#1565c0', color: '#fff', border: 'none'}}>
                   <div className="flex flex-col items-center justify-center">
-                    <div className="text-sm font-semibold gradient-text-neon mb-1" style={{color: 'var(--primary-color)'}}>
+                    <div className="text-sm font-semibold mb-1 text-white">
                       Sponsored by: {data.sponsorInfo.name || 'Unknown'}
                     </div>
                     <div className="text-xs text-gray-300">
@@ -318,7 +306,7 @@ export default function Home() {
 
             {/* Referral Card */}
             <div className="lg:col-span-1">
-              <div className="p-6 hover-lift-enhanced animate-fadeInUp glow-border-default rounded-2xl border" style={{animationDelay: '1.2s', backgroundColor: 'rgba(0,0,0,0.06)', borderColor: 'var(--default-border)'}}>
+              <div className="p-6 rounded-2xl border" style={{backgroundColor: '#1565c0', color: '#fff', border: 'none'}}>
                 <div className="flex flex-col items-center gap-3">
                   <div className="w-full text-center">
                     <div className="text-sm font-semibold text-white mb-1">Referral Link</div>
@@ -352,11 +340,11 @@ export default function Home() {
          {/* Dashboard Cards Section */}
          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6 mb-8">
           {/* Member ID */}
-          <div className="p-6 hover-lift-enhanced animate-fadeInUp glow-border-default relative rounded-2xl border" style={{animationDelay: '0.1s', backgroundColor: 'rgba(0, 0, 0, 0.1)', backdropFilter: 'blur(10px)', borderColor: 'var(--default-border)'}}>
+          <div className="p-6 hover-lift-enhanced animate-fadeInUp rounded-2xl border" style={{backgroundColor: '#1565c0', color: '#fff', border: 'none'}}>
             <div className="text-center relative">
-              <div className="absolute -top-2 -right-2 w-3 h-3 rounded-full animate-pulse" style={{backgroundColor: 'var(--primary-color)'}}></div>
+              <div className="absolute -top-2 -right-2 w-3 h-3 "></div>
               <div className="text-sm mb-2 font-medium" style={{color: 'rgba(255, 255, 255, 0.7)'}}>Member ID</div>
-              <div className="text-white font-bold text-lg gradient-text-neon">{data.memberId}</div>
+              <div className="text-white font-bold text-lg">{data.memberId}</div>
             </div>
             {/* Floating PICZEL SWAP Button */}
             {/* <div className="absolute -top-3 -left-3 z-10">
@@ -373,137 +361,135 @@ export default function Home() {
           </div>
 
           {/* User Name */}
-          <div className="p-6 hover-lift-enhanced animate-fadeInUp glow-border-default relative rounded-2xl border" style={{animationDelay: '0.1s', backgroundColor: 'rgba(0, 0, 0, 0.1)', backdropFilter: 'blur(10px)', borderColor: 'var(--default-border)'}}>
+          <div className="p-6 hover-lift-enhanced animate-fadeInUp rounded-2xl border" style={{backgroundColor: '#1565c0', color: '#fff', border: 'none'}}>
             <div className="text-center relative">
               <div className="absolute -top-2 -right-2 w-3 h-3 rounded-full gradient-text-neon" style={{backgroundColor: 'rgb(74, 222, 255)'}}></div>
               <div className="text-sm mb-2 font-medium" style={{color: 'rgba(255, 255, 255, 0.7)'}}>User Name</div>
-              <div className="font-bold text-lg gradient-text-neon" style={{color: 'rgb(74, 222, 255)'}}>{data.userName}</div>
+              <div className="font-bold text-lg text-white">{data.userName}</div>
             </div>
           </div>
 
           {/* User Email */}
-          <div className="p-6 hover-lift-enhanced animate-fadeInUp glow-border-default rounded-2xl border" style={{animationDelay: '0.3s', backgroundColor: 'rgba(0, 0, 0, 0.1)', backdropFilter: 'blur(10px)', borderColor: 'var(--default-border)'}}>
+          <div className="p-6 hover-lift-enhanced animate-fadeInUp rounded-2xl border" style={{backgroundColor: '#1565c0', color: '#fff', border: 'none'}}>
             <div className="text-center relative">
               <div className="absolute -top-2 -right-2 w-3 h-3 rounded-full gradient-text-neon" style={{backgroundColor: 'rgb(192, 132, 252)'}}></div>
               <div className="text-sm mb-2 font-medium" style={{color: 'rgba(255, 255, 255, 0.7)'}}>Email</div>
-              <div className="font-bold text-lg gradient-text-neon" style={{color: 'rgb(192, 132, 252)'}}>{data.userEmail}</div>
+              <div className="font-bold text-lg text-white">{data.userEmail}</div>
             </div>
           </div>
 
           {/* Status */}
-          <div className="p-6 hover-lift-enhanced animate-fadeInUp glow-border-default rounded-2xl border" style={{animationDelay: '0.2s', backgroundColor: 'rgba(0, 0, 0, 0.1)', backdropFilter: 'blur(10px)', borderColor: 'var(--default-border)'}}>
+          <div className="p-6 hover-lift-enhanced animate-fadeInUp rounded-2xl border" style={{backgroundColor: '#1565c0', color: '#fff', border: 'none'}}>
             <div className="text-center relative">
               <div className="absolute -top-2 -right-2 w-3 h-3 rounded-full gradient-text-neon" style={{backgroundColor: 'rgb(var(--success-rgb))'}}></div>
               <div className="text-sm mb-2 font-medium" style={{color: 'rgba(255, 255, 255, 0.7)'}}>Status</div>
-              <div className="font-bold text-lg gradient-text-neon" style={{color: 'rgb(var(--success-rgb))'}}>{data.status}</div>
+              <div className="font-bold text-lg text-white">{data.status}</div>
             </div>
           </div>
 
           {/* Total Team */}
-          <div className="p-6 hover-lift-enhanced animate-fadeInUp glow-border-default rounded-2xl border" style={{animationDelay: '0.4s', backgroundColor: 'rgba(0, 0, 0, 0.1)', backdropFilter: 'blur(10px)', borderColor: 'var(--default-border)'}}>
+          <div className="p-6 hover-lift-enhanced animate-fadeInUp rounded-2xl border" style={{animationDelay: '0.4s', backgroundColor: '#1565c0', color: '#fff', border: 'none'}}>
             <div className="text-center relative">
               <div className="absolute -top-2 -right-2 w-3 h-3 rounded-full gradient-text-neon" style={{backgroundColor: 'rgb(var(--info-rgb))'}}></div>
               <div className="text-sm mb-2 font-medium" style={{color: 'rgba(255, 255, 255, 0.7)'}}>Total Members</div>
-              <div className="font-bold text-lg gradient-text-neon" style={{color: 'rgb(var(--info-rgb))'}}>{data.totalTeam}</div>
+              <div className="font-bold text-lg text-white">{data.totalTeam}</div>
             </div>
           </div>
 
           {/* My Directs */}
-          <div className="p-6 hover-lift-enhanced animate-fadeInUp glow-border-default rounded-2xl border" style={{animationDelay: '0.5s', backgroundColor: 'rgba(0, 0, 0, 0.1)', backdropFilter: 'blur(10px)', borderColor: 'var(--default-border)'}}>
+          <div className="p-6 hover-lift-enhanced animate-fadeInUp rounded-2xl border" style={{animationDelay: '0.5s', backgroundColor: '#1565c0', color: '#fff', border: 'none'}}>
             <div className="text-center relative">
               <div className="absolute -top-2 -right-2 w-3 h-3 rounded-full gradient-text-neon" style={{backgroundColor: 'rgb(143, 0, 255)'}}></div>
               <div className="text-sm mb-2 font-medium" style={{color: 'rgba(255, 255, 255, 0.7)'}}>Direct Members</div>
-              <div className="font-bold text-lg gradient-text-neon" style={{color: 'rgb(143, 0, 255)'}}>{data.myDirects}</div>
+              <div className="font-bold text-lg text-white">{data.myDirects}</div>
             </div>
           </div>
 
           {/* Wallet */}
-          <div className="p-6 hover-lift-enhanced animate-fadeInUp glow-border-default rounded-2xl border" style={{animationDelay: '0.6s', backgroundColor: 'rgba(0, 0, 0, 0.1)', backdropFilter: 'blur(10px)', borderColor: 'var(--default-border)'}}>
+          <div className="p-6 hover-lift-enhanced animate-fadeInUp rounded-2xl border" style={{animationDelay: '0.6s', backgroundColor: '#1565c0', color: '#fff', border: 'none'}}>
             <div className="text-center relative">
               <div className="absolute -top-2 -right-2 w-3 h-3 rounded-full gradient-text-neon" style={{backgroundColor: 'rgb(var(--success-rgb))'}}></div>
               <div className="text-sm mb-2 font-medium" style={{color: 'rgba(255, 255, 255, 0.7)'}}>Total Available Balance</div>
-              <div className="font-bold text-lg gradient-text-neon" style={{color: 'rgb(var(--success-rgb))'}}>${data.wallet}</div>
+              <div className="font-bold text-lg text-white">${data.wallet}</div>
             </div>
           </div>
 
           {/* Total NFT Purchases */}
-          <div className="p-6 hover-lift-enhanced animate-fadeInUp glow-border-default rounded-2xl border" style={{animationDelay: '0.7s', backgroundColor: 'rgba(0, 0, 0, 0.1)', backdropFilter: 'blur(10px)', borderColor: 'var(--default-border)'}}>
+          <div className="p-6 hover-lift-enhanced animate-fadeInUp rounded-2xl border" style={{animationDelay: '0.7s', backgroundColor: '#1565c0', color: '#fff', border: 'none'}}>
             <div className="text-center relative">
               <div className="absolute -top-2 -right-2 w-3 h-3 rounded-full gradient-text-neon" style={{backgroundColor: 'rgb(6, 182, 212)'}}></div>
               <div className="text-sm mb-2 font-medium" style={{color: 'rgba(255, 255, 255, 0.7)'}}>Total NFT Purchases</div>
-              <div className="font-bold text-lg gradient-text-neon" style={{color: 'rgb(6, 182, 212)'}}>{data.totalNftPurchases || 0}</div>
+              <div className="font-bold text-lg text-white">{data.totalNftPurchases || 0}</div>
             </div>
           </div>
 
           {/* Total NFT Purchase Amount */}
-          <div className="p-6 hover-lift-enhanced animate-fadeInUp glow-border-default relative rounded-2xl border" style={{animationDelay: '0.1s', backgroundColor: 'rgba(0, 0, 0, 0.1)', backdropFilter: 'blur(10px)', borderColor: 'var(--default-border)'}}>
+          <div className="p-6 hover-lift-enhanced animate-fadeInUp relative rounded-2xl border" style={{animationDelay: '0.1s', backgroundColor: '#1565c0', color: '#fff', border: 'none'}}>
             <div className="text-center relative">
               <div className="absolute -top-2 -right-2 w-3 h-3 rounded-full gradient-text-neon" style={{backgroundColor: 'rgb(99, 102, 241)'}}></div>
               <div className="text-sm mb-2 font-medium" style={{color: 'rgba(255, 255, 255, 0.7)'}}>Total purchased amount</div>
-              <div className="font-bold text-lg gradient-text-neon" style={{color: 'rgb(99, 102, 241)'}}>${data.totalNftPurchaseAmount || 0}</div>
+              <div className="font-bold text-lg text-white">${data.totalNftPurchaseAmount || 0}</div>
             </div>
           </div>
 
           {/* Total Level Income */}
-          <div className="p-6 hover-lift-enhanced animate-fadeInUp glow-border-default rounded-2xl border" style={{animationDelay: '0.8s', backgroundColor: 'rgba(0, 0, 0, 0.1)', backdropFilter: 'blur(10px)', borderColor: 'var(--default-border)'}}>
+          <div className="p-6 hover-lift-enhanced animate-fadeInUp rounded-2xl border" style={{animationDelay: '0.8s', backgroundColor: '#1565c0', color: '#fff', border: 'none'}}>
             <div className="text-center relative">
               <div className="absolute -top-2 -right-2 w-3 h-3 rounded-full gradient-text-neon" style={{backgroundColor: 'rgb(16, 185, 129)'}}></div>
               <div className="text-sm mb-2 font-medium" style={{color: 'rgba(255, 255, 255, 0.7)'}}>Total Level Income</div>
-              <div className="font-bold text-lg gradient-text-neon" style={{color: 'rgb(16, 185, 129)'}}>${formatCurrency4Digits(data.levelIncome ?? data.totalLevelIncome ?? 0)}</div>
+              <div className="font-bold text-lg text-white">${formatCurrency4Digits(data.levelIncome ?? data.totalLevelIncome ?? 0)}</div>
             </div>
           </div>
 
           {/* Total Withdrawal Amount */}
-          <div className="p-6 hover-lift-enhanced animate-fadeInUp glow-border-default rounded-2xl border" style={{animationDelay: '0.9s', backgroundColor: 'rgba(0, 0, 0, 0.1)', backdropFilter: 'blur(10px)', borderColor: 'var(--default-border)'}}>
+          <div className="p-6 hover-lift-enhanced animate-fadeInUp rounded-2xl border" style={{animationDelay: '0.9s', backgroundColor: '#1565c0', color: '#fff', border: 'none'}}>
             <div className="text-center relative">
               <div className="absolute -top-2 -right-2 w-3 h-3 rounded-full gradient-text-neon" style={{backgroundColor: 'rgb(249, 115, 22)'}}></div>
               <div className="text-sm mb-2 font-medium" style={{color: 'rgba(255, 255, 255, 0.7)'}}>Total Withdrawal Amount</div>
-              <div className="font-bold text-lg gradient-text-neon" style={{color: 'rgb(249, 115, 22)'}}>${data.totalWithdrawalAmount || 0}</div>
+              <div className="font-bold text-lg text-white">${data.totalWithdrawalAmount || 0}</div>
             </div>
           </div>
 
           {/* Total Spot Income */}
-          <div className="p-6 hover-lift-enhanced animate-fadeInUp glow-border-default rounded-2xl border" style={{animationDelay: '1.0s', backgroundColor: 'rgba(0, 0, 0, 0.1)', backdropFilter: 'blur(10px)', borderColor: 'var(--default-border)'}}>
+          <div className="p-6 hover-lift-enhanced animate-fadeInUp rounded-2xl border" style={{animationDelay: '1.0s', backgroundColor: '#1565c0', color: '#fff', border: 'none'}}>
             <div className="text-center relative">
               <div className="absolute -top-2 -right-2 w-3 h-3 rounded-full gradient-text-neon" style={{backgroundColor: 'rgb(139, 69, 19)'}}></div>
               <div className="text-sm mb-2 font-medium" style={{color: 'rgba(255, 255, 255, 0.7)'}}>Total Spot Income</div>
-              <div className="font-bold text-lg gradient-text-neon" style={{color: 'rgb(139, 69, 19)'}}>${data.totalSpotIncome || 0}</div>
+              <div className="font-bold text-lg text-white">${data.totalSpotIncome || 0}</div>
             </div>
           </div>
 
           {/* Direct Members Volume */}
-          <div className="p-6 hover-lift-enhanced animate-fadeInUp glow-border-default rounded-2xl border" style={{animationDelay: '1.1s', backgroundColor: 'rgba(0, 0, 0, 0.1)', backdropFilter: 'blur(10px)', borderColor: 'var(--default-border)'}}>
+          <div className="p-6 hover-lift-enhanced animate-fadeInUp rounded-2xl border" style={{animationDelay: '1.1s', backgroundColor: '#1565c0', color: '#fff', border: 'none'}}>
             <div className="text-center relative">
               <div className="absolute -top-2 -right-2 w-3 h-3 rounded-full gradient-text-neon" style={{backgroundColor: 'rgb(20, 184, 166)'}}></div>
               <div className="text-sm mb-2 font-medium" style={{color: 'rgba(255, 255, 255, 0.7)'}}>Direct Members NFT Volume</div>
-              <div className="font-bold text-lg gradient-text-neon" style={{color: 'rgb(20, 184, 166)'}}>${data.directMembersNftVolume || data.memberVolumes?.directMembersVolume || 0}</div>
+              <div className="font-bold text-lg text-white">${data.directMembersNftVolume || data.memberVolumes?.directMembersVolume || 0}</div>
             </div>
           </div>
 
           {/* Total Members Volume */}
-          <div className="p-6 hover-lift-enhanced animate-fadeInUp glow-border-default rounded-2xl border" style={{animationDelay: '1.2s', backgroundColor: 'rgba(0, 0, 0, 0.1)', backdropFilter: 'blur(10px)', borderColor: 'var(--default-border)'}}>
+          <div className="p-6 hover-lift-enhanced animate-fadeInUp rounded-2xl border" style={{animationDelay: '1.2s', backgroundColor: '#1565c0', color: '#fff', border: 'none'}}>
             <div className="text-center relative">
               <div className="absolute -top-2 -right-2 w-3 h-3 rounded-full gradient-text-neon" style={{backgroundColor: 'rgb(244, 63, 94)'}}></div>
               <div className="text-sm mb-2 font-medium" style={{color: 'rgba(255, 255, 255, 0.7)'}}>Total Members NFT Volume</div>
-              <div className="font-bold text-lg gradient-text-neon" style={{color: 'rgb(244, 63, 94)'}}>${data.totalMembersNftVolume || data.memberVolumes?.totalMembersVolume || 0}</div>
+              <div className="font-bold text-lg text-white">${data.totalMembersNftVolume || data.memberVolumes?.totalMembersVolume || 0}</div>
             </div>
           </div>
 
           {/* NFT Buy Button as a Card */}
-          <div className="p-6 flex flex-col justify-center items-center hover-lift-enhanced animate-fadeInUp glow-border-default rounded-2xl border" style={{animationDelay: '1.3s', backgroundColor: 'rgba(0, 0, 0, 0.1)', backdropFilter: 'blur(10px)', borderColor: 'var(--default-border)'}}>
+          <div className="p-6 flex flex-col justify-center items-center hover-lift-enhanced animate-fadeInUp rounded-2xl border" style={{animationDelay: '1.3s', backgroundColor: '#1565c0', color: '#fff', border: 'none'}}>
             <Link href="/nft-buy">
               <button
-                className="px-6 py-3 rounded-xl font-bold text-base text-white transition-all duration-300 hover:scale-105 hover-bounce-enhanced"
-                style={{
-                  background:
-                    'linear-gradient(135deg, rgba(34,197,94,0.9) 0%, rgba(16,185,129,0.9) 100%)',
-                  border: '2px solid rgba(34,197,94,0.6)',
-                  boxShadow:
-                    '0 6px 20px rgba(34,197,94,0.2), 0 0 0 1px rgba(34,197,94,0.08)',
-                }}
-              >
-                Buy NFTs
-              </button>
+                  className="px-6 py-3 rounded-xl font-bold text-base text-white transition-all duration-300 hover:scale-105 hover-bounce-enhanced"
+                  style={{
+                    backgroundColor: '#0d47a1', // darker blue
+                    border: '2px solid #0d47a1',
+                    boxShadow: '0 6px 20px rgba(13,71,161,0.2), 0 0 0 1px rgba(13,71,161,0.08)',
+                  }}
+                >
+                  Buy NFTs
+                </button>
             </Link>
           </div>
         </div>

@@ -255,9 +255,9 @@ export default function Sidebar({ isOpen, onClose }) {
   return (
     <>
       {/* Sidebar */}
-      <div className={`w-64 border-r shadow-2xl flex flex-col animate-fadeInLeft mt-11 ml-4`} style={{borderColor: 'var(--default-border)', height: 'calc(100vh - 4rem)', backgroundColor: 'rgba(0, 0, 0, 0.1)', backdropFilter: 'blur(10px)'}}>
+      <div className="fixed left-0 top-12 bottom-0 w-64 border-r shadow-2xl flex flex-col animate-fadeInLeft z-40" style={{borderColor: '#1565c0', backgroundColor: '#1565c0', height: 'calc(100vh - 3rem)'}}>
         {/* Header */}
-        <div className="flex items-center p-4 border-b" style={{borderColor: 'var(--default-border)'}}>
+        <div className="flex items-center p-4 border-b" style={{borderColor: '#1565c0'}}>
           <div className="flex items-center space-x-3 group">
             {/* <div className="w-6 h-6 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform duration-300 animate-cardFloat" style={{background: 'linear-gradient(135deg, var(--primary-color), var(--secondary-color))'}}>
               <div className="w-3 h-3 bg-white rounded-full flex items-center justify-center">
@@ -274,7 +274,7 @@ export default function Sidebar({ isOpen, onClose }) {
         </div>
 
         {/* Navigation Items */}
-        <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto scrollbar-thin scrollbar-track-transparent" style={{scrollbarThumb: 'rgba(0, 255, 190, 0.3)'}}>
+        <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto scrollbar-thin scrollbar-track-transparent text-white" style={{scrollbarThumb: '#1565c0'}}>
           {menuItems.map((item, index) => (
             <div key={item.name} className="animate-fadeInUp" style={{animationDelay: `${index * 0.1}s`}}>
               {item.isLogout ? (
@@ -282,12 +282,13 @@ export default function Sidebar({ isOpen, onClose }) {
                   onClick={() => handleItemClick(item.name, item.hasDropdown, item.isLogout)}
                   className={`w-full flex items-center space-x-3 px-3 py-2 rounded-lg transition-all duration-300 group hover-lift-enhanced ${
                     activeItem === item.name
-                      ? 'glass-card border shadow-lg glow-border'
-                      : 'hover:glass-card hover:border hover-glow'
+                      ? 'border shadow-lg'
+                      : 'hover:border'
                   }`}
                   style={{
-                    borderColor: 'var(--default-border)',
-                    backgroundColor: activeItem === item.name ? 'rgba(239, 68, 68, 0.1)' : 'transparent'
+                    borderColor: '#1565c0',
+                    backgroundColor: activeItem === item.name ? '#0d47a1' : 'transparent',
+                    color: '#fff'
                   }}
                 >
                   <div className={`text-red-400 transition-transform duration-300 group-hover:scale-110 ${
@@ -310,9 +311,14 @@ export default function Sidebar({ isOpen, onClose }) {
                   onClick={() => handleItemClick(item.name, item.hasDropdown, item.isLogout)}
                   className={`w-full flex items-center space-x-3 px-3 py-2 rounded-lg transition-all duration-300 group hover-lift-enhanced ${
                     activeItem === item.name
-                      ? 'glass-card border border-slate-500/50 shadow-lg glow-border'
-                      : 'hover:glass-card hover:border hover:border-slate-500/30 hover-glow'
+                      ? 'border shadow-lg'
+                      : 'hover:border'
                   }`}
+                  style={{
+                    borderColor: '#1565c0',
+                    backgroundColor: activeItem === item.name ? '#0d47a1' : 'transparent',
+                    color: '#fff'
+                  }}
                 >
                   <div className={`text-white transition-transform duration-300 group-hover:scale-110 ${
                     activeItem === item.name ? 'animate-pulse' : ''
@@ -320,11 +326,7 @@ export default function Sidebar({ isOpen, onClose }) {
                     {renderIcon(item.icon, "w-5 h-5")}
                   </div>
                   {item.name !== 'Dashboard' && (
-                    <span className={`font-medium transition-colors duration-300 ${
-                      activeItem === item.name 
-                        ? 'text-white gradient-text-neon' 
-                        : 'text-slate-300 group-hover:text-white'
-                    }`}>
+                    <span className={`font-medium transition-colors duration-300 text-white`}>
                       {item.name}
                     </span>
                   )}
@@ -352,11 +354,7 @@ export default function Sidebar({ isOpen, onClose }) {
                       {renderIcon(item.icon, "w-5 h-5")}
                     </div>
                     {item.name !== 'Dashboard' && (
-                      <span className={`font-medium transition-colors duration-300 ${
-                        activeItem === item.name 
-                          ? 'text-white gradient-text-neon' 
-                          : 'text-slate-300 group-hover:text-white'
-                      }`}>
+                      <span className={`font-medium transition-colors duration-300 text-white`}>
                         {item.name}
                       </span>
                     )}
@@ -382,11 +380,7 @@ export default function Sidebar({ isOpen, onClose }) {
                         <div className="text-white group-hover:scale-110 transition-transform duration-300">
                           {renderIcon(dropdownItem.icon, "w-5 h-5")}
                         </div>
-                        <span className={`text-xs font-medium transition-colors duration-300 ${
-                          activeItem === dropdownItem.name 
-                            ? 'text-white gradient-text-neon' 
-                            : 'text-slate-400 group-hover:text-slate-300'
-                        }`}>
+                        <span className={`text-xs font-medium transition-colors duration-300 text-white`}>
                           {dropdownItem.name}
                         </span>
                         {activeItem === dropdownItem.name && (

@@ -60,16 +60,16 @@ export default function SpotIncomeHistoryPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center" style={{background: 'linear-gradient(to bottom right, var(--default-body-bg-color) 0%, var(--theme-bg-gradient) 25%, var(--default-body-bg-color) 100%)', fontFamily: 'var(--default-font-family)'}}>
-        <div className="text-white text-xl">Loading spot income history...</div>
+      <div className="min-h-screen flex items-center justify-center bg-white">
+        <div className="text-[#1565c0] text-xl">Loading spot income history...</div>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="min-h-screen flex items-center justify-center" style={{background: 'linear-gradient(to bottom right, var(--default-body-bg-color) 0%, var(--theme-bg-gradient) 25%, var(--default-body-bg-color) 100%)', fontFamily: 'var(--default-font-family)'}}>
-        <div className="text-red-400 text-xl">Error: {error}</div>
+      <div className="min-h-screen flex items-center justify-center bg-white">
+        <div className="text-red-500 text-xl">Error: {error}</div>
       </div>
     );
   }
@@ -91,15 +91,15 @@ export default function SpotIncomeHistoryPage() {
   }
 
   return (
-    <div className="min-h-screen" style={{background: 'linear-gradient(to bottom right, var(--default-body-bg-color) 0%, var(--theme-bg-gradient) 25%, var(--default-body-bg-color) 100%)', fontFamily: 'var(--default-font-family)'}}>
+    <div className="min-h-screen bg-white">
       <div className="max-w-5xl mx-auto px-4 py-8">
         <div className="mb-8 text-center">
-          <h1 className="text-4xl font-bold text-white mb-2 gradient-text-enhanced">Spot Income History</h1>
-          <p className="text-gray-300">See spot income from L1, L2, and L3 referrals and when they purchased NFTs</p>
+          <h1 className="text-4xl font-bold text-[#1565c0] mb-2">Spot Income History</h1>
+          <p className="text-[#1565c0]/80">See spot income from L1, L2, and L3 referrals and when they purchased NFTs</p>
           <div className="mt-4">
             <button
               onClick={fetchSpotIncome}
-              className="btn-enhanced px-4 py-2 text-white hover-bounce text-sm flex items-center space-x-2 mx-auto"
+              className="px-4 py-2 rounded bg-[#1565c0] text-white font-semibold text-sm flex items-center space-x-2 mx-auto"
             >
               <span className={`text-sm ${loading ? 'animate-spin' : ''}`}>{loading ? '⟳' : '↻'}</span>
               <span>Refresh Data</span>
@@ -110,41 +110,38 @@ export default function SpotIncomeHistoryPage() {
         {/* Summary Cards */}
         {spotIncomeData?.summary && (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-            <div className="bg-white/10 backdrop-blur-lg rounded-xl p-6 border border-white/20">
+            <div className="rounded-xl p-6 border" style={{background:'#1565c0', color:'#fff', borderColor:'#1565c0'}}>
               <div className="text-center">
-                <div className="text-2xl font-bold text-green-400 mb-2">
+                <div className="text-2xl font-bold text-white mb-2">
                   {spotIncomeData.summary.totalEntries}
                 </div>
-                <div className="text-sm text-gray-300">Total Entries</div>
+                <div className="text-sm text-white/80">Total Entries</div>
               </div>
             </div>
-            
-            <div className="bg-white/10 backdrop-blur-lg rounded-xl p-6 border border-white/20">
+            <div className="rounded-xl p-6 border" style={{background:'#1565c0', color:'#fff', borderColor:'#1565c0'}}>
               <div className="text-center">
-                <div className="text-2xl font-bold text-green-400 mb-2">
+                <div className="text-2xl font-bold text-white mb-2">
                   {formatCurrency(spotIncomeData.summary.totalSpotIncome)}
                 </div>
-                <div className="text-sm text-gray-300">Total Spot Income</div>
+                <div className="text-sm text-white/80">Total Spot Income</div>
               </div>
             </div>
-
-            <div className="bg-white/10 backdrop-blur-lg rounded-xl p-6 border border-white/20">
+            <div className="rounded-xl p-6 border" style={{background:'#1565c0', color:'#fff', borderColor:'#1565c0'}}>
               <div className="text-center">
-                <div className="text-sm font-semibold text-emerald-300 mb-1">Level 1</div>
-                <div className="text-xl font-bold text-green-400 mb-1">
+                <div className="text-sm font-semibold text-white/80 mb-1">Level 1</div>
+                <div className="text-xl font-bold text-white mb-1">
                   {spotIncomeData.summary.levelSummaries?.L1?.count || 0}
                 </div>
-                <div className="text-xs text-gray-400">{formatCurrency(spotIncomeData.summary.levelSummaries?.L1?.total || 0)}</div>
+                <div className="text-xs text-white/80">{formatCurrency(spotIncomeData.summary.levelSummaries?.L1?.total || 0)}</div>
               </div>
             </div>
-
-            <div className="bg-white/10 backdrop-blur-lg rounded-xl p-6 border border-white/20">
+            <div className="rounded-xl p-6 border" style={{background:'#1565c0', color:'#fff', borderColor:'#1565c0'}}>
               <div className="text-center">
-                <div className="text-sm font-semibold text-emerald-300 mb-1">L2 + L3</div>
-                <div className="text-xl font-bold text-green-400 mb-1">
+                <div className="text-sm font-semibold text-white/80 mb-1">L2 + L3</div>
+                <div className="text-xl font-bold text-white mb-1">
                   {(spotIncomeData.summary.levelSummaries?.L2?.count || 0) + (spotIncomeData.summary.levelSummaries?.L3?.count || 0)}
                 </div>
-                <div className="text-xs text-gray-400">
+                <div className="text-xs text-white/80">
                   {formatCurrency((spotIncomeData.summary.levelSummaries?.L2?.total || 0) + (spotIncomeData.summary.levelSummaries?.L3?.total || 0))}
                 </div>
               </div>
@@ -153,11 +150,11 @@ export default function SpotIncomeHistoryPage() {
         )}
 
         {/* Spot Income Entries by Level */}
-        <div className="card-enhanced rounded-2xl p-6 shadow-lg">
+        <div className="rounded-2xl p-6 shadow-lg" style={{background:'#1565c0', color:'#fff'}}>
           <div className="overflow-x-auto">
             <table className="w-full text-sm text-left">
-              <thead>
-                <tr style={{background: 'linear-gradient(to right, rgba(29, 68, 67, 0.8), rgba(29, 68, 67, 0.8))', borderBottom: '1px solid var(--default-border)'}}>
+              <thead style={{background:'#1565c0'}}>
+                <tr>
                   <th className="px-6 py-4 text-white font-semibold">S.No</th>
                   <th className="px-6 py-4 text-white font-semibold">Level</th>
                   <th className="px-6 py-4 text-white font-semibold">Referral Name</th>
@@ -170,32 +167,28 @@ export default function SpotIncomeHistoryPage() {
               <tbody>
                 {spotIncomeData?.spotIncomeHistory && spotIncomeData.spotIncomeHistory.length > 0 ? (
                   spotIncomeData.spotIncomeHistory.map((item, index) => (
-                    <tr key={`${item?.nftPurchaseId || index}`} className="transition-colors duration-200 hover:bg-opacity-20" style={{
-                      borderBottom: '1px solid var(--default-border)',
-                      backgroundColor: 'rgba(29, 68, 67, 0.1)'
+                    <tr key={`${item?.nftPurchaseId || index}`} className="transition-colors duration-200 hover:bg-white/10" style={{
+                      borderBottom: '1px solid #fff',
+                      backgroundColor: '#1565c0'
                     }}>
-                      <td className="px-6 py-4" style={{color: 'rgba(255, 255, 255, 0.8)'}}>{index + 1}</td>
+                      <td className="px-6 py-4 text-white/80">{index + 1}</td>
                       <td className="px-6 py-4 font-semibold">
-                        <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-bold ${
-                          item.level === 1 ? 'bg-green-500/20 text-green-400 border border-green-500/30' :
-                          item.level === 2 ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' :
-                          'bg-teal-500/20 text-teal-400 border border-teal-500/30'
-                        }`}>
+                        <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-white text-[#1565c0] border border-[#1565c0]">
                           L{item.level}
                         </span>
                       </td>
                       <td className="px-6 py-4 text-white font-medium">{item?.referral?.name || "Unknown"}</td>
-                      <td className="px-6 py-4" style={{color: 'rgba(255, 255, 255, 0.8)'}}>{item?.referral?.memberId || "-"}</td>
-                      <td className="px-6 py-4 font-medium" style={{color: 'var(--secondary-color)'}}>{formatCurrency(item?.spotIncome)}</td>
-                      <td className="px-6 py-4" style={{color: 'rgba(255, 255, 255, 0.8)'}}>
+                      <td className="px-6 py-4 text-white/80">{item?.referral?.memberId || "-"}</td>
+                      <td className="px-6 py-4 font-medium text-white">{formatCurrency(item?.spotIncome)}</td>
+                      <td className="px-6 py-4 text-white/80">
                         <span className="text-xs font-mono">{item?.nftCode || "-"}</span>
                       </td>
-                      <td className="px-6 py-4" style={{color: 'rgba(255, 255, 255, 0.8)'}}>{formatDate(item?.purchaseDate)}</td>
+                      <td className="px-6 py-4 text-white/80">{formatDate(item?.purchaseDate)}</td>
                     </tr>
                   ))
                 ) : (
                   <tr>
-                    <td className="px-6 py-8 text-center" colSpan={7} style={{color: 'rgba(255, 255, 255, 0.8)'}}>
+                    <td className="px-6 py-8 text-center text-white/80" colSpan={7}>
                       No spot income history available
                     </td>
                   </tr>

@@ -106,9 +106,9 @@ const TeamMembersPage = () => {
   // Loading state
   if (loading && membersData.length === 0) {
     return (
-      <div className="min-h-screen flex items-center justify-center" style={{background: 'linear-gradient(to bottom right, var(--default-body-bg-color) 0%, var(--theme-bg-gradient) 25%, var(--default-body-bg-color) 100%)', fontFamily: 'var(--default-font-family)'}}>
-        <div className="text-white text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white mx-auto mb-4"></div>
+      <div className="min-h-screen flex items-center justify-center bg-white">
+        <div className="text-[#1565c0] text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#1565c0] mx-auto mb-4"></div>
           <p>Loading team members...</p>
         </div>
       </div>
@@ -118,12 +118,12 @@ const TeamMembersPage = () => {
   // Error state
   if (error && membersData.length === 0) {
     return (
-      <div className="min-h-screen flex items-center justify-center" style={{background: 'linear-gradient(to bottom right, var(--default-body-bg-color) 0%, var(--theme-bg-gradient) 25%, var(--default-body-bg-color) 100%)', fontFamily: 'var(--default-font-family)'}}>
-        <div className="text-white text-center max-w-md">
-          <p className="text-red-400 mb-4">Error: {error}</p>
+      <div className="min-h-screen flex items-center justify-center bg-white">
+        <div className="text-[#1565c0] text-center max-w-md">
+          <p className="text-red-500 mb-4">Error: {error}</p>
           <button 
             onClick={fetchMembersData}
-            className="btn-enhanced px-4 py-2 text-white hover-bounce"
+            className="px-4 py-2 rounded bg-[#1565c0] text-white font-semibold"
           >
             Retry
           </button>
@@ -133,18 +133,18 @@ const TeamMembersPage = () => {
   }
 
   return (
-    <div className="min-h-screen flex p-4 sm:p-8 pt-20 lg:pt-8" style={{background: 'linear-gradient(to bottom right, var(--default-body-bg-color) 0%, var(--theme-bg-gradient) 25%, var(--default-body-bg-color) 100%)', fontFamily: 'var(--default-font-family)'}}>
+    <div className="min-h-screen flex p-4 sm:p-8 pt-20 lg:pt-8 bg-white">
 
       {/* Main Content */}
       <div className="flex-1">
         <div className="max-w-7xl mx-auto">
         <div className="text-center mb-8 sm:mb-12">
-          <h1 className="text-2xl sm:text-4xl font-bold text-white mb-2 gradient-text-enhanced animate-fadeInUp">My Directs</h1>
-          <p className="text-base sm:text-lg animate-fadeInUp" style={{color: 'rgba(255, 255, 255, 0.7)', animationDelay: '0.2s'}}>Check your Genealogy</p>
+          <h1 className="text-2xl sm:text-4xl font-bold text-[#1565c0] mb-2 animate-fadeInUp">My Directs</h1>
+          <p className="text-base sm:text-lg animate-fadeInUp text-[#1565c0]/80" style={{animationDelay: '0.2s'}}>Check your Genealogy</p>
           <div className="mt-4">
             <button 
               onClick={fetchMembersData}
-              className="btn-enhanced px-4 py-2 text-white hover-bounce text-sm flex items-center space-x-2 mx-auto"
+              className="px-4 py-2 rounded bg-[#1565c0] text-white font-semibold text-sm flex items-center space-x-2 mx-auto"
               disabled={loading}
             >
               <span className={`text-sm ${loading ? 'animate-spin' : ''}`}>
@@ -155,20 +155,20 @@ const TeamMembersPage = () => {
           </div>
         </div>
 
-        <div className="card-enhanced rounded-2xl p-4 sm:p-8 shadow-lg animate-fadeInUp" style={{animationDelay: '0.4s'}}>
+        <div className="rounded-2xl p-4 sm:p-8 shadow-lg animate-fadeInUp" style={{animationDelay: '0.4s', background:'#1565c0', color:'#fff'}}>
           <h2 className="text-xl sm:text-2xl font-semibold text-white mb-6 sm:mb-8 text-center">My Directs</h2>
           
           {/* Controls */}
           <div className="flex flex-col sm:flex-row justify-between items-center mb-4 sm:mb-6 gap-3 sm:gap-4">
             <div className="flex items-center gap-2 sm:gap-4">
-              <label className="text-xs sm:text-sm font-medium" style={{color: 'rgba(255, 255, 255, 0.8)'}}>Show</label>
+              <label className="text-xs sm:text-sm font-medium text-white/80">Show</label>
               <select
                 value={entriesPerPage}
                 onChange={handleEntriesChange}
-                className="px-2 sm:px-3 py-2 text-white rounded-lg text-xs sm:text-sm focus:outline-none transition-colors"
+                className="px-2 sm:px-3 py-2 text-[#1565c0] rounded-lg text-xs sm:text-sm focus:outline-none transition-colors"
                 style={{
-                  backgroundColor: 'rgba(29, 68, 67, 0.8)',
-                  border: '1px solid var(--default-border)'
+                  backgroundColor: '#fff',
+                  border: '1px solid #1565c0'
                 }}
               >
                 <option value={10}>10</option>
@@ -176,20 +176,20 @@ const TeamMembersPage = () => {
                 <option value={50}>50</option>
                 <option value={100}>100</option>
               </select>
-              <span className="text-xs sm:text-sm" style={{color: 'rgba(255, 255, 255, 0.8)'}}>entries</span>
+              <span className="text-xs sm:text-sm text-white/80">entries</span>
             </div>
             
             <div className="flex items-center gap-2">
-              <label className="text-xs sm:text-sm font-medium" style={{color: 'rgba(255, 255, 255, 0.8)'}}>Search:</label>
+              <label className="text-xs sm:text-sm font-medium text-white/80">Search:</label>
               <input
                 type="text"
                 value={searchTerm}
                 onChange={handleSearch}
                 placeholder="Search..."
-                className="px-2 sm:px-3 py-2 text-white rounded-lg text-xs sm:text-sm focus:outline-none transition-colors placeholder-gray-400 w-32 sm:w-48"
+                className="px-2 sm:px-3 py-2 text-[#1565c0] rounded-lg text-xs sm:text-sm focus:outline-none transition-colors placeholder-[#1565c0]/50 w-32 sm:w-48"
                 style={{
-                  backgroundColor: 'rgba(29, 68, 67, 0.8)',
-                  border: '1px solid var(--default-border)'
+                  backgroundColor: '#fff',
+                  border: '1px solid #1565c0'
                 }}
               />
             </div>
@@ -199,7 +199,7 @@ const TeamMembersPage = () => {
           <div className="overflow-x-auto">
             <table className="w-full text-xs sm:text-sm text-left">
               <thead>
-                <tr style={{background: 'linear-gradient(to right, rgba(29, 68, 67, 0.8), rgba(29, 68, 67, 0.8))', borderBottom: '1px solid var(--default-border)'}}>
+                <tr style={{background: '#1565c0', borderBottom: '1px solid #fff'}}>
                   <th className="px-2 sm:px-6 py-3 sm:py-4 text-white font-semibold">S.No</th>
                   <th className="px-2 sm:px-6 py-3 sm:py-4 text-white font-semibold hidden sm:table-cell">Image</th>
                   <th className="px-2 sm:px-6 py-3 sm:py-4 text-white font-semibold">Joining Date</th>
@@ -220,34 +220,32 @@ const TeamMembersPage = () => {
                   </tr>
                 ) : (
                   membersData.map((item, index) => (
-                    <tr key={item.id} className="transition-colors duration-200 hover:bg-opacity-20" style={{
-                      borderBottom: '1px solid var(--default-border)',
-                      backgroundColor: 'rgba(29, 68, 67, 0.1)'
+                    <tr key={item.id} className="transition-colors duration-200 hover:bg-white/10" style={{
+                      borderBottom: '1px solid #fff',
+                      backgroundColor: '#1565c0'
                     }}>
-                      <td className="px-2 sm:px-6 py-3 sm:py-4 text-xs sm:text-sm" style={{color: 'rgba(255, 255, 255, 0.8)'}}>{pagination.startIndex + index}</td>
+                      <td className="px-2 sm:px-6 py-3 sm:py-4 text-xs sm:text-sm text-white/80">{pagination.startIndex + index}</td>
                       <td className="px-2 sm:px-6 py-3 sm:py-4 hidden sm:table-cell">
-                        <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center" style={{
-                          background: 'linear-gradient(135deg, var(--primary-color), var(--secondary-color))'
-                        }}>
-                          <span className="text-white text-xs sm:text-sm font-medium">
+                        <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center bg-white">
+                          <span className="text-[#1565c0] text-xs sm:text-sm font-medium">
                             {item.name.charAt(0)}
                           </span>
                         </div>
                       </td>
-                      <td className="px-2 sm:px-6 py-3 sm:py-4 text-xs sm:text-sm" style={{color: 'rgba(255, 255, 255, 0.8)'}}>{item.joiningDate}</td>
-                      <td className="px-2 sm:px-6 py-3 sm:py-4 font-medium text-xs sm:text-sm" style={{color: 'var(--primary-color)'}}>{item.memberId}</td>
+                      <td className="px-2 sm:px-6 py-3 sm:py-4 text-xs sm:text-sm text-white/80">{item.joiningDate}</td>
+                      <td className="px-2 sm:px-6 py-3 sm:py-4 font-medium text-xs sm:text-sm text-white">{item.memberId}</td>
                       <td className="px-2 sm:px-6 py-3 sm:py-4 text-white font-medium text-xs sm:text-sm">{item.name}</td>
-                      <td className="px-2 sm:px-6 py-3 sm:py-4 font-medium max-w-xs truncate text-xs sm:text-sm hidden md:table-cell" style={{color: 'rgb(var(--info-rgb))'}} title={item.email}>
+                      <td className="px-2 sm:px-6 py-3 sm:py-4 font-medium max-w-xs truncate text-xs sm:text-sm hidden md:table-cell text-white/80" title={item.email}>
                         {item.email}
                       </td>
-                      <td className="px-2 sm:px-6 py-3 sm:py-4 font-medium text-xs sm:text-sm hidden lg:table-cell" style={{color: 'rgb(var(--success-rgb))'}}>{item.package}</td>
-                      <td className="px-2 sm:px-6 py-3 sm:py-4 font-medium text-xs sm:text-sm hidden lg:table-cell" style={{color: 'rgb(var(--warning-rgb))'}}>{item.sponsorId}</td>
+                      <td className="px-2 sm:px-6 py-3 sm:py-4 font-medium text-xs sm:text-sm hidden lg:table-cell text-white/80">{item.package}</td>
+                      <td className="px-2 sm:px-6 py-3 sm:py-4 font-medium text-xs sm:text-sm hidden lg:table-cell text-white/80">{item.sponsorId}</td>
                       <td className="px-2 sm:px-6 py-3 sm:py-4">
                         {(() => {
                           const amount = parseFloat((item.package ?? 0).toString().replace(/[^0-9.\-]/g, ''));
                           const derivedStatus = !isNaN(amount) && amount > 0 ? 'Active' : 'Inactive';
                           return (
-                            <span className="px-2 sm:px-3 py-1 rounded-full text-xs font-medium" style={getStatusColor(derivedStatus)}>
+                            <span className="px-2 sm:px-3 py-1 rounded-full text-xs font-medium bg-white text-[#1565c0]">
                               {derivedStatus}
                             </span>
                           );

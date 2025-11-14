@@ -177,7 +177,7 @@ export default function Navbar() {
 
   if (isLoading) {
     return (
-      <nav className="fixed top-0 left-0 right-0 z-50 border-b border-slate-700/30 shadow-2xl" style={{backgroundColor: 'rgba(0, 0, 0, 0.1)', backdropFilter: 'blur(10px)'}}>
+      <nav className="fixed top-0 left-0 right-0 z-50 border-b shadow-2xl" style={{backgroundColor: '#1565c0', borderColor: '#1565c0'}}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             <div className="flex items-center space-x-2">
@@ -189,12 +189,12 @@ export default function Navbar() {
                   height={32}
                   className="w-8 h-8 object-contain"
                 />
-                <span className="text-2xl font-bold bg-gradient-to-r from-purple-400 to-cyan-400 bg-clip-text text-transparent">
+                <span className="text-2xl font-bold text-white">
                   PICZEL
                 </span>
               </Link>
             </div>
-            <div className="animate-pulse bg-slate-700 h-8 w-20 rounded"></div>
+            <div className="animate-pulse bg-white h-8 w-20 rounded"></div>
           </div>
         </div>
       </nav>
@@ -203,7 +203,7 @@ export default function Navbar() {
 
   return (
     <>
-      <nav className="fixed top-0 left-0 right-0 z-50 border-b shadow-2xl animate-fadeInUp" style={{borderColor: 'var(--default-border)', backgroundColor: 'rgba(0, 0, 0, 0.1)', backdropFilter: 'blur(10px)'}}>
+      <nav className="fixed top-0 left-0 right-0 z-50 border-b shadow-2xl animate-fadeInUp" style={{borderColor: '#1565c0', backgroundColor: '#1565c0'}}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             {/* Left side - Hamburger Menu & Logo */}
@@ -211,17 +211,17 @@ export default function Navbar() {
               {/* Hamburger Menu Button */}
               <button
                 onClick={toggleSidebar}
-                className="p-2 rounded-lg transition-all duration-200 hover:bg-opacity-20"
+                className="p-2 rounded-lg transition-all duration-200 hover:bg-blue-800"
                 style={{
-                  backgroundColor: 'rgba(29, 68, 67, 0.8)',
-                  border: '1px solid var(--default-border)'
+                  backgroundColor: '#1565c0',
+                  border: '1px solid #1565c0'
                 }}
                 aria-label="Toggle sidebar"
               >
                 <div className="w-6 h-6 flex flex-col justify-center space-y-1">
-                  <div className="w-full h-0.5 bg-white transition-all duration-200" style={{backgroundColor: 'var(--primary-color)'}}></div>
-                  <div className="w-full h-0.5 bg-white transition-all duration-200" style={{backgroundColor: 'var(--primary-color)'}}></div>
-                  <div className="w-full h-0.5 bg-white transition-all duration-200" style={{backgroundColor: 'var(--primary-color)'}}></div>
+                  <div className="w-full h-0.5 bg-white transition-all duration-200"></div>
+                  <div className="w-full h-0.5 bg-white transition-all duration-200"></div>
+                  <div className="w-full h-0.5 bg-white transition-all duration-200"></div>
                 </div>
               </button>
               
@@ -235,7 +235,7 @@ export default function Navbar() {
                     height={32}
                     className="w-8 h-8 object-contain animate-cardFloat"
                   />
-                  <div className="text-2xl font-bold text-white gradient-text-enhanced animate-neonGlow">
+                  <div className="text-2xl font-bold text-white">
                     PICZEL
                   </div>
                 </Link>

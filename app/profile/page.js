@@ -31,7 +31,7 @@ export default function ProfilePage() {
   if (!isAuthenticated) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center text-white">
+        <div className="text-center text-blue-900">
           <h1 className="text-2xl font-bold mb-4">Access Denied</h1>
           <p>Please log in to view your profile.</p>
         </div>
@@ -40,13 +40,13 @@ export default function ProfilePage() {
   }
 
   return (
-    <div className="min-h-screen py-4 sm:py-12 px-4 pt-20 lg:pt-12" style={{background: 'linear-gradient(to bottom right, var(--default-body-bg-color) 0%, var(--theme-bg-gradient) 25%, var(--default-body-bg-color) 100%)', fontFamily: 'var(--default-font-family)'}}>
+    <div className="min-h-screen py-4 sm:py-12 px-4 pt-20 lg:pt-12" style={{background: '#fff', fontFamily: 'var(--default-font-family)'}}>
       <div className="max-w-4xl mx-auto">
-        <div className="card-enhanced rounded-xl shadow-2xl overflow-hidden animate-fadeInUp">
+        <div className="rounded-xl shadow-2xl overflow-hidden animate-fadeInUp" style={{backgroundColor: '#1565c0', color: '#fff'}}>
           {/* Header */}
-          <div className="px-4 sm:px-6 py-6 sm:py-8 border-b" style={{background: 'linear-gradient(to right, rgba(0, 255, 190, 0.2), rgba(0, 227, 210, 0.2))', borderColor: 'var(--default-border)'}}>
+          <div className="px-4 sm:px-6 py-6 sm:py-8 border-b" style={{backgroundColor: '#1565c0', borderColor: '#1565c0'}}>
             <div className="flex flex-col sm:flex-row items-center sm:items-start space-y-4 sm:space-y-0 sm:space-x-4">
-              <div className="w-16 h-16 rounded-full flex items-center justify-center ring-4" style={{background: 'linear-gradient(to bottom right, rgb(var(--success-rgb)), var(--primary-color))', ringColor: 'rgba(0, 255, 190, 0.3)'}}>
+              <div className="w-16 h-16 rounded-full flex items-center justify-center ring-4" style={{backgroundColor: '#0d47a1', border: '4px solid #fff'}}>
                 <span className="text-white font-bold text-2xl">
                   {user?.name?.charAt(0).toUpperCase() || "U"}
                 </span>
@@ -55,7 +55,7 @@ export default function ProfilePage() {
                 <h1 className="text-xl sm:text-2xl font-bold text-white">
                   {user?.name || "User Profile"}
                 </h1>
-                <p className="text-gray-300 text-sm sm:text-base" style={{color: 'rgba(255, 255, 255, 0.7)'}}>
+                <p className="text-white text-sm sm:text-base">
                   Member since{" "}
                   {new Date(user?.createdAt).toLocaleDateString() || "Unknown"}
                 </p>
@@ -66,13 +66,13 @@ export default function ProfilePage() {
           {/* Profile Content */}
           <div className="p-4 sm:p-6">
             {/* Member ID Section */}
-            <div className="mb-6 sm:mb-8 bg-gradient-to-r from-green-600/20 to-emerald-600/20 border border-green-400/30 rounded-lg p-3 sm:p-4">
+            <div className="mb-6 sm:mb-8 rounded-lg p-3 sm:p-4" style={{backgroundColor: '#1565c0', color: '#fff', border: 'none'}}>
               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-3 sm:space-y-0">
                 <div className="text-center sm:text-left">
                   <h3 className="text-base sm:text-lg font-semibold text-white mb-1">
                     Your Member ID
                   </h3>
-                  <p className="text-gray-300 text-xs sm:text-sm">
+                  <p className="text-white text-xs sm:text-sm">
                     Share this ID with others for sponsorship
                   </p>
                 </div>

@@ -269,9 +269,9 @@ export default function NFTDetailPage() {
   // Show loading while checking authentication
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
-        <div className="text-white text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white mx-auto mb-4"></div>
+      <div className="min-h-screen flex items-center justify-center bg-white">
+        <div className="text-[#1565c0] text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#1565c0] mx-auto mb-4"></div>
           <p>Loading...</p>
         </div>
       </div>
@@ -285,9 +285,9 @@ export default function NFTDetailPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
-        <div className="text-white text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white mx-auto mb-4"></div>
+      <div className="min-h-screen flex items-center justify-center bg-white">
+        <div className="text-[#1565c0] text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#1565c0] mx-auto mb-4"></div>
           <p>Loading NFT Series...</p>
         </div>
       </div>
@@ -296,12 +296,12 @@ export default function NFTDetailPage() {
 
   if (error) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
-        <div className="text-white text-center max-w-md">
-          <p className="text-red-400 mb-4">Error: {error}</p>
+      <div className="min-h-screen flex items-center justify-center bg-white">
+        <div className="text-[#1565c0] text-center max-w-md">
+          <p className="text-red-500 mb-4">Error: {error}</p>
           <button 
             onClick={fetchUserBalance}
-            className="btn-enhanced px-4 py-2 text-white hover-bounce"
+            className="px-4 py-2 rounded bg-[#1565c0] text-white font-semibold"
           >
             Retry
           </button>
@@ -311,48 +311,34 @@ export default function NFTDetailPage() {
   }
 
   return (
-    <div className="relative overflow-hidden min-h-screen pt-20 lg:pt-0">
-      {/* Animated Background */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="particle" style={{top: '10%', left: '10%'}}></div>
-        <div className="particle" style={{top: '20%', left: '80%'}}></div>
-        <div className="particle" style={{top: '60%', left: '20%'}}></div>
-        <div className="particle" style={{top: '80%', left: '70%'}}></div>
-        <div className="particle" style={{top: '40%', left: '90%'}}></div>
-        
-        <div className="absolute -top-40 -right-40 w-80 h-80 bg-gradient-to-br from-cyan-500/10 to-teal-500/10 rounded-full blur-3xl animate-pulse"></div>
-        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-gradient-to-br from-teal-500/10 to-cyan-400/10 rounded-full blur-3xl animate-pulse delay-1000"></div>
-        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-gradient-to-br from-emerald-700/5 to-teal-600/5 rounded-full blur-3xl animate-float"></div>
-      </div>
-
+    <div style={{ background: '#fff', minHeight: '100vh' }}>
       {/* Header */}
-      <div className="relative z-10 pt-4 sm:pt-8 pb-4 sm:pb-6">
+      <div className="pt-8 pb-6">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col sm:flex-row sm:items-center mb-4 sm:mb-6 space-y-4 sm:space-y-0">
             <div>
               <Link 
                 href="/"
-                className="inline-flex items-center text-white hover:text-cyan-400 transition-colors duration-200 mb-2 text-sm sm:text-base"
+                className="inline-flex items-center text-[#1565c0] hover:underline transition-colors duration-200 mb-2 text-sm sm:text-base"
               >
-                <svg className="w-4 h-4 sm:w-5 sm:h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-4 h-4 sm:w-5 sm:h-5 mr-2" fill="none" stroke="#1565c0" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
                 </svg>
                 Back to Dashboard
               </Link>
-              <h1 className="text-2xl sm:text-3xl font-bold text-white gradient-text-enhanced">
+              <h1 className="text-2xl sm:text-3xl font-bold text-[#1565c0]">
                 {baseSeries} Series NFTs
               </h1>
-              <p className="text-gray-300 mt-2 text-sm sm:text-base">
+              <p className="text-[#1565c0] mt-2 text-sm sm:text-base">
                 Available NFTs: {baseSeries}2 - {baseSeries}100
               </p>
             </div>
-            
           </div>
         </div>
       </div>
 
       {/* Wallet Cards */}
-      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-6 sm:mb-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-6 sm:mb-8">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
           {/* Purchase Wallet */}
           {/* <div className="p-4 sm:p-6 rounded-xl sm:rounded-2xl border hover-lift-enhanced" style={{backgroundColor:'rgba(0,0,0,0.1)', backdropFilter:'blur(10px)', borderColor:'var(--default-border)'}}>
@@ -505,7 +491,7 @@ export default function NFTDetailPage() {
       </div>
 
       {/* NFT Grid */}
-      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-6 sm:pb-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-6 sm:pb-8">
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-2 sm:gap-4">
           {nftCodes.map((nftCode, index) => {
             const status = getNFTStatus(nftCode);
@@ -516,12 +502,12 @@ export default function NFTDetailPage() {
             return (
               <div 
                 key={nftCode} 
-                className="p-2 sm:p-4 rounded-xl sm:rounded-2xl border hover-lift-enhanced animate-fadeInUp transition-all duration-200"
+                className="p-2 sm:p-4 rounded-xl sm:rounded-2xl border animate-fadeInUp transition-all duration-200"
                 style={{
                   animationDelay: `${index * 0.05}s`,
-                  backgroundColor: 'rgba(0,0,0,0.1)', 
-                  backdropFilter: 'blur(10px)', 
-                  borderColor: 'var(--default-border)',
+                  backgroundColor: '#1565c0',
+                  color: '#fff',
+                  borderColor: '#1565c0',
                   opacity: isLocked ? 0.6 : 1
                 }}
               >
@@ -589,40 +575,40 @@ export default function NFTDetailPage() {
         </div>
 
         {/* Summary */}
-        <div className="mt-6 sm:mt-8 p-4 sm:p-6 rounded-xl sm:rounded-2xl border" style={{backgroundColor: 'rgba(0,0,0,0.1)', backdropFilter: 'blur(10px)', borderColor: 'var(--default-border)'}}>
+        <div className="mt-6 sm:mt-8 p-4 sm:p-6 rounded-xl sm:rounded-2xl border" style={{backgroundColor:'#1565c0', color:'#fff', borderColor:'#1565c0'}}>
           <h3 className="text-lg sm:text-xl font-bold text-white mb-3 sm:mb-4">Series Summary</h3>
           <div className="grid grid-cols-3 gap-2 sm:gap-4 text-center">
             <div>
-              <div className="text-lg sm:text-2xl font-bold text-green-400">{purchases.length}</div>
-              <div className="text-xs sm:text-sm text-gray-400">Owned</div>
+              <div className="text-lg sm:text-2xl font-bold text-white">{purchases.length}</div>
+              <div className="text-xs sm:text-sm text-white/80">Owned</div>
             </div>
             <div>
-              <div className="text-lg sm:text-2xl font-bold text-blue-400">
+              <div className="text-lg sm:text-2xl font-bold text-white">
                 {nftCodes.filter(code => getNFTStatus(code).status === 'available').length}
               </div>
-              <div className="text-xs sm:text-sm text-gray-400">Available</div>
+              <div className="text-xs sm:text-sm text-white/80">Available</div>
             </div>
             <div>
-              <div className="text-lg sm:text-2xl font-bold text-gray-400">
+              <div className="text-lg sm:text-2xl font-bold text-white/80">
                 {nftCodes.filter(code => getNFTStatus(code).status === 'locked').length}
               </div>
-              <div className="text-xs sm:text-sm text-gray-400">Locked</div>
+              <div className="text-xs sm:text-sm text-white/80">Locked</div>
             </div>
           </div>
         </div>
 
         {/* NFT Purchase History */}
-        <div className="mt-6 sm:mt-8 p-4 sm:p-6 rounded-xl sm:rounded-2xl border" style={{backgroundColor: 'rgba(0,0,0,0.1)', backdropFilter: 'blur(10px)', borderColor: 'var(--default-border)'}}>
+        {/* <div className="mt-6 sm:mt-8 p-4 sm:p-6 rounded-xl sm:rounded-2xl border" style={{backgroundColor:'#1565c0', color:'#fff', borderColor:'#1565c0'}}>
           <h3 className="text-lg sm:text-xl font-bold text-white mb-4 sm:mb-6">{baseSeries} Series Purchase History</h3>
           {purchases.length === 0 ? (
             <div className="text-center py-8">
-              <div className="w-16 h-16 mx-auto mb-4 rounded-full flex items-center justify-center" style={{backgroundColor:'rgba(148,163,184,0.1)', border:'1px solid rgba(148,163,184,0.2)'}}>
-                <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div className="w-16 h-16 mx-auto mb-4 rounded-full flex items-center justify-center" style={{backgroundColor:'#fff', border:'1px solid #1565c0'}}>
+                <svg className="w-8 h-8 text-[#1565c0]" fill="none" stroke="#1565c0" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                 </svg>
               </div>
-              <p className="text-gray-400 text-sm sm:text-base">No {baseSeries} series NFTs purchased yet</p>
-              <p className="text-gray-500 text-xs sm:text-sm mt-1">Start by purchasing {baseSeries}2 NFT</p>
+              <p className="text-white text-sm sm:text-base">No {baseSeries} series NFTs purchased yet</p>
+              <p className="text-white/80 text-xs sm:text-sm mt-1">Start by purchasing {baseSeries}2 NFT</p>
             </div>
           ) : (
             <div className="space-y-3">
@@ -644,7 +630,7 @@ export default function NFTDetailPage() {
                   const profitAfterTax = profit - (profit * 0.25); // 25% tax on profit
                   
                   return (
-                    <div key={nftCode} className="flex items-center justify-between p-3 sm:p-4 rounded-lg border" style={{backgroundColor:'rgba(255,255,255,0.02)', borderColor:'var(--default-border)'}}>
+                    <div key={nftCode} className="flex items-center justify-between p-3 sm:p-4 rounded-lg border" style={{backgroundColor:'#1565c0', color:'#fff', borderColor:'#fff'}}>
                       <div className="flex items-center space-x-3 sm:space-x-4">
                         <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-lg overflow-hidden flex-shrink-0">
                           <Image 
@@ -657,15 +643,15 @@ export default function NFTDetailPage() {
                         </div>
                         <div>
                           <div className="text-white font-semibold text-sm sm:text-base">{nftCode}</div>
-                          <div className="text-gray-400 text-xs sm:text-sm">
+                          <div className="text-white/80 text-xs sm:text-sm">
                             {profitPercentage}% profit rate
                           </div>
                         </div>
                       </div>
                       <div className="text-right">
-                        <div className="text-green-400 font-semibold text-sm sm:text-base">${price.toFixed(2)}</div>
-                        <div className="text-gray-400 text-xs sm:text-sm">Purchase Price</div>
-                        <div className="text-green-300 text-xs sm:text-sm mt-1">
+                        <div className="text-white font-semibold text-sm sm:text-base">${price.toFixed(2)}</div>
+                        <div className="text-white/80 text-xs sm:text-sm">Purchase Price</div>
+                        <div className="text-white/80 text-xs sm:text-sm mt-1">
                           +${profitAfterTax.toFixed(2)} profit
                         </div>
                       </div>
@@ -674,7 +660,7 @@ export default function NFTDetailPage() {
                 })}
             </div>
           )}
-        </div>
+        </div> */}
       </div>
     </div>
   );

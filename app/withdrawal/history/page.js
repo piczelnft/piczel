@@ -29,7 +29,6 @@ export default function WithdrawalHistoryPage() {
             },
           }
         );
-
         if (response.ok) {
           const data = await response.json();
           setWithdrawals(data.withdrawals || []);
@@ -160,19 +159,18 @@ export default function WithdrawalHistoryPage() {
     <div
       className="min-h-screen pt-16 lg:pt-8"
       style={{
-        background:
-          "linear-gradient(to bottom right, var(--default-body-bg-color) 0%, var(--theme-bg-gradient) 25%, var(--default-body-bg-color) 100%)",
-        fontFamily: "var(--default-font-family)",
+        background: '#fff',
+        fontFamily: 'var(--default-font-family)',
       }}
     >
       <div className="container mx-auto px-4 py-4 sm:py-6 lg:py-8">
         <div className="max-w-6xl mx-auto">
           {/* Header */}
           <div className="text-center mb-6 sm:mb-8">
-            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-white gradient-text-enhanced mb-2">
+            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-white mb-2" style={{color:'black'}}>
               Withdrawal History
             </h1>
-            <p className="text-white/70 text-sm sm:text-base">
+            <p className="text-white text-sm sm:text-base" style={{color:'black'}}>
               Track all your withdrawal requests and their status
             </p>
           </div>
@@ -184,11 +182,12 @@ export default function WithdrawalHistoryPage() {
                 <button
                   key={status}
                   onClick={() => handleFilterChange(status)}
-                  className={`px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-medium transition-all duration-200 capitalize ${
-                    filter === status
-                      ? "bg-white text-black"
-                      : "bg-white/10 text-white hover:bg-white/20"
+                  className={`px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-medium transition-all duration-200 capitalize border 
+                    ${filter === status
+                      ? "bg-[#1565c0] text-white border-[#1565c0]"
+                      : "bg-white text-[#1565c0] border-[#1565c0] hover:bg-[#e3f0fd]"
                   }`}
+                  style={{ minWidth: 90 }}
                 >
                   {status}
                 </button>
@@ -207,11 +206,8 @@ export default function WithdrawalHistoryPage() {
           ) : error ? (
             <div className="text-center py-8 sm:py-12">
               <div
-                className="card-enhanced rounded-xl p-6 sm:p-8 max-w-md mx-4"
-                style={{
-                  backgroundColor: "rgba(255, 74, 74, 0.1)",
-                  border: "1px solid rgba(255, 74, 74, 0.3)",
-                }}
+                className="rounded-xl p-6 sm:p-8 max-w-md mx-4"
+                style={{backgroundColor:'#fff', border:'1px solid #d32f2f', color:'#d32f2f'}}
               >
                 <svg
                   className="w-10 h-10 sm:w-12 sm:h-12 text-red-400 mx-auto mb-4"
@@ -232,12 +228,8 @@ export default function WithdrawalHistoryPage() {
           ) : withdrawals.length === 0 ? (
             <div className="text-center py-8 sm:py-12">
               <div
-                className="card-enhanced rounded-xl p-6 sm:p-8 max-w-md mx-4"
-                style={{
-                  backgroundColor: "rgba(0, 0, 0, 0.1)",
-                  backdropFilter: "blur(10px)",
-                  borderColor: "var(--default-border)",
-                }}
+                className="rounded-xl p-6 sm:p-8 max-w-md mx-4"
+                style={{backgroundColor:'#1565c0', color:'#fff'}}
               >
                 <svg
                   className="w-10 h-10 sm:w-12 sm:h-12 text-gray-400 mx-auto mb-4"
@@ -265,12 +257,8 @@ export default function WithdrawalHistoryPage() {
               {/* Desktop Table View */}
               <div className="hidden lg:block">
                 <div
-                  className="card-enhanced rounded-xl overflow-hidden"
-                  style={{
-                    backgroundColor: "rgba(0, 0, 0, 0.1)",
-                    backdropFilter: "blur(10px)",
-                    borderColor: "var(--default-border)",
-                  }}
+                  className="rounded-xl overflow-hidden"
+                  style={{backgroundColor:'#1565c0', color:'#fff'}}
                 >
                   <div className="overflow-x-auto">
                     <table className="w-full">
@@ -322,9 +310,7 @@ export default function WithdrawalHistoryPage() {
                             </td>
                             <td className="py-4 px-6">
                               <span
-                                className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(
-                                  withdrawal.status
-                                )}`}
+                                className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(withdrawal.status)}`}
                               >
                                 {getStatusIcon(withdrawal.status)}
                                 {withdrawal.status}
@@ -348,12 +334,8 @@ export default function WithdrawalHistoryPage() {
                 {withdrawals.map((withdrawal, index) => (
                   <div
                     key={withdrawal._id || index}
-                    className="card-enhanced rounded-xl p-4 sm:p-6"
-                    style={{
-                      backgroundColor: "rgba(0, 0, 0, 0.1)",
-                      backdropFilter: "blur(10px)",
-                      borderColor: "var(--default-border)",
-                    }}
+                    className="rounded-xl p-4 sm:p-6"
+                    style={{backgroundColor:'#1565c0', color:'#fff'}}
                   >
                     <div className="flex justify-between items-start mb-3">
                       <div>
@@ -365,9 +347,7 @@ export default function WithdrawalHistoryPage() {
                         </p>
                       </div>
                       <span
-                        className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(
-                          withdrawal.status
-                        )}`}
+                        className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(withdrawal.status)}`}
                       >
                         {getStatusIcon(withdrawal.status)}
                         {withdrawal.status}

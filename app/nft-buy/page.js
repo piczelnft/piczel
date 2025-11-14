@@ -180,9 +180,9 @@ export default function NFTBuyPage() {
   // Show loading while checking authentication
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
-        <div className="text-white text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white mx-auto mb-4"></div>
+      <div className="min-h-screen flex items-center justify-center bg-white">
+        <div className="text-[#1565c0] text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#1565c0] mx-auto mb-4"></div>
           <p>Loading...</p>
         </div>
       </div>
@@ -196,9 +196,9 @@ export default function NFTBuyPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
-        <div className="text-white text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white mx-auto mb-4"></div>
+      <div className="min-h-screen flex items-center justify-center bg-white">
+        <div className="text-[#1565c0] text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#1565c0] mx-auto mb-4"></div>
           <p>Loading NFT Collection...</p>
         </div>
       </div>
@@ -207,12 +207,12 @@ export default function NFTBuyPage() {
 
   if (error) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
-        <div className="text-white text-center max-w-md">
-          <p className="text-red-400 mb-4">Error: {error}</p>
+      <div className="min-h-screen flex items-center justify-center bg-white">
+        <div className="text-[#1565c0] text-center max-w-md">
+          <p className="text-red-500 mb-4">Error: {error}</p>
           <button 
             onClick={fetchDashboardData}
-            className="btn-enhanced px-4 py-2 text-white hover-bounce"
+            className="px-4 py-2 rounded bg-[#1565c0] text-white font-semibold"
           >
             Retry
           </button>
@@ -224,61 +224,48 @@ export default function NFTBuyPage() {
   const data = dashboardData;
 
   return (
-    <div>
-      <div className="relative overflow-hidden min-h-screen pt-20 lg:pt-0">
-      {/* Animated Background */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="particle" style={{top: '10%', left: '10%'}}></div>
-        <div className="particle" style={{top: '20%', left: '80%'}}></div>
-        <div className="particle" style={{top: '60%', left: '20%'}}></div>
-        <div className="particle" style={{top: '80%', left: '70%'}}></div>
-        <div className="particle" style={{top: '40%', left: '90%'}}></div>
-        
-        <div className="absolute -top-40 -right-40 w-80 h-80 bg-gradient-to-br from-cyan-500/10 to-teal-500/10 rounded-full blur-3xl animate-pulse"></div>
-        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-gradient-to-br from-teal-500/10 to-cyan-400/10 rounded-full blur-3xl animate-pulse delay-1000"></div>
-        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-gradient-to-br from-emerald-700/5 to-teal-600/5 rounded-full blur-3xl animate-float"></div>
-      </div>
-
-      {/* Header */}
-      <div className="relative z-10 pt-4 sm:pt-8 pb-4 sm:pb-6">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between mb-4 sm:mb-6">
-            <div>
-              <Link 
-                href="/"
-                className="inline-flex items-center text-white hover:text-cyan-400 transition-colors duration-200 mb-2 text-sm sm:text-base"
-              >
-                <svg className="w-4 h-4 sm:w-5 sm:h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-                </svg>
-                Back to Dashboard
-              </Link>
-              <h1 className="text-2xl sm:text-3xl font-bold text-white gradient-text-enhanced">
-                NFT Collection
-              </h1>
-              <p className="text-gray-300 mt-2 text-sm sm:text-base">
-                Buy NFTs in order from A1 to J1. After buying one, the next NFT becomes available in 5 minutes (demo mode).
-              </p>
-            </div>
-            
-          </div>
-        </div>
-      </div>
-
-      {/* Global Summary Cards for A1-A100, B1-B100, ..., J1-J100 */}
-      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-6 sm:mb-8">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mb-6">
-          {/* Total NFT Purchased Amount (A1-A100, B1-B100, ..., J1-J100) */}
-          <div className="p-4 sm:p-6 rounded-xl sm:rounded-2xl border hover-lift-enhanced" style={{backgroundColor:'rgba(0,0,0,0.15)', backdropFilter:'blur(10px)', borderColor:'var(--default-border)'}}>
-            <div className="flex items-center justify-between mb-3">
-              <h3 className="text-lg sm:text-xl font-bold text-white">Total NFT Purchased Amount</h3>
-              <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center" style={{backgroundColor:'rgba(59,130,246,0.2)', border:'1px solid rgba(59,130,246,0.3)'}}>
-                <svg className="w-4 h-4 sm:w-5 sm:h-5 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
-                </svg>
+    <div style={{ background: '#fff', minHeight: '100vh' }}>
+      {/* All content wrapped in a single parent div to fix JSX error */}
+      <div>
+        {/* Header */}
+        <div className="pt-8 pb-6">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="flex items-center justify-between mb-4 sm:mb-6">
+              <div>
+                <Link 
+                  href="/"
+                  className="inline-flex items-center text-[#1565c0] hover:underline transition-colors duration-200 mb-2 text-sm sm:text-base"
+                >
+                  <svg className="w-4 h-4 sm:w-5 sm:h-5 mr-2" fill="none" stroke="#1565c0" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                  </svg>
+                  Back to Dashboard
+                </Link>
+                <h1 className="text-2xl sm:text-3xl font-bold text-[#1565c0]">
+                  NFT Collection
+                </h1>
+                <p className="text-[#1565c0] mt-2 text-sm sm:text-base">
+                  Buy NFTs in order from A1 to J1. After buying one, the next NFT becomes available in 5 minutes (demo mode).
+                </p>
               </div>
             </div>
-            <div className="text-2xl sm:text-3xl font-bold text-blue-400 mb-2">
+          </div>
+        </div>
+
+        {/* Global Summary Cards for A1-A100, B1-B100, ..., J1-J100 */}
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-6 sm:mb-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mb-6">
+            {/* Total NFT Purchased Amount (A1-A100, B1-B100, ..., J1-J100) */}
+            <div className="p-4 sm:p-6 rounded-xl sm:rounded-2xl border" style={{backgroundColor:'#1565c0', color:'#fff', borderColor:'#1565c0'}}>
+              <div className="flex items-center justify-between mb-3">
+                <h3 className="text-lg sm:text-xl font-bold text-white">Total NFT Purchased Amount</h3>
+                <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center" style={{backgroundColor:'#fff', border:'1px solid #1565c0'}}>
+                  <svg className="w-4 h-4 sm:w-5 sm:h-5 text-[#1565c0]" fill="none" stroke="#1565c0" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
+                  </svg>
+                </div>
+              </div>
+              <div className="text-2xl sm:text-3xl font-bold text-white mb-2">
               ${(() => {
                 // All A1-A100, B1-B100, ..., J1-J100
                 const allSeriesPurchases = nftPurchases.filter(p => {
@@ -303,7 +290,7 @@ export default function NFTBuyPage() {
             </p>
           </div>
           {/* Total Holding Wallet (A1-A100, ..., J1-J100) */}
-          <div className="p-4 sm:p-6 rounded-xl sm:rounded-2xl border hover-lift-enhanced" style={{backgroundColor:'rgba(0,0,0,0.15)', backdropFilter:'blur(10px)', borderColor:'var(--default-border)'}}>
+          <div className="p-4 sm:p-6 rounded-xl sm:rounded-2xl border" style={{backgroundColor:'#1565c0', color:'#fff', borderColor:'#1565c0'}}>
             <div className="flex items-center justify-between mb-3">
               <h3 className="text-lg sm:text-xl font-bold text-white">Total Holding Wallet</h3>
               <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center" style={{backgroundColor:'rgba(34,197,94,0.2)', border:'1px solid rgba(34,197,94,0.3)'}}>
@@ -350,7 +337,7 @@ export default function NFTBuyPage() {
             </p>
           </div>
           {/* Total Profit Value (A1-A100, ..., J1-J100) */}
-          <div className="p-4 sm:p-6 rounded-xl sm:rounded-2xl border hover-lift-enhanced" style={{backgroundColor:'rgba(0,0,0,0.15)', backdropFilter:'blur(10px)', borderColor:'var(--default-border)'}}>
+          <div className="p-4 sm:p-6 rounded-xl sm:rounded-2xl border" style={{backgroundColor:'#1565c0', color:'#fff', borderColor:'#1565c0'}}>
             <div className="flex items-center justify-between mb-3">
               <h3 className="text-lg sm:text-xl font-bold text-white">Total Profit Value</h3>
               <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center" style={{backgroundColor:'rgba(168,85,247,0.2)', border:'1px solid rgba(168,85,247,0.3)'}}>
@@ -400,7 +387,7 @@ export default function NFTBuyPage() {
           {/* Bottom Summary Cards Row */}
           <div className="flex flex-col sm:flex-row gap-3 mb-6">
             {/* Purchase Wallet */}
-            <div className="flex-1 p-2 sm:p-3 rounded-lg sm:rounded-xl border hover-lift-enhanced" style={{backgroundColor:'rgba(0,0,0,0.07)', backdropFilter:'blur(6px)', borderColor:'var(--default-border)'}}>
+            <div className="flex-1 p-2 sm:p-3 rounded-lg sm:rounded-xl border" style={{backgroundColor:'#1565c0', color:'#fff', borderColor:'#1565c0'}}>
             <div className="flex items-center justify-between mb-2">
               <h3 className="text-base sm:text-lg font-semibold text-white">Total Purchase Amount</h3>
               <div className="w-6 h-6 sm:w-8 sm:h-8 rounded-full flex items-center justify-center" style={{backgroundColor:'rgba(59,130,246,0.15)', border:'1px solid rgba(59,130,246,0.2)'}}>
@@ -409,7 +396,7 @@ export default function NFTBuyPage() {
                 </svg>
               </div>
             </div>
-            <div className="text-xl sm:text-2xl font-bold text-blue-400 mb-1">
+            <div className="text-xl sm:text-2xl font-bold text-white mb-1">
               ${(() => {
                 // Only count A1-J1 NFTs (number = 1)
                 const a1J1Purchases = nftPurchases.filter(p => {
@@ -432,7 +419,7 @@ export default function NFTBuyPage() {
           </div>
 
             {/* Holding Wallet */}
-            <div className="flex-1 p-2 sm:p-3 rounded-lg sm:rounded-xl border hover-lift-enhanced" style={{backgroundColor:'rgba(0,0,0,0.07)', backdropFilter:'blur(6px)', borderColor:'var(--default-border)'}}>
+            <div className="flex-1 p-2 sm:p-3 rounded-lg sm:rounded-xl border" style={{backgroundColor:'#1565c0', color:'#fff', borderColor:'#1565c0'}}>
             <div className="flex items-center justify-between mb-2">
               <h3 className="text-base sm:text-lg font-semibold text-white">Holding Wallet</h3>
               <div className="w-6 h-6 sm:w-8 sm:h-8 rounded-full flex items-center justify-center" style={{backgroundColor:'rgba(34,197,94,0.15)', border:'1px solid rgba(34,197,94,0.2)'}}>
@@ -441,7 +428,7 @@ export default function NFTBuyPage() {
                 </svg>
               </div>
             </div>
-            <div className="text-xl sm:text-2xl font-bold text-green-400 mb-1">
+            <div className="text-xl sm:text-2xl font-bold text-white mb-1">
               ${(() => {
                 // Only count A1-J1 NFTs (number = 1) and filter out paid ones
                 const unpaidA1J1Purchases = nftPurchases.filter(p => {
@@ -466,7 +453,7 @@ export default function NFTBuyPage() {
             <div className="mt-3">
               <div 
                 className="p-3 rounded-lg border"
-                style={{backgroundColor:'rgba(255,255,255,0.03)', borderColor:'var(--default-border)'}}
+                style={{backgroundColor:'#1565c0', color:'#fff', borderColor:'#fff'}}
               >
                 <div className="flex items-center justify-between">
                   <div className="text-xs text-gray-400">Unpaid NFTs</div>
@@ -490,7 +477,7 @@ export default function NFTBuyPage() {
           </div>
 
             {/* Total NFT Profit */}
-            <div className="flex-1 p-2 sm:p-3 rounded-lg sm:rounded-xl border hover-lift-enhanced" style={{backgroundColor:'rgba(0,0,0,0.07)', backdropFilter:'blur(6px)', borderColor:'var(--default-border)'}}>
+            <div className="flex-1 p-2 sm:p-3 rounded-lg sm:rounded-xl border" style={{backgroundColor:'#1565c0', color:'#fff', borderColor:'#1565c0'}}>
             <div className="flex items-center justify-between mb-2">
               <h3 className="text-base sm:text-lg font-semibold text-white">Total NFT Profit</h3>
               <div className="w-6 h-6 sm:w-8 sm:h-8 rounded-full flex items-center justify-center" style={{backgroundColor:'rgba(168,85,247,0.15)', border:'1px solid rgba(168,85,247,0.2)'}}>
@@ -499,7 +486,7 @@ export default function NFTBuyPage() {
                 </svg>
               </div>
             </div>
-            <div className="text-xl sm:text-2xl font-bold text-purple-400 mb-1">
+            <div className="text-xl sm:text-2xl font-bold text-white mb-1">
               ${(() => {
                 // Calculate total profit from paid out NFTs
                 // For A1-J1 NFTs: Purchase = $100, Holding = $105, Profit = $5 per NFT
@@ -524,7 +511,7 @@ export default function NFTBuyPage() {
             <div className="mt-3">
               <div 
                 className="p-3 rounded-lg border"
-                style={{backgroundColor:'rgba(255,255,255,0.03)', borderColor:'var(--default-border)'}}
+                style={{backgroundColor:'#1565c0', color:'#fff', borderColor:'#fff'}}
               >
                 <div className="flex items-center justify-between">
                   <div className="text-xs text-gray-400">Paid Out NFTs</div>
@@ -551,7 +538,7 @@ export default function NFTBuyPage() {
       </div>
 
       
-      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-6 sm:pb-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-6 sm:pb-8">
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 sm:gap-6">
           {NFT_SERIES.map((code) => {
             const status = getNftStatus(code);
@@ -559,20 +546,20 @@ export default function NFTBuyPage() {
             const available = status.available;
             const locked = status.locked;
             return (
-              <div key={code} className="p-2 sm:p-4 rounded-xl sm:rounded-2xl border hover-lift-enhanced animate-fadeInUp" style={{backgroundColor:'rgba(0,0,0,0.1)', backdropFilter:'blur(10px)', borderColor:'var(--default-border)'}}>
+              <div key={code} className="p-2 sm:p-4 rounded-xl sm:rounded-2xl border animate-fadeInUp" style={{backgroundColor:'#1565c0', color:'#fff', borderColor:'#1565c0'}}>
                 <div className="w-full aspect-square relative mb-2 sm:mb-3 overflow-hidden rounded-lg sm:rounded-xl">
                   <Image src={NFT_IMAGES[code] || '/logo.png'} alt={`${code} NFT`} fill sizes="200px" className="object-contain" />
                 </div>
                 <div className="flex items-center justify-between mb-2 sm:mb-3">
                   <div className="text-white font-semibold text-sm sm:text-base">{code}</div>
                   {owned && (
-                    <span className="text-xs px-1 sm:px-2 py-1 rounded" style={{background:'rgba(34,197,94,0.15)', color:'rgb(34,197,94)', border:'1px solid rgba(34,197,94,0.3)'}}>Owned</span>
+                    <span className="text-xs px-1 sm:px-2 py-1 rounded bg-white text-[#1565c0] border border-[#1565c0]">Owned</span>
                   )}
                   {!owned && locked && (
-                    <span className="text-xs px-1 sm:px-2 py-1 rounded" style={{background:'rgba(148,163,184,0.15)', color:'rgb(148,163,184)', border:'1px solid rgba(148,163,184,0.3)'}}>Locked</span>
+                    <span className="text-xs px-1 sm:px-2 py-1 rounded bg-white text-gray-400 border border-gray-300">Locked</span>
                   )}
                   {!owned && available && (
-                    <span className="text-xs px-1 sm:px-2 py-1 rounded" style={{background:'rgba(59,130,246,0.15)', color:'rgb(59,130,246)', border:'1px solid rgba(59,130,246,0.3)'}}>Available</span>
+                    <span className="text-xs px-1 sm:px-2 py-1 rounded bg-white text-[#1565c0] border border-[#1565c0]">Available</span>
                   )}
                 </div>
                 
@@ -580,10 +567,12 @@ export default function NFTBuyPage() {
                 <button
                   onClick={() => handleBuyNft(code)}
                   disabled={!available}
-                  className="w-full py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm font-medium text-white transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed mb-1 sm:mb-2"
+                  className="w-full py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm font-medium transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed mb-1 sm:mb-2"
                   style={{
-                    backgroundColor: available ? 'rgba(29, 68, 67, 0.8)' : 'rgba(255,255,255,0.1)',
-                    border: '1px solid var(--default-border)'
+                    backgroundColor: available ? '#fff' : '#e3e3e3',
+                    color: available ? '#1565c0' : '#888',
+                    border: '1px solid #1565c0',
+                    fontWeight: 600
                   }}
                 >
                   {owned ? `Purchased ${code}` : available ? `Buy ${code}` : `Buy ${code}`}
@@ -591,21 +580,18 @@ export default function NFTBuyPage() {
                 
                 {/* View Series Button */}
                 <Link href={`/nft/${code}`} className="block">
-                  <div className="w-full py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm font-medium text-white transition-all duration-200 text-center hover:bg-opacity-80" style={{
-                    backgroundColor: 'rgba(59,130,246,0.6)',
-                    border: '1px solid rgba(59,130,246,0.3)'
-                  }}>
+                  <div className="w-full py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm font-medium text-[#1565c0] bg-white border border-[#1565c0] text-center hover:bg-[#e3f0fd] transition-all duration-200">
                     View {code} Series
                   </div>
                 </Link>
                 
                 {!available && !owned && (
-                  <p className="mt-1 sm:mt-2 text-xs text-center" style={{color:'rgba(255,255,255,0.6)'}}>
+                  <p className="mt-1 sm:mt-2 text-xs text-center text-white">
                     Buy previous NFT first and wait 5 minutes.
                   </p>
                 )}
                 {owned && (
-                  <p className="mt-1 sm:mt-2 text-xs text-center" style={{color:'rgba(34,197,94,0.8)'}}>
+                  <p className="mt-1 sm:mt-2 text-xs text-center text-white">
                     Click &quot;View Series&quot; to see A2-A100 NFTs
                   </p>
                 )}
@@ -615,24 +601,24 @@ export default function NFTBuyPage() {
         </div>
 
         {/* Summary */}
-        <div className="mt-6 sm:mt-8 p-4 sm:p-6 rounded-xl sm:rounded-2xl border" style={{backgroundColor: 'rgba(0,0,0,0.1)', backdropFilter: 'blur(10px)', borderColor: 'var(--default-border)'}}>
+        <div className="mt-6 sm:mt-8 p-4 sm:p-6 rounded-xl sm:rounded-2xl border" style={{backgroundColor:'#1565c0', color:'#fff', borderColor:'#1565c0'}}>
           <h3 className="text-lg sm:text-xl font-bold text-white mb-3 sm:mb-4">Collection Summary</h3>
           <div className="grid grid-cols-3 gap-2 sm:gap-4 text-center">
             <div>
-              <div className="text-lg sm:text-2xl font-bold text-green-400">{nftPurchases.length}</div>
-              <div className="text-xs sm:text-sm text-gray-400">Owned</div>
+              <div className="text-lg sm:text-2xl font-bold text-white">{nftPurchases.length}</div>
+              <div className="text-xs sm:text-sm text-white/80">Owned</div>
             </div>
             <div>
-              <div className="text-lg sm:text-2xl font-bold text-blue-400">
+              <div className="text-lg sm:text-2xl font-bold text-white">
                 {NFT_SERIES.filter(code => getNftStatus(code).available).length}
               </div>
-              <div className="text-xs sm:text-sm text-gray-400">Available</div>
+              <div className="text-xs sm:text-sm text-white/80">Available</div>
             </div>
             <div>
-              <div className="text-lg sm:text-2xl font-bold text-gray-400">
+              <div className="text-lg sm:text-2xl font-bold text-white/80">
                 {NFT_SERIES.filter(code => getNftStatus(code).locked).length}
               </div>
-              <div className="text-xs sm:text-sm text-gray-400">Locked</div>
+              <div className="text-xs sm:text-sm text-white/80">Locked</div>
             </div>
           </div>
         </div>

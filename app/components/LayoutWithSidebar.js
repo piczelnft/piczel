@@ -7,7 +7,7 @@ export default function LayoutWithSidebar({ children }) {
   const { sidebarOpen, closeSidebar } = useSidebar();
 
   return (
-    <div className="min-h-screen flex" style={{background: 'linear-gradient(to bottom right, var(--default-body-bg-color) 0%, var(--theme-bg-gradient) 25%, var(--default-body-bg-color) 100%)', fontFamily: 'var(--default-font-family)'}}>
+    <div className="min-h-screen flex" style={{background: '#fff', fontFamily: 'var(--default-font-family)'}}>
       {/* Sidebar */}
       {sidebarOpen && (
         <div>

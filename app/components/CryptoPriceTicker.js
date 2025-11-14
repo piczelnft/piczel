@@ -158,215 +158,106 @@ export default function CryptoPriceTicker() {
 
   return (
     <div
-      className="fixed top-16 left-0 right-0 z-40 border-b shadow-lg ticker-glow overflow-hidden animate-fadeInUp"
+      className="fixed top-16 left-0 right-0 z-40 border-b shadow-lg overflow-hidden animate-fadeInUp"
       style={{
-        borderColor: "var(--default-border)",
-        backgroundColor: "rgba(0, 0, 0, 0.1)",
-        backdropFilter: "blur(10px)",
+        borderColor: '#1565c0',
+        backgroundColor: '#1565c0',
+        color: '#fff',
       }}
     >
       <div className="h-12 flex items-center relative">
-        {/* Animated Background */}
-        <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          <div
-            className="absolute inset-0 animate-pulse"
-            style={{
-              background:
-                "linear-gradient(to right, transparent, rgba(0, 255, 190, 0.05), transparent)",
-            }}
-          ></div>
-          <div
-            className="absolute top-0 left-0 w-full h-px"
-            style={{
-              background:
-                "linear-gradient(to right, transparent, var(--primary-color), transparent)",
-            }}
-          ></div>
-          {/* Floating particles */}
-          <div className="particle" style={{ top: "20%", left: "10%" }}></div>
-          <div className="particle" style={{ top: "60%", left: "30%" }}></div>
-          <div className="particle" style={{ top: "40%", left: "70%" }}></div>
-          <div className="particle" style={{ top: "80%", left: "90%" }}></div>
-        </div>
         {loading ? (
-          /* Loading State */
           <div className="flex items-center justify-center w-full relative z-10">
             <div className="flex items-center space-x-2">
               <div
                 className="w-4 h-4 border-2 border-t-transparent rounded-full animate-spin"
-                style={{ borderColor: "var(--primary-color)" }}
+                style={{ borderColor: '#fff' }}
               ></div>
-              <span
-                className="text-sm font-medium animate-neonGlow"
-                style={{ color: "var(--primary-color)" }}
-              >
+              <span className="text-sm font-medium" style={{ color: '#fff' }}>
                 {connectionStatus}
               </span>
             </div>
           </div>
         ) : error ? (
-          /* Error State */
           <div className="flex items-center justify-center w-full relative z-10">
             <div className="flex items-center space-x-2">
               <div
                 className="w-4 h-4 rounded-full flex items-center justify-center animate-pulse"
-                style={{ backgroundColor: "rgb(var(--danger-rgb))" }}
+                style={{ backgroundColor: '#fff' }}
               >
-                <span className="text-white text-xs">!</span>
+                <span className="text-blue-900 text-xs">!</span>
               </div>
-              <span
-                className="text-sm font-medium animate-neonGlow"
-                style={{ color: "rgb(var(--danger-rgb))" }}
-              >
+              <span className="text-sm font-medium" style={{ color: '#fff' }}>
                 {error}
               </span>
             </div>
           </div>
         ) : cryptoData.length === 0 ? (
-          /* No Data State */
           <div className="flex items-center justify-center w-full relative z-10">
             <div className="flex items-center space-x-2">
               <div
                 className="w-4 h-4 border-2 border-t-transparent rounded-full animate-spin"
-                style={{ borderColor: "rgb(var(--warning-rgb))" }}
+                style={{ borderColor: '#fff' }}
               ></div>
-              <span
-                className="text-sm font-medium animate-neonGlow"
-                style={{ color: "rgb(var(--warning-rgb))" }}
-              >
+              <span className="text-sm font-medium" style={{ color: '#fff' }}>
                 Waiting for data...
               </span>
             </div>
           </div>
         ) : (
-          /* Scrolling Ticker Container */
           <div
             className="flex items-center space-x-8 animate-scroll whitespace-nowrap relative z-10"
-            style={{ width: "200%" }}
+            style={{ width: '200%' }}
           >
             {duplicatedData.map((crypto, index) => (
               <div
                 key={`${crypto.symbol}-${index}`}
                 className="flex items-center space-x-3 flex-shrink-0 group hover-lift-enhanced"
               >
-                {/* Crypto Icon */}
                 <div
                   className="w-6 h-6 rounded-full flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-300 animate-cardFloat"
-                  style={{
-                    background:
-                      "linear-gradient(135deg, rgb(var(--warning-rgb)), rgb(var(--orange-rgb)))",
-                  }}
+                  style={{ backgroundColor: '#0d47a1' }}
                 >
                   <span className="text-white font-bold text-xs">
                     {crypto.symbol.charAt(0)}
                   </span>
                 </div>
-
-                {/* Crypto Info */}
                 <div className="flex items-center space-x-2">
-                  <span className="text-white font-semibold text-sm gradient-text-neon">
+                  <span className="text-white font-semibold text-sm">
                     {crypto.symbol}
                   </span>
-                  <span
-                    className="text-xs"
-                    style={{ color: "rgba(255, 255, 255, 0.7)" }}
-                  >
+                  <span className="text-xs text-white">
                     {crypto.name}
                   </span>
                 </div>
-
-                {/* Price */}
-                <div
-                  className={`font-bold text-sm transition-all duration-500 animate-neonGlow ${
-                    crypto.isPositive ? "text-green-400" : "text-red-400"
-                  }`}
-                  style={{
-                    color: crypto.isPositive
-                      ? "rgb(var(--success-rgb))"
-                      : "rgb(var(--danger-rgb))",
-                  }}
-                >
+                <div className="font-bold text-sm text-white">
                   {crypto.price}
-                  <span
-                    className={`ml-1 text-xs`}
-                    style={{
-                      color: crypto.isPositive
-                        ? "rgb(var(--success-rgb))"
-                        : "rgb(var(--danger-rgb))",
-                    }}
-                  >
-                    {crypto.isPositive ? "↗" : "↘"}
+                  <span className="ml-1 text-xs text-white">
+                    {crypto.isPositive ? '↗' : '↘'}
                   </span>
                 </div>
-
-                {/* Price Change */}
                 <div className="flex items-center space-x-2">
-                  {/* 24h Change */}
                   <div
-                    className={`flex items-center space-x-1 px-2 py-1 rounded-full text-xs font-medium transition-all duration-300 ${
-                      crypto.isPositive
-                        ? "hover:bg-opacity-30"
-                        : "hover:bg-opacity-30"
-                    }`}
-                    style={{
-                      backgroundColor: crypto.isPositive
-                        ? "rgba(72, 247, 104, 0.2)"
-                        : "rgba(255, 74, 74, 0.2)",
-                      color: crypto.isPositive
-                        ? "rgb(var(--success-rgb))"
-                        : "rgb(var(--danger-rgb))",
-                      border: `1px solid ${
-                        crypto.isPositive
-                          ? "rgba(72, 247, 104, 0.3)"
-                          : "rgba(255, 74, 74, 0.3)"
-                      }`,
-                    }}
+                    className="flex items-center space-x-1 px-2 py-1 rounded-full text-xs font-medium"
+                    style={{ backgroundColor: '#1565c0', color: '#fff', border: '1px solid #fff' }}
                   >
-                    <span className={`text-xs`}>
-                      {crypto.isPositive ? "↗" : "↘"}
-                    </span>
+                    <span className="text-xs">{crypto.isPositive ? '↗' : '↘'}</span>
                     <span>{crypto.change}</span>
                   </div>
-
-                  {/* Real-time Change */}
-                  {crypto.hasRealTimeChange &&
-                    Math.abs(crypto.realTimeChangePercent) > 0.01 && (
-                      <div
-                        className={`flex items-center space-x-1 px-1 py-0.5 rounded text-xs font-medium transition-all duration-300 ${
-                          crypto.isRealTimePositive
-                            ? "hover:bg-opacity-30"
-                            : "hover:bg-opacity-30"
-                        }`}
-                        style={{
-                          backgroundColor: crypto.isRealTimePositive
-                            ? "rgba(0, 255, 190, 0.2)"
-                            : "rgba(255, 74, 74, 0.2)",
-                          color: crypto.isRealTimePositive
-                            ? "var(--primary-color)"
-                            : "rgb(var(--danger-rgb))",
-                          border: `1px solid ${
-                            crypto.isRealTimePositive
-                              ? "rgba(0, 255, 190, 0.3)"
-                              : "rgba(255, 74, 74, 0.3)"
-                          }`,
-                        }}
-                      >
-                        <span className="text-xs">
-                          {crypto.isRealTimePositive ? "↗" : "↘"}
-                        </span>
-                        <span>
-                          {crypto.isRealTimePositive ? "+" : ""}
-                          {crypto.realTimeChangePercent.toFixed(2)}%
-                        </span>
-                      </div>
-                    )}
+                  {crypto.hasRealTimeChange && Math.abs(crypto.realTimeChangePercent) > 0.01 && (
+                    <div
+                      className="flex items-center space-x-1 px-1 py-0.5 rounded text-xs font-medium"
+                      style={{ backgroundColor: '#1565c0', color: '#fff', border: '1px solid #fff' }}
+                    >
+                      <span className="text-xs">{crypto.isRealTimePositive ? '↗' : '↘'}</span>
+                      <span>
+                        {crypto.isRealTimePositive ? '+' : ''}
+                        {crypto.realTimeChangePercent.toFixed(2)}%
+                      </span>
+                    </div>
+                  )}
                 </div>
-
-                {/* Separator */}
-                <div
-                  className="w-px h-4"
-                  style={{ backgroundColor: "var(--default-border)" }}
-                ></div>
+                <div className="w-px h-4" style={{ backgroundColor: '#fff' }}></div>
               </div>
             ))}
           </div>

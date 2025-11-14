@@ -121,27 +121,27 @@ export default function LevelIncomePage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-green-900 to-emerald-900 flex items-center justify-center">
-        <div className="text-white text-xl">Loading level income data...</div>
+      <div className="min-h-screen flex items-center justify-center bg-white">
+        <div className="text-[#1565c0] text-xl">Loading level income data...</div>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-green-900 to-emerald-900 flex items-center justify-center">
-        <div className="text-red-400 text-xl">Error: {error}</div>
+      <div className="min-h-screen flex items-center justify-center bg-white">
+        <div className="text-red-500 text-xl">Error: {error}</div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-green-900 to-emerald-900">
+    <div className="min-h-screen bg-white">
       <div className="container mx-auto px-4 py-8">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-4xl font-bold text-white mb-2">Level Income Details</h1>
-          <p className="text-gray-300">
+          <h1 className="text-4xl font-bold text-[#1565c0] mb-2">Level Income Details</h1>
+          <p className="text-[#1565c0]/80">
             Track your income from users who used your sponsor ID and their NFT purchases
           </p>
         </div>
@@ -149,58 +149,46 @@ export default function LevelIncomePage() {
         {/* Summary Cards */}
         {levelIncomeData?.summary && (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-            <div className="bg-white/10 backdrop-blur-lg rounded-xl p-6 border border-white/20">
+            <div className="rounded-xl p-6 border" style={{background:'#1565c0', color:'#fff', borderColor:'#1565c0'}}>
               <div className="text-center">
-                <div className="text-2xl font-bold text-green-400 mb-2">
+                <div className="text-2xl font-bold text-white mb-2">
                   {levelIncomeData.summary.totalEntries}
                 </div>
-                <div className="text-sm text-gray-300">Total NFT Purchases</div>
+                <div className="text-sm text-white/80">Total NFT Purchases</div>
               </div>
             </div>
-            
-            <div className="bg-white/10 backdrop-blur-lg rounded-xl p-6 border border-white/20">
+            <div className="rounded-xl p-6 border" style={{background:'#1565c0', color:'#fff', borderColor:'#1565c0'}}>
               <div className="text-center">
-                <div className="text-2xl font-bold text-green-400 mb-2">
+                <div className="text-2xl font-bold text-white mb-2">
                   {formatCurrency(levelIncomeData.summary.totalLevelIncome)}
                 </div>
-                <div className="text-sm text-gray-300">Total Earned</div>
+                <div className="text-sm text-white/80">Total Earned</div>
               </div>
             </div>
-            
-            {/* <div className="bg-white/10 backdrop-blur-lg rounded-xl p-6 border border-white/20">
+            <div className="rounded-xl p-6 border" style={{background:'#1565c0', color:'#fff', borderColor:'#1565c0'}}>
               <div className="text-center">
-                <div className="text-2xl font-bold text-green-400 mb-2">
-                  {formatCurrency(levelIncomeData.summary.totalRemaining)}
-                </div>
-                <div className="text-sm text-gray-300">Remaining</div>
-              </div>
-            </div> */}
-            
-            <div className="bg-white/10 backdrop-blur-lg rounded-xl p-6 border border-white/20">
-              <div className="text-center">
-                <div className="text-2xl font-bold text-green-400 mb-2">
+                <div className="text-2xl font-bold text-white mb-2">
                   {formatCurrency(levelIncomeData.summary.totalDailyAmount)}
                 </div>
-                <div className="text-sm text-gray-300">Daily Amount</div>
+                <div className="text-sm text-white/80">Daily Amount</div>
               </div>
             </div>
           </div>
         )}
 
         {/* Level Income Table */}
-        <div className="bg-white/10 backdrop-blur-lg rounded-xl border border-white/20 overflow-hidden">
-          <div className="px-6 py-4 border-b border-white/20">
+        <div className="rounded-xl border overflow-hidden" style={{background:'#1565c0', color:'#fff', borderColor:'#1565c0'}}>
+          <div className="px-6 py-4 border-b" style={{borderColor:'#fff'}}>
             <h2 className="text-xl font-semibold text-white">Referral Income Breakdown</h2>
-            <p className="text-gray-300 text-sm mt-1">
+            <p className="text-white/80 text-sm mt-1">
               Detailed breakdown of income from users who used your sponsor ID
             </p>
           </div>
 
-
           {/* Responsive Table for all devices */}
           <div className="overflow-x-auto">
             <table className="w-full min-w-[500px] text-sm text-left">
-              <thead className="bg-white/5">
+              <thead style={{background:'#1565c0'}}>
                 <tr>
                   <th className="px-6 py-4 text-white font-semibold">S.No</th>
                   <th className="px-6 py-4 text-white font-semibold">Level</th>
@@ -213,23 +201,23 @@ export default function LevelIncomePage() {
                 {Array.from({ length: 10 }, (_, li) => li + 1).flatMap((lvl) => (
                   groupedLevels[lvl] && groupedLevels[lvl].length > 0
                     ? groupedLevels[lvl].map((entry, idx) => (
-                        <tr key={`${lvl}-${entry.referral?.memberId || entry.referral?.email || idx}`} className="hover:bg-white/5 transition-colors">
-                          <td className="px-6 py-4" style={{color: 'rgba(255,255,255,0.8)'}}>{idx + 1}</td>
+                        <tr key={`${lvl}-${entry.referral?.memberId || entry.referral?.email || idx}`} className="hover:bg-white/10 transition-colors">
+                          <td className="px-6 py-4 text-white/80">{idx + 1}</td>
                           <td className="px-6 py-4 font-semibold">
-                            <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-green-500/20 text-green-400 border border-green-500/30`}>L{lvl}</span>
+                            <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-white text-[#1565c0] border border-[#1565c0]">L{lvl}</span>
                           </td>
                           <td className="px-6 py-4 text-white font-medium">{entry.referral?.name || "Unknown"}</td>
                           <td className="px-6 py-4 text-center">
-                            <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-blue-500/20 text-blue-400 border border-blue-500/30">
+                            <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-white text-[#1565c0] border border-[#1565c0]">
                               {entry.nftPurchaseCount || 1}
                             </span>
                           </td>
-                          <td className="px-6 py-4" style={{color: 'rgba(255,255,255,0.8)'}}>{formatDate(entry.lastPayment)}</td>
+                          <td className="px-6 py-4 text-white/80">{formatDate(entry.lastPayment)}</td>
                         </tr>
                       ))
                     : [
                         <tr key={`empty-${lvl}`}>
-                          <td className="px-6 py-4 text-center" colSpan={5} style={{color: 'rgba(255,255,255,0.8)'}}>
+                          <td className="px-6 py-4 text-center text-white/80" colSpan={5}>
                             No referrals at Level {lvl}
                           </td>
                         </tr>
@@ -241,8 +229,8 @@ export default function LevelIncomePage() {
 
           {(!levelIncomeData?.levelIncomeDetails || levelIncomeData.levelIncomeDetails.length === 0) && (
             <div className="text-center py-12">
-              <div className="text-gray-400 text-lg">No referral income data available</div>
-              <div className="text-gray-500 text-sm mt-2">
+              <div className="text-white/80 text-lg">No referral income data available</div>
+              <div className="text-white/60 text-sm mt-2">
                 Income will appear here when users sign up using your sponsor ID and purchase NFTs
               </div>
             </div>

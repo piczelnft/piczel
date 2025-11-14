@@ -118,7 +118,7 @@ export default function ProfileSummary() {
   // Loading state
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center" style={{background: 'linear-gradient(to bottom right, var(--default-body-bg-color) 0%, var(--theme-bg-gradient) 25%, var(--default-body-bg-color) 100%)', fontFamily: 'var(--default-font-family)'}}>
+      <div className="min-h-screen flex items-center justify-center" style={{background: '#fff', fontFamily: 'var(--default-font-family)'}}>
         <div className="text-white text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white mx-auto mb-4"></div>
           <p>Loading profile...</p>
@@ -130,7 +130,7 @@ export default function ProfileSummary() {
   // Error state
   if (error && !profileData.fullName) {
     return (
-      <div className="min-h-screen flex items-center justify-center" style={{background: 'linear-gradient(to bottom right, var(--default-body-bg-color) 0%, var(--theme-bg-gradient) 25%, var(--default-body-bg-color) 100%)', fontFamily: 'var(--default-font-family)'}}>
+      <div className="min-h-screen flex items-center justify-center" style={{background: '#fff', fontFamily: 'var(--default-font-family)'}}>
         <div className="text-white text-center max-w-md">
           <p className="text-red-400 mb-4">Error: {error}</p>
           <button 
@@ -145,22 +145,23 @@ export default function ProfileSummary() {
   }
 
   return (
-    <div className="min-h-screen" style={{background: 'linear-gradient(to bottom right, var(--default-body-bg-color) 0%, var(--theme-bg-gradient) 25%, var(--default-body-bg-color) 100%)', fontFamily: 'var(--default-font-family)'}}>
+    <div className="min-h-screen" style={{background: '#fff', fontFamily: 'var(--default-font-family)'}}>
       {/* Header */}
-      <div className="backdrop-blur-sm border-b" style={{background: 'linear-gradient(to right, rgba(29, 68, 67, 0.8), rgba(29, 68, 67, 0.8))', borderColor: 'var(--default-border)'}}>
+      <div className="border-b" style={{backgroundColor: '#1565c0', borderColor: '#1565c0'}}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex items-center justify-between">
             <Link href="/" className="transition-colors" style={{color: 'var(--primary-color)'}}>
               ← Back to Dashboard
             </Link>
             <div className="text-center">
-              <h1 className="text-2xl font-bold text-white">👤 Profile Settings</h1>
-              <p className="text-gray-300 text-sm" style={{color: 'rgba(255, 255, 255, 0.7)'}}>Update your profile settings</p>
+              <h1 className="text-2xl font-bold text-white">Profile Settings</h1>
+              <p className="text-white text-sm">Update your profile settings</p>
               <div className="mt-2">
                 <button 
                   onClick={fetchProfileData}
                   className="btn-enhanced px-3 py-1 text-white hover-bounce text-xs flex items-center space-x-1 mx-auto"
                   disabled={loading}
+                  style={{backgroundColor: '#0d47a1', border: 'none'}}
                 >
                   <span className={`text-xs ${loading ? 'animate-spin' : ''}`}>
                     {loading ? '⟳' : '↻'}
@@ -177,7 +178,7 @@ export default function ProfileSummary() {
       {/* Main Content */}
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Profile Card */}
-        <div className="card-enhanced rounded-2xl p-8 shadow-2xl animate-fadeInUp">
+        <div className="rounded-2xl p-8 shadow-2xl animate-fadeInUp" style={{backgroundColor: '#1565c0', color: '#fff'}}>
           <div className="flex items-center justify-between mb-8">
             <h2 className="text-2xl font-bold text-white">Profile Information</h2>
             <button
@@ -197,7 +198,7 @@ export default function ProfileSummary() {
             <div className="lg:col-span-1">
               <div className="text-center">
                 <div className="relative w-32 h-32 mx-auto mb-4">
-                  <div className="w-full h-full rounded-full flex items-center justify-center text-white text-4xl font-bold" style={{background: 'linear-gradient(to bottom right, var(--primary-color), var(--secondary-color))', color: 'white'}}>
+                  <div className="w-full h-full rounded-full flex items-center justify-center text-white text-4xl font-bold" style={{backgroundColor: '#0d47a1', color: 'white'}}>
                     {profileData.profileImage ? (
                       <Image
                         src={URL.createObjectURL(profileData.profileImage)}
@@ -213,16 +214,16 @@ export default function ProfileSummary() {
                 
                 <div className="space-y-2">
                   <h3 className="text-xl font-semibold text-white">{profileData.fullName || 'Loading...'}</h3>
-                  <p className="text-gray-400">{profileData.email}</p>
+                  <p className="text-white">{profileData.email}</p>
                   {profileData.memberId && (
-                    <p className="text-sm" style={{color: 'var(--primary-color)'}}>ID: {profileData.memberId}</p>
+                    <p className="text-sm" style={{color: '#fff'}}>ID: {profileData.memberId}</p>
                   )}
                 </div>
 
                 {/* Error Display */}
                 {error && (
-                  <div className="mt-4 p-3 rounded-lg" style={{backgroundColor: 'rgba(var(--danger-rgb), 0.2)', border: '1px solid rgba(var(--danger-rgb), 0.3)'}}>
-                    <p className="text-sm" style={{color: 'rgb(var(--danger-rgb))'}}>
+                  <div className="mt-4 p-3 rounded-lg" style={{backgroundColor: '#fff', color: '#d32f2f'}}>
+                    <p className="text-sm">
                       ⚠️ {error}
                     </p>
                   </div>
@@ -241,7 +242,7 @@ export default function ProfileSummary() {
               <div className="space-y-6">
                 {/* Full Name */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                  <label className="block text-sm font-medium text-white mb-2">
                     Full Name:
                   </label>
                   {isEditing ? (
@@ -251,13 +252,12 @@ export default function ProfileSummary() {
                       onChange={(e) => handleInputChange('fullName', e.target.value)}
                       className="w-full text-white px-4 py-3 rounded-xl focus:outline-none focus:ring-2 focus:border-transparent transition-all duration-200"
                       style={{
-                        backgroundColor: 'rgba(29, 68, 67, 0.8)',
-                        border: '1px solid var(--default-border)',
-                        focusRingColor: 'var(--primary-color)'
+                        backgroundColor: '#0d47a1',
+                        border: '1px solid #fff',
                       }}
                     />
                   ) : (
-                    <div className="text-white px-4 py-3 rounded-xl" style={{backgroundColor: 'rgba(29, 68, 67, 0.8)', border: '1px solid var(--default-border)'}}>
+                    <div className="text-white px-4 py-3 rounded-xl" style={{backgroundColor: '#0d47a1', border: '1px solid #fff'}}>
                       {profileData.fullName}
                     </div>
                   )}
@@ -265,7 +265,7 @@ export default function ProfileSummary() {
 
                 {/* Email */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                  <label className="block text-sm font-medium text-white mb-2">
                     Email:
                   </label>
                   {isEditing ? (
@@ -275,13 +275,12 @@ export default function ProfileSummary() {
                       onChange={(e) => handleInputChange('email', e.target.value)}
                       className="w-full text-white px-4 py-3 rounded-xl focus:outline-none focus:ring-2 focus:border-transparent transition-all duration-200"
                       style={{
-                        backgroundColor: 'rgba(29, 68, 67, 0.8)',
-                        border: '1px solid var(--default-border)',
-                        focusRingColor: 'var(--primary-color)'
+                        backgroundColor: '#0d47a1',
+                        border: '1px solid #fff',
                       }}
                     />
                   ) : (
-                    <div className="text-white px-4 py-3 rounded-xl" style={{backgroundColor: 'rgba(29, 68, 67, 0.8)', border: '1px solid var(--default-border)'}}>
+                    <div className="text-white px-4 py-3 rounded-xl" style={{backgroundColor: '#0d47a1', border: '1px solid #fff'}}>
                       {profileData.email}
                     </div>
                   )}
@@ -289,7 +288,7 @@ export default function ProfileSummary() {
 
                 {/* Mobile */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                  <label className="block text-sm font-medium text-white mb-2">
                     Mobile:
                   </label>
                   {isEditing ? (
@@ -299,13 +298,12 @@ export default function ProfileSummary() {
                       onChange={(e) => handleInputChange('mobile', e.target.value)}
                       className="w-full text-white px-4 py-3 rounded-xl focus:outline-none focus:ring-2 focus:border-transparent transition-all duration-200"
                       style={{
-                        backgroundColor: 'rgba(29, 68, 67, 0.8)',
-                        border: '1px solid var(--default-border)',
-                        focusRingColor: 'var(--primary-color)'
+                        backgroundColor: '#0d47a1',
+                        border: '1px solid #fff',
                       }}
                     />
                   ) : (
-                    <div className="text-white px-4 py-3 rounded-xl" style={{backgroundColor: 'rgba(29, 68, 67, 0.8)', border: '1px solid var(--default-border)'}}>
+                    <div className="text-white px-4 py-3 rounded-xl" style={{backgroundColor: '#0d47a1', border: '1px solid #fff'}}>
                       {profileData.mobile}
                     </div>
                   )}
@@ -313,7 +311,7 @@ export default function ProfileSummary() {
 
                 {/* Country */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                  <label className="block text-sm font-medium text-white mb-2">
                     Country:
                   </label>
                   {isEditing ? (
@@ -322,9 +320,8 @@ export default function ProfileSummary() {
                       onChange={(e) => handleInputChange('country', e.target.value)}
                       className="w-full text-white px-4 py-3 rounded-xl focus:outline-none focus:ring-2 focus:border-transparent transition-all duration-200"
                       style={{
-                        backgroundColor: 'rgba(29, 68, 67, 0.8)',
-                        border: '1px solid var(--default-border)',
-                        focusRingColor: 'var(--primary-color)'
+                        backgroundColor: '#0d47a1',
+                        border: '1px solid #fff',
                       }}
                     >
                       <option value="India">India</option>
@@ -339,7 +336,7 @@ export default function ProfileSummary() {
                       <option value="Brazil">Brazil</option>
                     </select>
                   ) : (
-                    <div className="text-white px-4 py-3 rounded-xl" style={{backgroundColor: 'rgba(29, 68, 67, 0.8)', border: '1px solid var(--default-border)'}}>
+                    <div className="text-white px-4 py-3 rounded-xl" style={{backgroundColor: '#0d47a1', border: '1px solid #fff'}}>
                       {profileData.country}
                     </div>
                   )}
@@ -354,7 +351,8 @@ export default function ProfileSummary() {
               <button
                 onClick={handleSave}
                 disabled={saving}
-                className={`px-8 py-3 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white font-bold rounded-xl transition-all duration-300 hover:scale-105 shadow-lg hover:shadow-green-500/25 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 flex items-center space-x-2`}
+                className={`px-8 py-3 text-white font-bold rounded-xl transition-all duration-300 hover:scale-105 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 flex items-center space-x-2`}
+                style={{backgroundColor: '#1565c0', border: 'none'}}
               >
                 {saving && (
                   <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>

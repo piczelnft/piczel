@@ -139,10 +139,6 @@ function SignupPageContent() {
       newErrors.sponsorId = "Please validate a valid Sponsorship ID";
     }
 
-    if (!formData.note.trim()) {
-      newErrors.note = "Re-enter Password is required";
-    }
-
     return newErrors;
   };
 
@@ -232,7 +228,7 @@ function SignupPageContent() {
   }
 
   return (
-    <div className="min-h-screen flex" style={{background: 'linear-gradient(to bottom right, var(--default-body-bg-color) 0%, var(--theme-bg-gradient) 25%, var(--default-body-bg-color) 100%)', fontFamily: 'var(--default-font-family)'}}>
+    <div className="min-h-screen flex" style={{background: 'linear-gradient(135deg, #1565c0 0%, #1976d2 50%, #2196f3 100%)', fontFamily: 'var(--default-font-family)'}}>
       {/* Left Half - Trading Animation */}
       <div className="hidden lg:flex lg:w-1/2 relative overflow-hidden">
         {/* Animated Background */}
@@ -243,17 +239,17 @@ function SignupPageContent() {
           <div className="particle" style={{top: '60%', left: '20%'}}></div>
           <div className="particle" style={{top: '80%', left: '70%'}}></div>
           <div className="particle" style={{top: '40%', left: '90%'}}></div>
-          
-          {/* Gradient orbs */}
-          <div className="absolute -top-40 -right-40 w-80 h-80 bg-gradient-to-br from-cyan-500/10 to-teal-500/10 rounded-full blur-3xl animate-pulse"></div>
-          <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-gradient-to-br from-teal-500/10 to-cyan-400/10 rounded-full blur-3xl animate-pulse delay-1000"></div>
-          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-gradient-to-br from-emerald-700/5 to-teal-600/5 rounded-full blur-3xl animate-float"></div>
+
+          {/* Gradient orbs (blue theme) */}
+          <div className="absolute -top-40 -right-40 w-80 h-80 bg-gradient-to-br from-[#1976d2]/20 to-[#2196f3]/20 rounded-full blur-3xl animate-pulse"></div>
+          <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-gradient-to-br from-[#2196f3]/20 to-[#1565c0]/20 rounded-full blur-3xl animate-pulse delay-1000"></div>
+          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-gradient-to-br from-[#1565c0]/10 to-[#1976d2]/10 rounded-full blur-3xl animate-float"></div>
         </div>
 
         {/* Trading Visualization */}
         <div className="relative z-10 flex flex-col justify-center items-center w-full px-8">
           <div className="text-center mb-12">
-            <h1 className="text-5xl font-bold text-white gradient-text-enhanced mb-4 animate-fadeInUp">
+            <h1 className="text-5xl font-bold text-white mb-4 animate-fadeInUp">
               PICZEL
             </h1>
             <p className="text-xl text-white/80 animate-fadeInUp" style={{animationDelay: '0.2s'}}>
@@ -264,11 +260,11 @@ function SignupPageContent() {
           {/* Animated Trading Charts */}
           <div className="w-full max-w-md space-y-6">
             {/* Price Chart Animation */}
-            <div className="card-enhanced rounded-xl p-6 animate-fadeInUp" style={{animationDelay: '0.4s', backgroundColor: 'rgba(0, 0, 0, 0.1)', backdropFilter: 'blur(10px)', borderColor: 'var(--default-border)'}}>
+            <div className="card-enhanced rounded-xl p-6 animate-fadeInUp" style={{animationDelay: '0.4s', backgroundColor: 'rgba(21, 101, 192, 0.15)', backdropFilter: 'blur(10px)', borderColor: '#1565c0'}}>
               <div className="flex justify-between items-center mb-4">
                 <div>
                   <div className="text-white font-semibold">ETH/USD</div>
-                  <div className="text-green-400 text-sm">+3.21%</div>
+                  <div className="text-blue-400 text-sm">+3.21%</div>
                 </div>
                 <div className="text-white font-bold text-xl">$3,456.78</div>
               </div>
@@ -276,16 +272,16 @@ function SignupPageContent() {
                 <svg className="w-full h-full" viewBox="0 0 200 100" preserveAspectRatio="none">
                   <path
                     d="M0,80 L20,60 L40,90 L60,40 L80,100 L100,50 L120,95 L140,30 L160,80 L180,55 L200,75"
-                    stroke="url(#signupTradingGradient)"
+                    stroke="url(#signupTradingGradientBlue)"
                     strokeWidth="3"
                     fill="none"
                     className="animate-zigzag"
                   />
                   <defs>
-                    <linearGradient id="signupTradingGradient" x1="0%" y1="0%" x2="100%" y2="0%">
-                      <stop offset="0%" stopColor="rgb(34, 197, 94)" />
-                      <stop offset="50%" stopColor="rgb(59, 130, 246)" />
-                      <stop offset="100%" stopColor="rgb(34, 197, 94)" />
+                    <linearGradient id="signupTradingGradientBlue" x1="0%" y1="0%" x2="100%" y2="0%">
+                      <stop offset="0%" stopColor="#2196f3" />
+                      <stop offset="50%" stopColor="#1565c0" />
+                      <stop offset="100%" stopColor="#1976d2" />
                     </linearGradient>
                   </defs>
                 </svg>
@@ -294,28 +290,28 @@ function SignupPageContent() {
 
             {/* Live Trading Stats */}
             <div className="grid grid-cols-2 gap-4 animate-fadeInUp" style={{animationDelay: '0.6s'}}>
-              <div className="card-enhanced rounded-lg p-4 text-center" style={{backgroundColor: 'rgba(0, 0, 0, 0.1)', backdropFilter: 'blur(10px)', borderColor: 'var(--default-border)'}}>
+              <div className="card-enhanced rounded-lg p-4 text-center" style={{backgroundColor: 'rgba(21, 101, 192, 0.15)', backdropFilter: 'blur(10px)', borderColor: '#1565c0'}}>
                 <div className="text-white font-bold text-lg">Market Cap</div>
-                <div className="text-green-400 font-semibold">$1.2T</div>
+                <div className="text-blue-400 font-semibold">$1.2T</div>
               </div>
-              <div className="card-enhanced rounded-lg p-4 text-center" style={{backgroundColor: 'rgba(0, 0, 0, 0.1)', backdropFilter: 'blur(10px)', borderColor: 'var(--default-border)'}}>
+              <div className="card-enhanced rounded-lg p-4 text-center" style={{backgroundColor: 'rgba(21, 101, 192, 0.15)', backdropFilter: 'blur(10px)', borderColor: '#1565c0'}}>
                 <div className="text-white font-bold text-lg">New Users</div>
-                <div className="text-blue-400 font-semibold">5.2K+</div>
+                <div className="text-blue-200 font-semibold">5.2K+</div>
               </div>
             </div>
 
             {/* Trading Features */}
             <div className="space-y-3 animate-fadeInUp" style={{animationDelay: '0.8s'}}>
               <div className="flex items-center space-x-3 text-white/80">
-                <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
+                <div className="w-2 h-2 bg-blue-400 rounded-full animate-pulse"></div>
                 <span>Instant Account Setup</span>
               </div>
               <div className="flex items-center space-x-3 text-white/80">
-                <div className="w-2 h-2 bg-blue-400 rounded-full animate-pulse"></div>
+                <div className="w-2 h-2 bg-blue-200 rounded-full animate-pulse"></div>
                 <span>Multi-Currency Support</span>
               </div>
               <div className="flex items-center space-x-3 text-white/80">
-                <div className="w-2 h-2 bg-purple-400 rounded-full animate-pulse"></div>
+                <div className="w-2 h-2 bg-white rounded-full animate-pulse"></div>
                 <span>24/7 Customer Support</span>
               </div>
             </div>
@@ -327,15 +323,15 @@ function SignupPageContent() {
       <div className="w-full lg:w-1/2 flex items-center justify-center px-4 py-12">
       <div className="max-w-md w-full space-y-8">
         <div className="text-center">
-          <h2 className="mt-6 text-3xl font-bold text-white gradient-text-enhanced animate-fadeInUp">
+          <h2 className="mt-6 text-3xl font-bold text-white animate-fadeInUp">
             Create Your Account
           </h2>
-            <p className="mt-2 text-sm animate-fadeInUp" style={{color: 'rgba(255, 255, 255, 0.7)', animationDelay: '0.2s'}}>
+            <p className="mt-2 text-sm animate-fadeInUp text-white" style={{animationDelay: '0.2s'}}>
             Join PICZEL and start your crypto journey
           </p>
         </div>
 
-          <div className="card-enhanced rounded-xl shadow-2xl p-8 animate-fadeInUp" style={{animationDelay: '0.4s'}}>
+          <div className="rounded-xl shadow-2xl p-8 animate-fadeInUp bg-[#1565c0] border border-blue-800 text-white" style={{animationDelay: '0.4s'}}>
           {/* Wallet Connect Optional */}
           <div className="mb-6">
             {!walletConnected ? (
@@ -394,8 +390,7 @@ function SignupPageContent() {
             <div>
               <label
                 htmlFor="name"
-                className="block text-sm font-medium mb-2"
-                style={{ color: "rgba(255, 255, 255, 0.8)" }}
+                className="block text-sm font-medium mb-2 text-white"
               >
                 Full Name
               </label>
@@ -406,13 +401,7 @@ function SignupPageContent() {
                 required
                 value={formData.name}
                 onChange={handleChange}
-                className="w-full px-4 py-3 rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:border-transparent"
-                style={{
-                  backgroundColor: "rgba(29, 68, 67, 0.8)",
-                  border: "1px solid var(--default-border)",
-                  color: "rgb(var(--default-text-color-rgb))",
-                  focusRingColor: "var(--primary-color)",
-                }}
+                className="w-full px-4 py-3 rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:border-blue-300 bg-blue-100 border border-blue-200 text-blue-900 placeholder-blue-400"
                 placeholder="Enter your full name"
               />
               {errors.name && (
@@ -428,8 +417,7 @@ function SignupPageContent() {
             <div>
               <label
                 htmlFor="email"
-                className="block text-sm font-medium mb-2"
-                style={{ color: "rgba(255, 255, 255, 0.8)" }}
+                className="block text-sm font-medium mb-2 text-white"
               >
                 Email Address
               </label>
@@ -440,13 +428,7 @@ function SignupPageContent() {
                 required
                 value={formData.email}
                 onChange={handleChange}
-                className="w-full px-4 py-3 rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:border-transparent"
-                style={{
-                  backgroundColor: "rgba(29, 68, 67, 0.8)",
-                  border: "1px solid var(--default-border)",
-                  color: "rgb(var(--default-text-color-rgb))",
-                  focusRingColor: "var(--primary-color)",
-                }}
+                className="w-full px-4 py-3 rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:border-blue-300 bg-blue-100 border border-blue-200 text-blue-900 placeholder-blue-400"
                 placeholder="Enter your email"
               />
               {errors.email && (
@@ -462,8 +444,7 @@ function SignupPageContent() {
             <div>
               <label
                 htmlFor="mobile"
-                className="block text-sm font-medium mb-2"
-                style={{ color: "rgba(255, 255, 255, 0.8)" }}
+                className="block text-sm font-medium mb-2 text-white"
               >
                 Mobile Number
               </label>
@@ -474,13 +455,7 @@ function SignupPageContent() {
                 required
                 value={formData.mobile}
                 onChange={handleChange}
-                className="w-full px-4 py-3 rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:border-transparent"
-                style={{
-                  backgroundColor: "rgba(29, 68, 67, 0.8)",
-                  border: "1px solid var(--default-border)",
-                  color: "rgb(var(--default-text-color-rgb))",
-                  focusRingColor: "var(--primary-color)",
-                }}
+                className="w-full px-4 py-3 rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:border-blue-300 bg-blue-100 border border-blue-200 text-blue-900 placeholder-blue-400"
                 placeholder="Enter your mobile number"
               />
               {errors.mobile && (
@@ -496,8 +471,7 @@ function SignupPageContent() {
             <div>
               <label
                 htmlFor="sponsorId"
-                className="block text-sm font-medium mb-2"
-                style={{ color: "rgba(255, 255, 255, 0.8)" }}
+                className="block text-sm font-medium mb-2 text-white"
               >
                 Sponsorship ID *
               </label>
@@ -509,20 +483,14 @@ function SignupPageContent() {
                   required
                   value={formData.sponsorId}
                   onChange={handleChange}
-                  className="flex-1 px-4 py-3 rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:border-transparent"
-                  style={{
-                    backgroundColor: "rgba(29, 68, 67, 0.8)",
-                    border: "1px solid var(--default-border)",
-                    color: "rgb(var(--default-text-color-rgb))",
-                    focusRingColor: "var(--primary-color)",
-                  }}
+                  className="flex-1 px-4 py-3 rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:border-blue-300 bg-blue-100 border border-blue-200 text-blue-900 placeholder-blue-400"
                   placeholder="Enter sponsor's ID (e.g., M123ABC)"
                 />
                 <button
                   type="button"
                   onClick={validateSponsor}
                   disabled={!formData.sponsorId.trim() || sponsorChecking}
-                  className="btn-enhanced hover-bounce hover-glow px-4 py-3 rounded-lg text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="px-4 py-3 rounded-lg text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed bg-white text-[#1565c0] border border-blue-200 hover:bg-blue-100 hover:text-blue-900 transition-all duration-200"
                 >
                   {sponsorChecking ? "Checking..." : "Validate"}
                 </button>
@@ -566,8 +534,7 @@ function SignupPageContent() {
             <div>
               <label
                 htmlFor="password"
-                className="block text-sm font-medium mb-2"
-                style={{ color: "rgba(255, 255, 255, 0.8)" }}
+                className="block text-sm font-medium mb-2 text-white"
               >
                 Password
               </label>
@@ -579,13 +546,7 @@ function SignupPageContent() {
                   required
                   value={formData.password}
                   onChange={handleChange}
-                  className="w-full px-4 py-3 pr-12 rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:border-transparent"
-                  style={{
-                    backgroundColor: "rgba(29, 68, 67, 0.8)",
-                    border: "1px solid var(--default-border)",
-                    color: "rgb(var(--default-text-color-rgb))",
-                    focusRingColor: "var(--primary-color)",
-                  }}
+                  className="w-full px-4 py-3 pr-12 rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:border-blue-300 bg-blue-100 border border-blue-200 text-blue-900 placeholder-blue-400"
                   placeholder="Create a password"
                 />
                 <button
@@ -618,8 +579,7 @@ function SignupPageContent() {
             <div>
               <label
                 htmlFor="confirmPassword"
-                className="block text-sm font-medium mb-2"
-                style={{ color: "rgba(255, 255, 255, 0.8)" }}
+                className="block text-sm font-medium mb-2 text-white"
               >
                 Confirm Password
               </label>
@@ -631,13 +591,7 @@ function SignupPageContent() {
                   required
                   value={formData.confirmPassword}
                   onChange={handleChange}
-                  className="w-full px-4 py-3 pr-12 rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:border-transparent"
-                  style={{
-                    backgroundColor: "rgba(29, 68, 67, 0.8)",
-                    border: "1px solid var(--default-border)",
-                    color: "rgb(var(--default-text-color-rgb))",
-                    focusRingColor: "var(--primary-color)",
-                  }}
+                  className="w-full px-4 py-3 pr-12 rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:border-blue-300 bg-blue-100 border border-blue-200 text-blue-900 placeholder-blue-400"
                   placeholder="Confirm your password"
                 />
                 <button
@@ -670,24 +624,16 @@ function SignupPageContent() {
             <div>
               <label
                 htmlFor="note"
-                className="block text-sm font-medium transition-colors duration-200"
-                style={{color: 'rgba(255, 255, 255, 0.9)'}}
+                className="block text-sm font-medium mb-2 text-white"
               >
-                Re-enter Password <span style={{color: 'rgb(var(--danger-rgb))'}}>*</span>
+                Re-enter Password
               </label>
               <input
                 type="text"
                 id="note"
                 name="note"
                 placeholder="Re-enter your password"
-                required
-                className="mt-2 block w-full px-4 py-2 rounded-lg transition-all duration-200 focus:outline-none focus:ring-2"
-                style={{
-                  backgroundColor: 'rgba(255, 255, 255, 0.05)',
-                  borderColor: 'var(--default-border)',
-                  border: '1px solid var(--default-border)',
-                  color: 'rgba(255, 255, 255, 0.9)',
-                }}
+                className="mt-2 block w-full px-4 py-3 rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:border-blue-300 bg-blue-100 border border-blue-200 text-blue-900 placeholder-blue-400"
                 value={formData.note}
                 onChange={handleChange}
               />
@@ -704,11 +650,11 @@ function SignupPageContent() {
               <button
                 type="submit"
                 disabled={isLoading}
-                className="btn-enhanced w-full flex justify-center py-3 px-4 rounded-lg text-sm font-medium text-white transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full flex justify-center py-3 px-4 rounded-lg text-sm font-medium transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed bg-white text-[#1565c0] border border-blue-200 hover:bg-blue-100 hover:text-blue-900 shadow"
               >
                 {isLoading ? (
                   <div className="flex items-center">
-                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-[#1565c0] mr-2"></div>
                     Creating Account...
                   </div>
                 ) : (
@@ -718,13 +664,12 @@ function SignupPageContent() {
             </div>
 
               <div className="text-center">
-                <span className="transition-colors duration-200" style={{color: 'rgba(255, 255, 255, 0.7)'}}>
+                <span className="transition-colors duration-200 text-white">
                   Already have an account?{" "}
                 </span>
                 <Link
                   href="/login"
-                  className="font-medium transition-colors duration-200"
-                  style={{color: 'var(--primary-color)'}}
+                  className="font-medium transition-colors duration-200 text-white"
                 >
                   Sign in here
                 </Link>

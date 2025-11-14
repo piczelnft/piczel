@@ -164,202 +164,168 @@ const SupportCreatePage = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
+      <div className="min-h-screen flex items-center justify-center bg-white">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-cyan-400 mx-auto mb-4"></div>
-          <p className="text-white text-lg">Loading...</p>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4"></div>
+          <p className="text-blue-900 text-lg">Loading...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen flex bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 p-8">
-
+    <div className="min-h-screen flex flex-col bg-white p-8">
       {/* Main Content */}
       <div className="flex-1">
         <div className="max-w-4xl mx-auto">
-        <div className="text-center mb-12">
-          <h1 className="text-4xl font-bold text-white mb-2">Create Support Ticket</h1>
-          <p className="text-lg text-gray-300">Send a message to our support team</p>
-        </div>
-
-        {/* Error Message */}
-        {error && (
-          <div className="mb-6 p-4 bg-red-500/20 border border-red-500/30 rounded-lg">
-            <p className="text-red-300 text-center">{error}</p>
+          <div className="text-center mb-12">
+            <h1 className="text-4xl font-bold text-blue-900 mb-2">Create Support Ticket</h1>
+            <p className="text-lg text-blue-700">Send a message to our support team</p>
           </div>
-        )}
 
-        {/* Success Message */}
-        {success && (
-          <div className="mb-6 p-4 bg-green-500/20 border border-green-500/30 rounded-lg">
-            <p className="text-green-300 text-center">{success}</p>
-          </div>
-        )}
-
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Admin Information */}
-          {/* <div className="lg:col-span-1">
-            <div className="bg-gradient-to-br from-slate-800/50 to-purple-800/50 backdrop-blur-sm rounded-2xl p-6 border border-purple-500/20 shadow-lg">
-              <h2 className="text-xl font-semibold text-white mb-6 text-center">Admin Information</h2>
-              
-              <div className="text-center mb-6">
-                <div className="w-20 h-20 mx-auto rounded-full bg-gradient-to-br from-cyan-500 to-purple-600 flex items-center justify-center shadow-lg border-3 border-white mb-4">
-                  <span className="text-white text-2xl font-bold">A</span>
-                </div>
-                <div className="text-white font-semibold text-lg">{adminInfo.name}</div>
-                <div className="text-gray-300 text-sm">{adminInfo.memberId}</div>
-              </div>
-              
-              <div className="space-y-4">
-                <div className="bg-gradient-to-br from-slate-700/50 to-purple-700/50 backdrop-blur-sm rounded-lg p-4 border border-purple-500/30">
-                  <div className="text-gray-300 text-sm mb-1">Email</div>
-                  <div className="text-white font-medium">{adminInfo.email}</div>
-                </div>
-                
-                <div className="bg-gradient-to-br from-slate-700/50 to-purple-700/50 backdrop-blur-sm rounded-lg p-4 border border-purple-500/30">
-                  <div className="text-gray-300 text-sm mb-1">Member ID</div>
-                  <div className="text-cyan-400 font-medium">{adminInfo.memberId}</div>
-                </div>
-                
-                <div className="bg-gradient-to-br from-slate-700/50 to-purple-700/50 backdrop-blur-sm rounded-lg p-4 border border-purple-500/30">
-                  <div className="text-gray-300 text-sm mb-1">Status</div>
-                  <div className="text-green-400 font-medium">Online</div>
-                </div>
-              </div>
+          {/* Error Message */}
+          {error && (
+            <div className="mb-6 p-4 bg-red-100 border border-red-300 rounded-lg">
+              <p className="text-red-700 text-center">{error}</p>
             </div>
-          </div> */}
+          )}
 
-          {/* Message Form */}
-          <div className="lg:col-span-2">
-            <div className="bg-gradient-to-br from-slate-800/50 to-purple-800/50 backdrop-blur-sm rounded-2xl p-8 border border-purple-500/20 shadow-lg">
-              <h2 className="text-2xl font-semibold text-white mb-8 text-center">Create Support Ticket</h2>
-              
-              <form onSubmit={handleSubmit} className="space-y-6">
-                {/* Member ID */}
-                <div>
-                  <label className="block text-gray-300 text-sm font-medium mb-2">
-                    Member ID
-                  </label>
-                  <div className="bg-gradient-to-br from-slate-700/50 to-purple-700/50 backdrop-blur-sm rounded-lg p-4 border border-purple-500/30">
-                    <div className="text-white font-semibold text-lg">{formData.memberId}</div>
-                  </div>
-                </div>
+          {/* Success Message */}
+          {success && (
+            <div className="mb-6 p-4 bg-green-100 border border-green-300 rounded-lg">
+              <p className="text-green-700 text-center">{success}</p>
+            </div>
+          )}
 
-                {/* Subject */}
-                <div>
-                  <label className="block text-gray-300 text-sm font-medium mb-2">
-                    Subject
-                  </label>
-                  <input
-                    type="text"
-                    name="subject"
-                    value={formData.subject}
-                    onChange={handleInputChange}
-                    placeholder="Enter Subject"
-                    className="w-full px-4 py-4 bg-slate-700/50 text-white border border-purple-500/30 rounded-lg text-base focus:outline-none focus:border-purple-400 transition-colors placeholder-gray-400"
-                    required
-                  />
-                </div>
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            {/* Message Form */}
+            <div className="lg:col-span-2">
+              <div className="bg-[#1565c0] rounded-2xl p-8 border border-blue-800 shadow-lg">
+                <h2 className="text-2xl font-semibold text-white mb-8 text-center">Create Support Ticket</h2>
 
-                {/* Category and Priority */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <form onSubmit={handleSubmit} className="space-y-6">
+                  {/* Member ID */}
                   <div>
-                    <label className="block text-gray-300 text-sm font-medium mb-2">
-                      Category
+                    <label className="block text-blue-100 text-sm font-medium mb-2">
+                      Member ID
                     </label>
-                    <select
-                      name="category"
-                      value={formData.category}
-                      onChange={handleInputChange}
-                      className="w-full px-4 py-4 bg-slate-700/50 text-white border border-purple-500/30 rounded-lg text-base focus:outline-none focus:border-purple-400 transition-colors"
-                    >
-                      <option value="General">General</option>
-                      <option value="Technical">Technical</option>
-                      <option value="Account">Account</option>
-                      <option value="Payment">Payment</option>
-                      <option value="Bug Report">Bug Report</option>
-                      <option value="Feature Request">Feature Request</option>
-                    </select>
+                    <div className="bg-blue-800/80 rounded-lg p-4 border border-blue-900">
+                      <div className="text-white font-semibold text-lg">{formData.memberId}</div>
+                    </div>
                   </div>
 
+                  {/* Subject */}
                   <div>
-                    <label className="block text-gray-300 text-sm font-medium mb-2">
-                      Priority
+                    <label className="block text-blue-100 text-sm font-medium mb-2">
+                      Subject
                     </label>
-                    <select
-                      name="priority"
-                      value={formData.priority}
+                    <input
+                      type="text"
+                      name="subject"
+                      value={formData.subject}
                       onChange={handleInputChange}
-                      className="w-full px-4 py-4 bg-slate-700/50 text-white border border-purple-500/30 rounded-lg text-base focus:outline-none focus:border-purple-400 transition-colors"
-                    >
-                      <option value="low">Low</option>
-                      <option value="medium">Medium</option>
-                      <option value="high">High</option>
-                      <option value="urgent">Urgent</option>
-                    </select>
+                      placeholder="Enter Subject"
+                      className="w-full px-4 py-4 bg-blue-800/80 text-white border border-blue-900 rounded-lg text-base focus:outline-none focus:border-blue-400 transition-colors placeholder-blue-200"
+                      required
+                    />
                   </div>
-                </div>
 
-                {/* Message */}
-                <div>
-                  <label className="block text-gray-300 text-sm font-medium mb-2">
-                    Message
-                  </label>
-                  <textarea
-                    name="message"
-                    value={formData.message}
-                    onChange={handleInputChange}
-                    placeholder="Enter Your Issue"
-                    rows={6}
-                    className="w-full px-4 py-4 bg-slate-700/50 text-white border border-purple-500/30 rounded-lg text-base focus:outline-none focus:border-purple-400 transition-colors placeholder-gray-400 resize-none"
-                    required
-                  />
-                </div>
+                  {/* Category and Priority */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-blue-100 text-sm font-medium mb-2">
+                        Category
+                      </label>
+                      <select
+                        name="category"
+                        value={formData.category}
+                        onChange={handleInputChange}
+                        className="w-full px-4 py-4 bg-blue-800/80 text-white border border-blue-900 rounded-lg text-base focus:outline-none focus:border-blue-400 transition-colors"
+                      >
+                        <option value="General">General</option>
+                        <option value="Technical">Technical</option>
+                        <option value="Account">Account</option>
+                        <option value="Payment">Payment</option>
+                        <option value="Bug Report">Bug Report</option>
+                        <option value="Feature Request">Feature Request</option>
+                      </select>
+                    </div>
 
-                {/* Submit Button */}
-                <div className="pt-4">
-                  <button
-                    type="submit"
-                    disabled={submitting}
-                    className={`w-full px-6 py-4 rounded-lg text-lg font-medium transition-all duration-300 shadow-lg ${
-                      submitting
-                        ? 'bg-gray-600 text-gray-400 cursor-not-allowed'
-                        : 'bg-gradient-to-r from-cyan-500 to-purple-600 text-white hover:from-cyan-600 hover:to-purple-700 hover:shadow-xl cursor-pointer'
-                    }`}
-                  >
-                    {submitting ? (
-                      <div className="flex items-center justify-center">
-                        <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
-                        Creating Ticket...
-                      </div>
-                    ) : (
-                      'Create Support Ticket'
-                    )}
-                  </button>
-                </div>
-              </form>
+                    <div>
+                      <label className="block text-blue-100 text-sm font-medium mb-2">
+                        Priority
+                      </label>
+                      <select
+                        name="priority"
+                        value={formData.priority}
+                        onChange={handleInputChange}
+                        className="w-full px-4 py-4 bg-blue-800/80 text-white border border-blue-900 rounded-lg text-base focus:outline-none focus:border-blue-400 transition-colors"
+                      >
+                        <option value="low">Low</option>
+                        <option value="medium">Medium</option>
+                        <option value="high">High</option>
+                        <option value="urgent">Urgent</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  {/* Message */}
+                  <div>
+                    <label className="block text-blue-100 text-sm font-medium mb-2">
+                      Message
+                    </label>
+                    <textarea
+                      name="message"
+                      value={formData.message}
+                      onChange={handleInputChange}
+                      placeholder="Enter Your Issue"
+                      rows={6}
+                      className="w-full px-4 py-4 bg-blue-800/80 text-white border border-blue-900 rounded-lg text-base focus:outline-none focus:border-blue-400 transition-colors placeholder-blue-200 resize-none"
+                      required
+                    />
+                  </div>
+
+                  {/* Submit Button */}
+                  <div className="pt-4">
+                    <button
+                      type="submit"
+                      disabled={submitting}
+                      className={`w-full px-6 py-4 rounded-lg text-lg font-medium transition-all duration-300 shadow-lg ${
+                        submitting
+                          ? 'bg-blue-300 text-blue-100 cursor-not-allowed'
+                          : 'bg-white text-[#1565c0] hover:bg-blue-100 hover:text-blue-900 cursor-pointer'
+                      }`}
+                    >
+                      {submitting ? (
+                        <div className="flex items-center justify-center">
+                          <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-700 mr-2"></div>
+                          Creating Ticket...
+                        </div>
+                      ) : (
+                        'Create Support Ticket'
+                      )}
+                    </button>
+                  </div>
+                </form>
+              </div>
             </div>
           </div>
         </div>
-
-      </div>
       </div>
 
       {/* Replies Section */}
       <div className="flex-1 mt-8">
         <div className="max-w-4xl mx-auto">
-          <div className="bg-gradient-to-br from-slate-800/50 to-purple-800/50 backdrop-blur-sm rounded-2xl p-6 border border-purple-500/20 shadow-lg">
+          <div className="bg-[#1565c0] rounded-2xl p-6 border border-blue-800 shadow-lg">
             <h2 className="text-xl font-semibold text-white mb-4">Your Support Replies</h2>
             {loadingReplies ? (
               <div className="text-center py-8">
-                <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-cyan-400 mx-auto mb-3"></div>
-                <p className="text-gray-300 text-sm">Loading replies...</p>
+                <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-500 mx-auto mb-3"></div>
+                <p className="text-blue-100 text-sm">Loading replies...</p>
               </div>
             ) : myTickets.length === 0 ? (
               <div className="text-center py-8">
-                <p className="text-gray-400 text-sm">No tickets found yet. Create a ticket to receive replies from support.</p>
+                <p className="text-blue-100 text-sm">No tickets found yet. Create a ticket to receive replies from support.</p>
               </div>
             ) : (
               <div className="space-y-4">
@@ -370,32 +336,32 @@ const SupportCreatePage = () => {
                     createdAt: r.createdAt
                   })) : [];
                   return (
-                    <div key={t._id} className="p-4 rounded-lg border" style={{borderColor:'rgba(255,255,255,0.15)', backgroundColor:'rgba(255,255,255,0.04)'}}>
+                    <div key={t._id} className="p-4 rounded-lg border border-blue-900 bg-blue-800/80">
                       <div className="flex items-center justify-between mb-2">
                         <div className="text-white font-semibold">
                           #{t.ticketId} • {t.subject || 'No subject'}
                         </div>
-                        <div className="text-xs text-gray-400">
+                        <div className="text-xs text-blue-100">
                           {new Date(t.updatedAt || t.createdAt).toLocaleString()}
                         </div>
                       </div>
-                      <div className="text-gray-300 text-sm mb-3">
+                      <div className="text-blue-100 text-sm mb-3">
                         {t.message || t.description}
                       </div>
                       {replies.length === 0 ? (
-                        <div className="text-xs text-gray-400">No replies yet.</div>
+                        <div className="text-xs text-blue-100">No replies yet.</div>
                       ) : (
                         <div className="space-y-2">
                           {replies
                             .slice()
                             .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
                             .map((r, idx) => (
-                              <div key={`${t._id}-r-${idx}`} className="p-3 rounded-md bg-slate-700/40 border border-purple-500/20">
+                              <div key={`${t._id}-r-${idx}`} className="p-3 rounded-md bg-blue-900/80 border border-blue-800">
                                 <div className="flex items-center justify-between mb-1">
-                                  <div className="text-xs text-cyan-300">
+                                  <div className="text-xs text-white">
                                     {r.by || 'Admin'}
                                   </div>
-                                  <div className="text-[10px] text-gray-400">
+                                  <div className="text-[10px] text-blue-100">
                                     {new Date(r.createdAt).toLocaleString()}
                                   </div>
                                 </div>

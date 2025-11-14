@@ -203,15 +203,15 @@ export default function WithdrawalRequestPage() {
   };
 
   return (
-    <div className="min-h-screen pt-20 lg:pt-8" style={{background: 'linear-gradient(to bottom right, var(--default-body-bg-color) 0%, var(--theme-bg-gradient) 25%, var(--default-body-bg-color) 100%)', fontFamily: 'var(--default-font-family)'}}>
+    <div className="min-h-screen pt-20 lg:pt-8" style={{background: '#fff', fontFamily: 'var(--default-font-family)'}}>
       <div className="container mx-auto px-4 py-4 sm:py-8">
         <div className="max-w-2xl mx-auto">
           {/* Header */}
           <div className="text-center mb-6 sm:mb-8">
-            <h1 className="text-2xl sm:text-3xl font-bold text-white gradient-text-enhanced mb-2">
+            <h1 className="text-2xl sm:text-3xl font-bold text-black mb-2" style={{color:'black'}}>
               Request Withdrawal
             </h1>
-            <p className="text-white/70 text-sm sm:text-base">
+            <p className="text-black text-sm sm:text-base" style={{color:'black'}}>
               Withdraw your funds to your preferred wallet address
             </p>
           </div>
@@ -219,7 +219,7 @@ export default function WithdrawalRequestPage() {
           {/* Balance Cards */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-4 sm:mb-6">
             {/* Total Balance */}
-            <div className="card-enhanced rounded-xl p-4 sm:p-6" style={{backgroundColor: 'rgba(0, 0, 0, 0.1)', backdropFilter: 'blur(10px)', borderColor: 'var(--default-border)'}}>
+            <div className="rounded-xl p-4 sm:p-6" style={{backgroundColor: '#1565c0', color:'#fff'}}>
               <div className="flex items-center justify-between">
                 <div>
                   <h3 className="text-white font-semibold mb-1 text-sm sm:text-base">Total Balance</h3>
@@ -234,7 +234,7 @@ export default function WithdrawalRequestPage() {
             </div>
 
             {/* Withdrawal Balance */}
-            <div className="card-enhanced rounded-xl p-4 sm:p-6" style={{backgroundColor: 'rgba(0, 0, 0, 0.1)', backdropFilter: 'blur(10px)', borderColor: 'var(--default-border)'}}>
+            <div className="rounded-xl p-4 sm:p-6" style={{backgroundColor: '#1565c0', color:'#fff'}}>
               <div className="flex items-center justify-between">
                 <div>
                   <h3 className="text-white font-semibold mb-1 text-sm sm:text-base">Withdrawal Balance</h3>
@@ -249,7 +249,7 @@ export default function WithdrawalRequestPage() {
             </div>
 
             {/* Level Income */}
-            <div className="card-enhanced rounded-xl p-4 sm:p-6" style={{backgroundColor: 'rgba(0, 0, 0, 0.1)', backdropFilter: 'blur(10px)', borderColor: 'var(--default-border)'}}>
+            <div className="rounded-xl p-4 sm:p-6" style={{backgroundColor: '#1565c0', color:'#fff'}}>
               <div className="flex items-center justify-between">
                 <div>
                   <h3 className="text-white font-semibold mb-1 text-sm sm:text-base">Level Income</h3>
@@ -264,7 +264,7 @@ export default function WithdrawalRequestPage() {
             </div>
 
             {/* Spot Income */}
-            <div className="card-enhanced rounded-xl p-4 sm:p-6" style={{backgroundColor: 'rgba(0, 0, 0, 0.1)', backdropFilter: 'blur(10px)', borderColor: 'var(--default-border)'}}>
+            <div className="rounded-xl p-4 sm:p-6" style={{backgroundColor: '#1565c0', color:'#fff'}}>
               <div className="flex items-center justify-between">
                 <div>
                   <h3 className="text-white font-semibold mb-1 text-sm sm:text-base">Spot Income</h3>
@@ -280,23 +280,23 @@ export default function WithdrawalRequestPage() {
           </div>
 
           {/* Withdrawal Form */}
-          <div className="card-enhanced rounded-xl shadow-2xl p-4 sm:p-8">
+          <div className="rounded-xl shadow-2xl p-4 sm:p-8" style={{backgroundColor: '#1565c0', color:'#fff'}}>
             <form className="space-y-4 sm:space-y-6" onSubmit={handleSubmit}>
               {errors.general && (
-                <div className="px-4 py-3 rounded-lg animate-fadeInUp" style={{backgroundColor: 'rgba(255, 74, 74, 0.2)', border: '1px solid rgba(255, 74, 74, 0.3)', color: 'rgb(var(--danger-rgb))'}}>
+                <div className="px-4 py-3 rounded-lg animate-fadeInUp" style={{backgroundColor: '#fff', border: '1px solid #d32f2f', color: '#d32f2f'}}>
                   {errors.general}
                 </div>
               )}
 
               {message && (
-                <div className="px-4 py-3 rounded-lg animate-fadeInUp" style={{backgroundColor: 'rgba(72, 247, 104, 0.2)', border: '1px solid rgba(72, 247, 104, 0.3)', color: 'rgb(var(--success-rgb))'}}>
+                <div className="px-4 py-3 rounded-lg animate-fadeInUp" style={{backgroundColor: '#fff', border: '1px solid #388e3c', color: '#388e3c'}}>
                   {message}
                 </div>
               )}
 
               {/* Amount */}
               <div>
-                <label htmlFor="amount" className="block text-sm font-medium mb-2" style={{color: 'rgba(255, 255, 255, 0.8)'}}>
+                <label htmlFor="amount" className="block text-sm font-medium mb-2" style={{color: '#fff'}}>
                   Withdrawal Amount (USD)
                 </label>
                 <div className="relative">
@@ -312,10 +312,9 @@ export default function WithdrawalRequestPage() {
                     onChange={handleChange}
                     className="w-full px-3 sm:px-4 py-2 sm:py-3 pl-6 sm:pl-8 rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:border-transparent text-sm sm:text-base"
                     style={{
-                      backgroundColor: 'rgba(29, 68, 67, 0.8)',
-                      border: '1px solid var(--default-border)',
-                      color: 'rgb(var(--default-text-color-rgb))',
-                      focusRingColor: 'var(--primary-color)'
+                      backgroundColor: '#0d47a1',
+                      border: '1px solid #fff',
+                      color: '#fff',
                     }}
                     placeholder={`Enter amount (max: $${getAvailableBalance().toFixed(2)})`}
                   />
@@ -367,7 +366,7 @@ export default function WithdrawalRequestPage() {
 
               {/* Payment Method */}
               <div>
-                <label htmlFor="paymentMethod" className="block text-sm font-medium mb-2" style={{color: 'rgba(255, 255, 255, 0.8)'}}>
+                <label htmlFor="paymentMethod" className="block text-sm font-medium mb-2" style={{color: '#fff'}}>
                   Payment Method
                 </label>
                 <select
@@ -377,10 +376,9 @@ export default function WithdrawalRequestPage() {
                   onChange={handleChange}
                   className="w-full px-3 sm:px-4 py-2 sm:py-3 rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:border-transparent text-sm sm:text-base"
                   style={{
-                    backgroundColor: 'rgba(29, 68, 67, 0.8)',
-                    border: '1px solid var(--default-border)',
-                    color: 'rgb(var(--default-text-color-rgb))',
-                    focusRingColor: 'var(--primary-color)'
+                    backgroundColor: '#0d47a1',
+                    border: '1px solid #fff',
+                    color: '#fff',
                   }}
                 >
                   <option value="crypto">USDT</option>
@@ -392,7 +390,7 @@ export default function WithdrawalRequestPage() {
 
               {/* Withdrawal Type */}
               <div>
-                <label className="block text-sm font-medium mb-3" style={{color: 'rgba(255, 255, 255, 0.8)'}}>
+                <label className="block text-sm font-medium mb-3" style={{color: '#fff'}}>
                   Withdrawal Type
                 </label>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -400,25 +398,22 @@ export default function WithdrawalRequestPage() {
                   <div 
                     className={`relative p-4 rounded-lg border-2 cursor-pointer transition-all duration-200 ${
                       formData.withdrawalType === 'spot' 
-                        ? 'border-purple-400 bg-purple-400/10' 
-                        : 'border-gray-600 bg-gray-800/50 hover:border-gray-500'
+                        ? 'border-blue-400' 
+                        : 'border-white'
                     }`}
+                    style={{backgroundColor: '#0d47a1', color: '#fff'}}
                     onClick={() => setFormData(prev => ({ ...prev, withdrawalType: 'spot', amount: '' }))}
                   >
                     <div className="flex items-center space-x-3">
-                      <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center ${
-                        formData.withdrawalType === 'spot' 
-                          ? 'border-purple-400 bg-purple-400' 
-                          : 'border-gray-400'
-                      }`}>
+                      <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center ${formData.withdrawalType === 'spot' ? 'border-blue-400 bg-blue-400' : 'border-white'}`}>
                         {formData.withdrawalType === 'spot' && (
                           <div className="w-2 h-2 rounded-full bg-white"></div>
                         )}
                       </div>
                       <div>
                         <h3 className="text-white font-semibold text-sm">Spot Income</h3>
-                        <p className="text-purple-400 font-bold text-lg">${formatCurrency4Digits(spotIncome)}</p>
-                        <p className="text-gray-400 text-xs">Available for withdrawal</p>
+                        <p className="text-white font-bold text-lg">${formatCurrency4Digits(spotIncome)}</p>
+                        <p className="text-white text-xs">Available for withdrawal</p>
                       </div>
                     </div>
                   </div>
@@ -427,25 +422,22 @@ export default function WithdrawalRequestPage() {
                   <div 
                     className={`relative p-4 rounded-lg border-2 cursor-pointer transition-all duration-200 ${
                       formData.withdrawalType === 'level' 
-                        ? 'border-blue-400 bg-blue-400/10' 
-                        : 'border-gray-600 bg-gray-800/50 hover:border-gray-500'
+                        ? 'border-blue-400' 
+                        : 'border-white'
                     }`}
+                    style={{backgroundColor: '#0d47a1', color: '#fff'}}
                     onClick={() => setFormData(prev => ({ ...prev, withdrawalType: 'level', amount: '' }))}
                   >
                     <div className="flex items-center space-x-3">
-                      <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center ${
-                        formData.withdrawalType === 'level' 
-                          ? 'border-blue-400 bg-blue-400' 
-                          : 'border-gray-400'
-                      }`}>
+                      <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center ${formData.withdrawalType === 'level' ? 'border-blue-400 bg-blue-400' : 'border-white'}`}>
                         {formData.withdrawalType === 'level' && (
                           <div className="w-2 h-2 rounded-full bg-white"></div>
                         )}
                       </div>
                       <div>
                   <h3 className="text-white font-semibold text-sm">Level Income</h3>
-                  <p className="text-blue-400 font-bold text-lg">${formatCurrency4Digits(levelIncome)}</p>
-                        <p className="text-gray-400 text-xs">Available for withdrawal</p>
+                  <p className="text-white font-bold text-lg">${formatCurrency4Digits(levelIncome)}</p>
+                    <p className="text-white text-xs">Available for withdrawal</p>
                       </div>
                     </div>
                   </div>
@@ -457,7 +449,7 @@ export default function WithdrawalRequestPage() {
 
               {/* Wallet Address */}
               <div>
-                <label htmlFor="walletAddress" className="block text-sm font-medium mb-2" style={{color: 'rgba(255, 255, 255, 0.8)'}}>
+                <label htmlFor="walletAddress" className="block text-sm font-medium mb-2" style={{color: '#fff'}}>
                   Wallet Address
                 </label>
                 <textarea
@@ -469,10 +461,9 @@ export default function WithdrawalRequestPage() {
                   onChange={handleChange}
                   className="w-full px-3 sm:px-4 py-2 sm:py-3 rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:border-transparent text-sm sm:text-base"
                   style={{
-                    backgroundColor: 'rgba(29, 68, 67, 0.8)',
-                    border: '1px solid var(--default-border)',
-                    color: 'rgb(var(--default-text-color-rgb))',
-                    focusRingColor: 'var(--primary-color)'
+                    backgroundColor: '#0d47a1',
+                    border: '1px solid #fff',
+                    color: '#fff',
                   }}
                   placeholder="Enter your wallet address"
                 />
@@ -508,8 +499,8 @@ export default function WithdrawalRequestPage() {
                 <button
                   type="submit"
                   disabled={isLoading || getAvailableBalance() < 5}
-                  className="btn-enhanced w-full flex justify-center py-2 sm:py-3 px-4 rounded-lg text-sm font-medium text-white transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
-                >
+                  className="w-full flex justify-center py-2 sm:py-3 px-4 rounded-lg text-sm font-medium text-white transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                  style={{backgroundColor: '#1565c0', border: 'none'}}>
                   {isLoading ? (
                     <div className="flex items-center">
                       <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
@@ -523,10 +514,10 @@ export default function WithdrawalRequestPage() {
 
               {/* Info */}
               <div className="text-center">
-                <p className="text-xs sm:text-sm" style={{color: 'rgba(255, 255, 255, 0.6)'}}>
+                <p className="text-xs sm:text-sm" style={{color: '#fff'}}>
                   Minimum withdrawal: $5 | Processing time: 24-48 hours | Only 1 withdrawal per day
                 </p>
-                <p className="text-xs mt-1" style={{color: 'rgba(255, 255, 255, 0.5)'}}>
+                <p className="text-xs mt-1" style={{color: '#fff'}}>
                   Select withdrawal type to withdraw from Spot Income or Level Income
                 </p>
               </div>
