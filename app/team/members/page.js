@@ -140,7 +140,7 @@ const TeamMembersPage = () => {
         <div className="max-w-7xl mx-auto">
         <div className="text-center mb-8 sm:mb-12">
           <h1 className="text-2xl sm:text-4xl font-bold text-[#1565c0] mb-2 animate-fadeInUp">My Directs</h1>
-          <p className="text-base sm:text-lg animate-fadeInUp text-[#1565c0]/80" style={{animationDelay: '0.2s'}}>Check your Genealogy</p>
+          <p className="text-base sm:text-lg animate-fadeInUp text-[#1565c0]/80" style={{animationDelay: '0.2s'}}></p>
           <div className="mt-4">
             <button 
               onClick={fetchMembersData}

@@ -669,7 +669,7 @@ function SignupPageContent() {
                 </span>
                 <Link
                   href="/login"
-                  className="font-medium transition-colors duration-200 text-white"
+                  className="font-bold transition-colors duration-200 text-white"
                 >
                   Sign in here
                 </Link>

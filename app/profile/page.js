@@ -78,7 +78,7 @@ export default function ProfilePage() {
                 </div>
                 <div className="flex flex-col sm:flex-row items-center space-y-2 sm:space-y-0 sm:space-x-3">
                   <div className="bg-black/20 px-3 sm:px-4 py-2 rounded-lg border border-white/20 w-full sm:w-auto">
-                    <span className="text-green-400 font-mono text-sm sm:text-lg font-bold break-all">
+                    <span className="text-white font-mono text-sm sm:text-lg font-bold break-all">
                       {user?.memberId || "Not assigned"}
                     </span>
                   </div>
@@ -88,7 +88,7 @@ export default function ProfilePage() {
                       // You could add a toast notification here
                       alert("Member ID copied to clipboard!");
                     }}
-                    className="w-full sm:w-auto px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors flex items-center justify-center space-x-2"
+                    className="w-full sm:w-auto px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors flex items-center justify-center space-x-2"
                   >
                     <svg
                       className="w-4 h-4"
@@ -150,8 +150,8 @@ export default function ProfilePage() {
                           type="text"
                           value={`https://www.piczelnft.com/signup?sponsor=${user?.memberId || "PIC123456"}`}
                           readOnly
-                          className="flex-1 px-3 py-2 rounded-lg text-sm bg-gray-800 border text-white"
-                          style={{ borderColor: "var(--default-border)" }}
+                          className="flex-1 px-3 py-2 rounded-lg text-sm border text-white"
+                          style={{ backgroundColor: "#1565c0", borderColor: "#1976d2" }}
                         />
                         <button
                           onClick={() => {
@@ -194,7 +194,8 @@ export default function ProfilePage() {
                   </h2>
                   <button
                     onClick={() => setIsEditing(!isEditing)}
-                    className="btn-enhanced px-4 py-2 text-white rounded-lg transition-colors w-full sm:w-auto"
+                    className="px-4 py-2 rounded-lg transition-colors w-full sm:w-auto hover:bg-blue-50 border border-white"
+                    style={{backgroundColor: 'white', color: '#1565c0'}}
                   >
                     {isEditing ? "Cancel" : "Edit"}
                   </button>
@@ -282,7 +283,8 @@ export default function ProfilePage() {
 
                     <button
                       type="submit"
-                      className="btn-enhanced w-full py-2 sm:py-3 text-white rounded-lg transition-all duration-200 text-sm sm:text-base"
+                      className="w-full py-2 sm:py-3 rounded-lg transition-all duration-200 text-sm sm:text-base hover:bg-blue-50 border border-white font-semibold"
+                      style={{backgroundColor: 'white', color: '#1565c0'}}
                     >
                       Save Changes
                     </button>

@@ -150,7 +150,7 @@ export default function ProfileSummary() {
       <div className="border-b" style={{backgroundColor: '#1565c0', borderColor: '#1565c0'}}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex items-center justify-between">
-            <Link href="/" className="transition-colors" style={{color: 'var(--primary-color)'}}>
+            <Link href="/" className="transition-colors text-white hover:text-blue-200">
               ← Back to Dashboard
             </Link>
             <div className="text-center">
@@ -159,7 +159,7 @@ export default function ProfileSummary() {
               <div className="mt-2">
                 <button 
                   onClick={fetchProfileData}
-                  className="btn-enhanced px-3 py-1 text-white hover-bounce text-xs flex items-center space-x-1 mx-auto"
+                  className="px-3 py-1 text-white text-xs flex items-center space-x-1 mx-auto rounded-lg transition-all duration-200 hover:bg-blue-900"
                   disabled={loading}
                   style={{backgroundColor: '#0d47a1', border: 'none'}}
                 >
@@ -183,11 +183,14 @@ export default function ProfileSummary() {
             <h2 className="text-2xl font-bold text-white">Profile Information</h2>
             <button
               onClick={() => setIsEditing(!isEditing)}
-              className={`px-6 py-2 rounded-xl font-medium transition-all duration-300 ${
+              className={`px-6 py-2 rounded-xl font-medium transition-all duration-300 text-white ${
                 isEditing
-                  ? 'bg-gradient-to-r from-gray-500 to-gray-600 hover:from-gray-600 hover:to-gray-700 text-white'
-                  : 'btn-enhanced text-white'
+                  ? 'hover:bg-gray-700'
+                  : 'hover:bg-blue-900'
               }`}
+              style={{
+                backgroundColor: isEditing ? '#6b7280' : '#0d47a1'
+              }}
             >
               {isEditing ? 'Cancel' : 'Edit Profile'}
             </button>

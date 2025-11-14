@@ -317,8 +317,8 @@ export default function Home() {
                       type="text"
                       value={`https://www.piczelnft.com/signup?sponsor=${data.memberId}`}
                       readOnly
-                      className="flex-1 px-3 py-2 rounded-lg text-xs bg-gray-800 border text-white"
-                      style={{borderColor: 'var(--default-border)'}}
+                      className="flex-1 px-3 py-2 rounded-lg text-xs border text-white"
+                      style={{backgroundColor: '#1565c0', borderColor: '#1976d2'}}
                     />
                     <button
                       onClick={() => {

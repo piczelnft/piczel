@@ -522,7 +522,7 @@ function LoginForm() {
                 </span>
                 <Link
                   href="/signup"
-                  className="font-medium transition-colors duration-200 text-[#1565c0]"
+                  className="font-bold transition-colors duration-200 text-[#1565c0]"
                 >
                   Create one here
                 </Link>

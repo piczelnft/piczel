@@ -183,11 +183,11 @@ export default function Navbar() {
             <div className="flex items-center space-x-2">
               <Link href="/" className="flex items-center space-x-2">
                 <Image
-                  src="/logo.png"
+                  src="/picl.png"
                   alt="Piczel Logo"
-                  width={32}
-                  height={32}
-                  className="w-8 h-8 object-contain"
+                  width={48}
+                  height={48}
+                  className="w-12 h-12 object-contain"
                 />
                 <span className="text-2xl font-bold text-white">
                   PICZEL
@@ -229,11 +229,11 @@ export default function Navbar() {
               <div className="flex items-center space-x-2 group">
                 <Link href="/" className="flex items-center space-x-2 group-hover:scale-105 transition-transform duration-300">
                   <Image
-                    src="/logo.png"
+                    src="/picl.png"
                     alt="Piczel Logo"
-                    width={32}
-                    height={32}
-                    className="w-8 h-8 object-contain animate-cardFloat"
+                    width={48}
+                    height={48}
+                    className="w-12 h-12 object-contain animate-cardFloat"
                   />
                   <div className="text-2xl font-bold text-white">
                     PICZEL
