@@ -114,15 +114,12 @@ export default function Home() {
       }
       const currentNftPurchases = Array.isArray(nftData.purchases) ? nftData.purchases : [];
       setNftPurchases(currentNftPurchases);
-      
-      const isActive = currentNftPurchases.length > 0;
-      const statusText = isActive ? "Active" : "Inactive";
 
       setDashboardData({ 
         ...data, 
         userName: user?.name || data.userName || "John Doe", 
         userEmail: user?.email || data.userEmail || "john.doe@example.com",
-        status: statusText, // Set status based on NFT purchases
+        // Use the status from API (which comes from user.isActivated in database)
       });
       setLastUpdated(new Date().toLocaleTimeString());
     } catch (err) {
@@ -212,7 +209,7 @@ export default function Home() {
   // Fallback to default data if API fails
   const data = dashboardData || {
     memberId: "DGT123456",
-    status: nftPurchases.length > 0 ? "Active" : "Inactive", // Dynamically set status in fallback
+    status: "Inactive", // Default fallback status
     rank: "Basic",
     totalTeam: 863,
     myDirects: 65,

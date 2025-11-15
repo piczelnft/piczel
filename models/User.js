@@ -109,6 +109,10 @@ const UserSchema = new mongoose.Schema({
     type: Number,
     default: 0,
   },
+  holdingWalletBalance: {
+    type: Number,
+    default: 0,
+  },
   fundBalance: {
     type: Number,
     default: 0,
@@ -120,6 +124,11 @@ const UserSchema = new mongoose.Schema({
   totalWithdrawal: {
     type: Number,
     default: 0,
+  },
+  // Deactivation tracking - when holding wallet becomes 0, schedule deactivation after 10 minutes
+  deactivationScheduledAt: {
+    type: Date,
+    default: null,
   },
   // Income tracking
   sponsorIncome: {

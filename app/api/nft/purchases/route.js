@@ -65,6 +65,13 @@ async function distributeSpotIncome(sponsorId, actionMemberId, actionType = 'nft
       break;
     }
 
+    // Check if sponsor is active before distributing income
+    if (!sponsor.isActivated) {
+      console.log(`L${level + 1} Sponsor ${sponsor.memberId} is INACTIVE - skipping spot income`);
+      currentSponsorId = sponsor.sponsor; // Move up to next level
+      continue;
+    }
+
     // Check conditions based on level
     let meetsCondition = false;
     let conditionNotMet = '';
@@ -159,7 +166,7 @@ export async function POST(request) {
     }
 
     await dbConnect();
-    const user = await User.findById(userId).select("memberId sponsor wallet.balance walletBalance");
+    const user = await User.findById(userId).select("memberId sponsor wallet.balance walletBalance holdingWalletBalance isActivated");
     if (!user) {
       return NextResponse.json({ error: "User not found" }, { status: 404, headers: corsHeaders() });
     }
@@ -190,32 +197,51 @@ export async function POST(request) {
     ];
     const totalCommissions = COMMISSION_RATES.reduce((sum, r) => sum + r, 0) * nftReward; // 20%
     const currentBalance = user.wallet?.balance || user.walletBalance || 0;
+    const currentHoldingBalance = user.holdingWalletBalance || 0;
+    
     // User gets full $100 in wallet - commissions are deducted invisibly and paid to sponsors over 365 days
     const newBalance = currentBalance + nftReward;
+    const newHoldingBalance = currentHoldingBalance + nftReward;
 
     console.log(`NFT Purchase Debug - User: ${user.memberId}`);
     console.log(`Current wallet.balance: $${user.wallet?.balance || 0}`);
     console.log(`Current walletBalance: $${user.walletBalance || 0}`);
+    console.log(`Current holdingWalletBalance: $${currentHoldingBalance}`);
     console.log(`User Reward: $${nftReward} (full amount - commissions are invisible)`);
     console.log(`New Balance: $${newBalance}`);
+    console.log(`New Holding Balance: $${newHoldingBalance}`);
 
-    // Update both wallet balance fields to ensure consistency
+    // Update wallet balance, holding wallet balance, and reactivate user if needed
+    // If user was inactive, reactivate them since they purchased an NFT
+    const updateData = { 
+      "wallet.balance": newBalance,
+      "walletBalance": newBalance,
+      "holdingWalletBalance": newHoldingBalance,
+      "deactivationScheduledAt": null // Clear any scheduled deactivation
+    };
+
+    // Reactivate user if they were inactive
+    const wasInactive = !user.isActivated;
+    if (wasInactive) {
+      updateData.isActivated = true;
+      updateData.activatedAt = new Date();
+      console.log(`🔓 Reactivating user ${user.memberId} due to NFT purchase`);
+    }
+
     const updatedUser = await User.findOneAndUpdate(
       { _id: userId },
-      { 
-        $set: { 
-          "wallet.balance": newBalance,
-          "walletBalance": newBalance
-        } 
-      },
-      { new: true, select: "memberId name email sponsor wallet.balance walletBalance" } // Include name and email here
+      { $set: updateData },
+      { new: true, select: "memberId name email sponsor wallet.balance walletBalance holdingWalletBalance isActivated" }
     );
 
     console.log(`Updated wallet.balance: $${updatedUser?.wallet?.balance}`);
     console.log(`Updated walletBalance: $${updatedUser?.walletBalance}`);
+    console.log(`Updated holdingWalletBalance: $${updatedUser?.holdingWalletBalance}`);
+    console.log(`User activation status: ${updatedUser?.isActivated}`);
 
     // Distribute spot income to 3 levels when NFT is purchased: Level 1 = $3, Level 2 = $1, Level 3 = $1
-    if (user.sponsor) {
+    // Only distribute if user is now active
+    if (updatedUser.isActivated && user.sponsor) {
       await distributeSpotIncome(user.sponsor, user.memberId, 'nft_purchase');
     }
 
@@ -260,6 +286,26 @@ export async function POST(request) {
       }
 
       console.log(`Processing level ${level} sponsor: ${sponsorUser.memberId} (${sponsorUser.name})`);
+
+      // Check if sponsor is active first
+      if (!sponsorUser.isActivated) {
+        console.log(`Level ${level} sponsor ${sponsorUser.memberId} is INACTIVE - skipping commission`);
+        commissions.push({
+          level,
+          sponsorId: sponsorUser.memberId,
+          sponsorName: sponsorUser.name,
+          commissionRate: `${(rate * 100).toFixed(2)}%`,
+          totalCommission: '0.00',
+          dailyAmount: '0.00',
+          commissionAmount: '0.00',
+          incomeType: 'levelIncome',
+          volumeAdded: nftReward.toFixed(2),
+          paymentSchedule: 'Skipped',
+          reason: 'user is inactive (holding wallet balance is 0)'
+        });
+        currentUserForUpline = sponsorUser;
+        continue;
+      }
 
       // Check conditions for commission distribution
       let canReceiveCommission = true;

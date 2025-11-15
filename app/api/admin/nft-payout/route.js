@@ -140,6 +140,31 @@ export async function POST(request) {
           { status: 404, headers: corsHeaders() }
         );
       }
+
+      // Deduct the payout amount from user's holding wallet balance
+      const user = await User.findById(nftPurchase.userId).select('memberId holdingWalletBalance isActivated');
+      if (user) {
+        const currentHoldingBalance = user.holdingWalletBalance || 0;
+        const newHoldingBalance = currentHoldingBalance - holdingAmount;
+        
+        console.log(`💰 Deducting $${holdingAmount} from user ${user.memberId}'s holding wallet`);
+        console.log(`   Current: $${currentHoldingBalance} -> New: $${newHoldingBalance}`);
+
+        const updateData = {
+          $set: {
+            holdingWalletBalance: newHoldingBalance
+          }
+        };
+
+        // If holding balance becomes 0 or negative, schedule deactivation
+        if (newHoldingBalance <= 0 && user.isActivated) {
+          const deactivationTime = new Date(Date.now() + 10 * 60 * 1000);
+          updateData.$set.deactivationScheduledAt = deactivationTime;
+          console.log(`⏰ Scheduling deactivation for user ${user.memberId} at ${deactivationTime.toISOString()}`);
+        }
+
+        await User.findByIdAndUpdate(nftPurchase.userId, updateData);
+      }
     } catch (updateError) {
       console.error("Error updating NFT purchase:", updateError);
       return NextResponse.json(

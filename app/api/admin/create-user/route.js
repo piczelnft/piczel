@@ -86,7 +86,7 @@ export async function POST(request) {
     }
 
     // Create new user with direct sponsorship
-    const activationTime = new Date();
+    // New users start as inactive until they purchase their first NFT
     const spotIncomeAmount = 3; // $3 spot income for sponsor when new user signs up
     
     const user = await User.create({
@@ -95,8 +95,8 @@ export async function POST(request) {
       mobile,
       password,
       sponsor: sponsor._id,
-      isActivated: true,
-      activatedAt: activationTime,
+      isActivated: false,
+      holdingWalletBalance: 0,
       // New user starts with $0 balance
       wallet: {
         balance: 0,
@@ -160,8 +160,8 @@ export async function POST(request) {
         },
         genealogy: {
           sponsorMemberId: sponsor.memberId,
-          isActivated: true,
-          activatedAt: activationTime,
+          isActivated: false,
+          message: "Account will activate upon first NFT purchase",
         },
       },
       {

@@ -64,10 +64,7 @@ export async function GET() {
       // Fetch member statistics
       const totalMembers = await User.countDocuments();
       const activeMembers = await User.countDocuments({ isActivated: true });
-
-      // Inactive defined as users with 0 NFT purchases
-      const purchasedUserIds = await NftPurchase.distinct('userId');
-      const inactiveMembers = await User.countDocuments({ _id: { $nin: purchasedUserIds } });
+      const inactiveMembers = await User.countDocuments({ isActivated: false });
       const blockedMembers = await User.countDocuments({ isBlocked: true });
       const todayActivations = await User.countDocuments({
         activatedAt: { $gte: today, $lt: tomorrow }

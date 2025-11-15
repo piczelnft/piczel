@@ -52,6 +52,21 @@ export async function GET(request) {
           continue;
         }
 
+        // Check if sponsor is active - skip payment if inactive
+        if (!sponsorUser.isActivated) {
+          console.log(`Skipping commission for inactive sponsor: ${sponsorUser.memberId} (${sponsorUser.name})`);
+          // Update next payment date to check again in 5 minutes
+          await DailyCommission.findOneAndUpdate(
+            { _id: commission._id },
+            {
+              $set: {
+                nextPaymentDate: new Date(Date.now() + 5 * 60 * 1000)
+              }
+            }
+          );
+          continue;
+        }
+
         // Calculate the payment amount
         const paymentAmount = commission.dailyAmount;
         const currentBalance = sponsorUser.wallet?.balance || sponsorUser.walletBalance || 0;

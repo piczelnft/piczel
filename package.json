@@ -15,6 +15,7 @@
     "mongoose": "^8.18.1",
     "next": "15.5.3",
     "next-auth": "^4.24.11",
+    "node-cron": "^4.2.1",
     "nodemailer": "^6.10.1",
     "react": "19.1.0",
     "react-d3-tree": "^3.6.6",

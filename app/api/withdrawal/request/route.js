@@ -75,8 +75,8 @@ export async function POST(request) {
     // Connect to database
     await dbConnect();
 
-    // Get user information (include incomes for withdrawal balance)
-    const user = await User.findById(decoded.userId).select('name email memberId wallet.balance walletBalance sponsorIncome levelIncome rewardIncome');
+    // Get user information (include incomes for withdrawal balance and holding wallet)
+    const user = await User.findById(decoded.userId).select('name email memberId wallet.balance walletBalance holdingWalletBalance sponsorIncome levelIncome rewardIncome isActivated deactivationScheduledAt');
     if (!user) {
       return NextResponse.json(
         { error: "User not found" },
@@ -86,6 +86,7 @@ export async function POST(request) {
 
     // Compute balances
     const currentBalance = user.wallet?.balance || user.walletBalance || 0;
+    const currentHoldingBalance = user.holdingWalletBalance || 0;
     const sponsorIncome = user.sponsorIncome || 0;
     const levelIncome = user.levelIncome || 0;
     const rewardIncome = user.rewardIncome || 0;
@@ -147,7 +148,8 @@ export async function POST(request) {
     const updateFields = {
       $inc: { 
         'wallet.balance': -deductionAmount,
-        'walletBalance': -deductionAmount
+        'walletBalance': -deductionAmount,
+        'holdingWalletBalance': -deductionAmount  // Also deduct from holding wallet
       }
     };
     
@@ -158,12 +160,27 @@ export async function POST(request) {
       updateFields.$inc.levelIncome = -deductionAmount;
     }
     
+    // Calculate new holding wallet balance
+    const newHoldingBalance = currentHoldingBalance - deductionAmount;
+    
+    // If holding wallet balance becomes 0 or negative, schedule deactivation after 10 minutes
+    if (newHoldingBalance <= 0 && user.isActivated) {
+      const deactivationTime = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes from now
+      updateFields.$set = {
+        deactivationScheduledAt: deactivationTime
+      };
+      console.log(`⏰ Scheduling deactivation for user ${user.memberId} at ${deactivationTime.toISOString()}`);
+    }
+    
     await User.findByIdAndUpdate(decoded.userId, updateFields);
 
     return NextResponse.json(
       { 
         message: "Withdrawal request created successfully",
-        withdrawal: withdrawal
+        withdrawal: withdrawal,
+        holdingBalanceWarning: newHoldingBalance <= 0 ? 
+          "Your holding wallet balance is 0. Your account will be deactivated in 10 minutes if no NFT purchase is made." : 
+          null
       },
       { status: 201, headers: corsHeaders() }
     );

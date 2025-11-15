@@ -206,11 +206,11 @@ export default function MemberManagement() {
     }).format(amount);
   };
 
-  const getStatusBadge = (walletBalance) => {
-    const status = walletBalance > 0 ? 'Active' : 'Inactive';
+  const getStatusBadge = (status) => {
     const statusClasses = {
       Active: "bg-green-100 text-green-800",
       Inactive: "bg-yellow-100 text-yellow-800",
+      Blocked: "bg-red-100 text-red-800",
     };
     return (
       <span
@@ -479,7 +479,7 @@ export default function MemberManagement() {
                     {formatCurrency(member.walletBalance)}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    {getStatusBadge(member.walletBalance)}
+                    {getStatusBadge(member.status)}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                     <button
@@ -523,7 +523,7 @@ export default function MemberManagement() {
                     <h3 className="text-lg font-medium text-gray-900 truncate">
                       {member.memberName}
                     </h3>
-                    {getStatusBadge(member.walletBalance)}
+                    {getStatusBadge(member.status)}
                   </div>
                   <div className="mt-2 space-y-1">
                     <p className="text-sm text-gray-600">
