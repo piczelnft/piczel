@@ -13,6 +13,8 @@ export default function Home() {
   const [error, setError] = useState(null);
   const [lastUpdated, setLastUpdated] = useState(null);
   const [nftPurchases, setNftPurchases] = useState([]); // Add this line
+  const [deactivationCountdown, setDeactivationCountdown] = useState(null);
+  const [deactivationScheduledAt, setDeactivationScheduledAt] = useState(null);
 
   // Truncate to 5 decimals without rounding
   const formatFixed5Trunc = (value) => {
@@ -121,6 +123,15 @@ export default function Home() {
         userEmail: user?.email || data.userEmail || "john.doe@example.com",
         // Use the status from API (which comes from user.isActivated in database)
       });
+      
+      // Store deactivation schedule if exists
+      if (data.deactivationScheduledAt) {
+        setDeactivationScheduledAt(new Date(data.deactivationScheduledAt));
+      } else {
+        setDeactivationScheduledAt(null);
+        setDeactivationCountdown(null);
+      }
+      
       setLastUpdated(new Date().toLocaleTimeString());
     } catch (err) {
       console.error('Error fetching dashboard data:', err);
@@ -135,6 +146,35 @@ export default function Home() {
       fetchDashboardData();
     }
   }, [isAuthenticated, token, fetchDashboardData]);
+
+  // Countdown timer for deactivation
+  useEffect(() => {
+    if (!deactivationScheduledAt) {
+      setDeactivationCountdown(null);
+      return;
+    }
+
+    const updateCountdown = () => {
+      const now = new Date();
+      const diff = deactivationScheduledAt.getTime() - now.getTime();
+      
+      if (diff <= 0) {
+        setDeactivationCountdown('00:00');
+        // Refresh dashboard data to get updated status
+        fetchDashboardData();
+        return;
+      }
+
+      const minutes = Math.floor(diff / 60000);
+      const seconds = Math.floor((diff % 60000) / 1000);
+      setDeactivationCountdown(`${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`);
+    };
+
+    updateCountdown();
+    const interval = setInterval(updateCountdown, 1000);
+
+    return () => clearInterval(interval);
+  }, [deactivationScheduledAt, fetchDashboardData]);
 
   // Auto-refresh disabled per request
 
@@ -381,6 +421,20 @@ export default function Home() {
               <div className="absolute -top-2 -right-2 w-3 h-3 rounded-full gradient-text-neon" style={{backgroundColor: 'rgb(var(--success-rgb))'}}></div>
               <div className="text-sm mb-2 font-medium" style={{color: 'rgba(255, 255, 255, 0.7)'}}>Status</div>
               <div className="font-bold text-lg text-white">{data.status}</div>
+              {deactivationCountdown && data.status === 'Active' && (
+                <div className="mt-2">
+                  <div className="text-xs" style={{color: 'rgba(255, 255, 255, 0.7)'}}>Deactivating in:</div>
+                  <div 
+                    className="font-bold text-xl mt-1" 
+                    style={{
+                      color: '#ff1744',
+                      animation: 'pulse 1s ease-in-out infinite'
+                    }}
+                  >
+                    {deactivationCountdown}
+                  </div>
+                </div>
+              )}
             </div>
           </div>
 

@@ -100,7 +100,7 @@ export async function GET() {
 
       // Get user data
       console.log("Fetching user data for userId:", userId);
-      const user = await User.findById(userId).select('memberId name email sponsorIncome levelIncome rewardIncome wallet.balance walletBalance isActivated package sponsoredMembersVolume sponsor');
+      const user = await User.findById(userId).select('memberId name email sponsorIncome levelIncome rewardIncome wallet.balance walletBalance isActivated package sponsoredMembersVolume sponsor deactivationScheduledAt');
       
       // Get sponsor information
       let sponsorInfo = null;
@@ -299,7 +299,8 @@ export async function GET() {
           directMembersVolume: await calculateDirectMembersNftVolume(userId),
           totalMembersVolume: await calculateTotalMembersNftVolume(userId)
         },
-        sponsorInfo: sponsorInfo
+        sponsorInfo: sponsorInfo,
+        deactivationScheduledAt: user.deactivationScheduledAt || null
       };
 
       console.log("Dashboard API - Final response data:", {
