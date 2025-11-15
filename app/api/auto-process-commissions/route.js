@@ -20,6 +20,7 @@ export async function GET(request) {
 
     // Use current time so commissions created today are eligible immediately
     const now = new Date();
+    console.log(`Current time: ${now.toISOString()}`);
 
     // Find all active daily commissions that need payment now (only 5-minute demo commissions)
     const commissionsToProcess = await DailyCommission.find({
@@ -31,8 +32,17 @@ export async function GET(request) {
     });
 
     console.log(`Found ${commissionsToProcess.length} commissions to process`);
+    
+    if (commissionsToProcess.length > 0) {
+      console.log(`Sample commission:`, {
+        sponsorId: commissionsToProcess[0].sponsorId,
+        nextPaymentDate: commissionsToProcess[0].nextPaymentDate,
+        daysRemaining: commissionsToProcess[0].daysRemaining
+      });
+    }
 
     const processedCommissions = [];
+    const skippedCommissions = [];
     const errors = [];
 
     for (const commission of commissionsToProcess) {
@@ -54,7 +64,7 @@ export async function GET(request) {
 
         // Check if sponsor is active - skip payment if inactive
         if (!sponsorUser.isActivated) {
-          console.log(`Skipping commission for inactive sponsor: ${sponsorUser.memberId} (${sponsorUser.name})`);
+          console.log(`⏭️ Skipping commission for inactive sponsor: ${sponsorUser.memberId} (${sponsorUser.name})`);
           // Update next payment date to check again in 5 minutes
           await DailyCommission.findOneAndUpdate(
             { _id: commission._id },
@@ -64,6 +74,14 @@ export async function GET(request) {
               }
             }
           );
+          
+          skippedCommissions.push({
+            sponsorId: sponsorUser.memberId,
+            sponsorName: sponsorUser.name,
+            level: commission.level,
+            reason: 'User is inactive'
+          });
+          
           continue;
         }
 
@@ -129,22 +147,25 @@ export async function GET(request) {
 
     // Get summary statistics
     const totalProcessed = processedCommissions.length;
+    const totalSkipped = skippedCommissions.length;
     const totalAmount = processedCommissions.reduce((sum, comm) => sum + comm.paymentAmount, 0);
     const completedCommissions = processedCommissions.filter(comm => comm.status === 'completed').length;
 
-    console.log(`Automatic commission processing completed: ${totalProcessed} commissions processed, $${totalAmount.toFixed(2)} distributed`);
-    console.log(`API Response Summary: Processed: ${totalProcessed}, Distributed: $${totalAmount.toFixed(2)}, Completed: ${completedCommissions}, Errors: ${errors.length}`);
+    console.log(`Automatic commission processing completed: ${totalProcessed} commissions processed, ${totalSkipped} skipped (inactive users), $${totalAmount.toFixed(2)} distributed`);
+    console.log(`API Response Summary: Processed: ${totalProcessed}, Skipped: ${totalSkipped}, Distributed: $${totalAmount.toFixed(2)}, Completed: ${completedCommissions}, Errors: ${errors.length}`);
 
     return NextResponse.json(
       {
         message: "Commissions processed automatically",
         summary: {
           totalProcessed,
+          totalSkipped,
           totalAmount: totalAmount.toFixed(2),
           completedCommissions,
           errors: errors.length
         },
         processedCommissions,
+        skippedCommissions,
         errors
       },
       {
