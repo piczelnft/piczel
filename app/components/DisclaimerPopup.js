@@ -90,7 +90,7 @@ export default function DisclaimerPopup() {
               I Understand & Accept
             </button>
             <p className="mt-4 text-xs text-white opacity-75">
-              By clicking "I Understand & Accept", you acknowledge that you have read and understood this disclaimer.
+              By clicking &quot;I Understand & Accept&quot;, you acknowledge that you have read and understood this disclaimer.
             </p>
           </div>
         </div>

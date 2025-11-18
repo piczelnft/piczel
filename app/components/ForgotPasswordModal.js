@@ -74,7 +74,7 @@ export default function ForgotPasswordModal({ isOpen, onClose }) {
         {/* Content */}
         <div className="p-8">
           <h2 className="text-2xl font-bold text-gray-900 mb-2">Forgot Password?</h2>
-          <p className="text-gray-600 mb-6">Enter your email address and we'll send you a link to reset your password.</p>
+          <p className="text-gray-600 mb-6">Enter your email address and we&apos;ll send you a link to reset your password.</p>
 
           {message.text && (
             <div className={`mb-4 p-3 rounded-lg text-sm ${
