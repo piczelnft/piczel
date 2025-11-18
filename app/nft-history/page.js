@@ -62,12 +62,12 @@ export default function NftHistory() {
 
   if (!isAuthenticated) {
     return (
-      <div className="min-h-screen flex items-center justify-center" style={{background: 'linear-gradient(135deg, #1565c0 0%, #1976d2 50%, #2196f3 100%)', fontFamily: 'var(--default-font-family)'}}>
+      <div className="min-h-screen flex items-center justify-center" style={{background: '#fff', fontFamily: 'var(--default-font-family)'}}>
         <div className="text-center">
           <div className="mb-8">
             <div className="text-8xl mb-4">🔒</div>
-            <h1 className="text-4xl font-bold text-white mb-4">Authentication Required</h1>
-            <p className="text-blue-100 text-lg">Please log in to view your NFT purchase history.</p>
+            <h1 className="text-4xl font-bold mb-4" style={{color: '#1565c0'}}>Authentication Required</h1>
+            <p className="text-lg" style={{color: '#64b5f6'}}>Please log in to view your NFT purchase history.</p>
           </div>
           <a 
             href="/login" 
@@ -81,25 +81,25 @@ export default function NftHistory() {
   }
 
   return (
-    <div className="min-h-screen" style={{background: 'linear-gradient(135deg, #1565c0 0%, #1976d2 50%, #2196f3 100%)', fontFamily: 'var(--default-font-family)'}}>
+    <div className="min-h-screen" style={{background: '#fff', fontFamily: 'var(--default-font-family)'}}>
       <div className="container mx-auto px-4 py-8">
         <div className="mb-8">
-          <h1 className="text-4xl font-bold text-white mb-2">NFT Purchase History</h1>
-          <p className="text-blue-100">View all your purchased NFTs</p>
+          <h1 className="text-4xl font-bold mb-2" style={{color: '#1565c0'}}>NFT Purchase History</h1>
+          <p style={{color: '#64b5f6'}}>View all your purchased NFTs</p>
         </div>
 
         {loading ? (
           <div className="flex items-center justify-center py-12">
             <div className="text-center">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-200 mx-auto mb-4"></div>
-              <p className="text-blue-100">Loading your NFT purchases...</p>
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 mx-auto mb-4" style={{borderColor: '#1565c0'}}></div>
+              <p style={{color: '#64b5f6'}}>Loading your NFT purchases...</p>
             </div>
           </div>
         ) : error ? (
           <div className="text-center py-12">
             <div className="text-6xl mb-4">❌</div>
-            <h2 className="text-2xl font-bold text-white mb-4">Error Loading NFT History</h2>
-            <p className="text-blue-100 mb-6">{error}</p>
+            <h2 className="text-2xl font-bold mb-4" style={{color: '#1565c0'}}>Error Loading NFT History</h2>
+            <p className="mb-6" style={{color: '#64b5f6'}}>{error}</p>
             <button 
               onClick={fetchNftPurchases}
               className="px-6 py-3 rounded-lg bg-[#1565c0] text-white font-semibold hover:bg-[#1976d2] transition-all duration-200 inline-block"
@@ -110,8 +110,8 @@ export default function NftHistory() {
         ) : purchases.length === 0 ? (
           <div className="text-center py-12">
             <div className="text-8xl mb-4">📦</div>
-            <h2 className="text-2xl font-bold text-white mb-4">No NFT Purchases Found</h2>
-            <p className="text-blue-100 mb-6">You haven&apos;t purchased any NFTs yet.</p>
+            <h2 className="text-2xl font-bold mb-4" style={{color: '#1565c0'}}>No NFT Purchases Found</h2>
+            <p className="mb-6" style={{color: '#64b5f6'}}>You haven&apos;t purchased any NFTs yet.</p>
             <a 
               href="/nft-buy" 
               className="px-6 py-3 rounded-lg bg-[#1565c0] text-white font-semibold hover:bg-[#1976d2] transition-all duration-200 inline-block"

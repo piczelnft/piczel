@@ -208,10 +208,10 @@ export default function WithdrawalRequestPage() {
         <div className="max-w-2xl mx-auto">
           {/* Header */}
           <div className="text-center mb-6 sm:mb-8">
-            <h1 className="text-2xl sm:text-3xl font-bold text-black mb-2" style={{color:'black'}}>
+            <h1 className="text-2xl sm:text-3xl font-bold mb-2" style={{color:'#1565c0'}}>
               Request Withdrawal
             </h1>
-            <p className="text-black text-sm sm:text-base" style={{color:'black'}}>
+            <p className="text-sm sm:text-base" style={{color:'#64b5f6'}}>
               Withdraw your funds to your preferred wallet address
             </p>
           </div>
@@ -238,10 +238,10 @@ export default function WithdrawalRequestPage() {
               <div className="flex items-center justify-between">
                 <div>
                   <h3 className="text-white font-semibold mb-1 text-sm sm:text-base">Withdrawal Balance</h3>
-                  <p className="text-xl sm:text-2xl font-bold" style={{color: 'rgb(var(--primary-rgb))'}}>${formatCurrency4Digits(withdrawalBalance)}</p>
+                  <p className="text-xl sm:text-2xl font-bold text-green-400">${formatCurrency4Digits(withdrawalBalance)}</p>
                 </div>
                 <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full flex items-center justify-center" style={{backgroundColor: 'rgba(0, 255, 190, 0.15)'}}>
-                  <svg className="w-5 h-5 sm:w-6 sm:h-6" style={{color: 'var(--primary-color)'}} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-5 h-5 sm:w-6 sm:h-6 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1M16 11a4 4 0 10-8 0 4 4 0 008 0zm6-5h-3m-4 0H5m0 0H2m3 0v3m0-3V3" />
                   </svg>
                 </div>
@@ -253,10 +253,10 @@ export default function WithdrawalRequestPage() {
               <div className="flex items-center justify-between">
                 <div>
                   <h3 className="text-white font-semibold mb-1 text-sm sm:text-base">Level Income</h3>
-                  <p className="text-xl sm:text-2xl font-bold text-blue-400">${formatCurrency4Digits(levelIncome)}</p>
+                  <p className="text-xl sm:text-2xl font-bold text-green-400">${formatCurrency4Digits(levelIncome)}</p>
                 </div>
                 <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full flex items-center justify-center" style={{backgroundColor: 'rgba(59, 130, 246, 0.2)'}}>
-                  <svg className="w-5 h-5 sm:w-6 sm:h-6 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-5 h-5 sm:w-6 sm:h-6 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
                   </svg>
                 </div>
@@ -268,10 +268,10 @@ export default function WithdrawalRequestPage() {
               <div className="flex items-center justify-between">
                 <div>
                   <h3 className="text-white font-semibold mb-1 text-sm sm:text-base">Spot Income</h3>
-                  <p className="text-xl sm:text-2xl font-bold text-purple-400">${formatCurrency4Digits(spotIncome)}</p>
+                  <p className="text-xl sm:text-2xl font-bold text-green-400">${formatCurrency4Digits(spotIncome)}</p>
                 </div>
                 <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full flex items-center justify-center" style={{backgroundColor: 'rgba(168, 85, 247, 0.2)'}}>
-                  <svg className="w-5 h-5 sm:w-6 sm:h-6 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-5 h-5 sm:w-6 sm:h-6 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
                   </svg>
                 </div>
@@ -500,7 +500,7 @@ export default function WithdrawalRequestPage() {
                   type="submit"
                   disabled={isLoading || getAvailableBalance() < 5}
                   className="w-full flex justify-center py-2 sm:py-3 px-4 rounded-lg text-sm font-medium text-white transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
-                  style={{backgroundColor: '#1565c0', border: 'none'}}>
+                  style={{backgroundColor: '#0d47a1', border: 'none'}}>
                   {isLoading ? (
                     <div className="flex items-center">
                       <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>

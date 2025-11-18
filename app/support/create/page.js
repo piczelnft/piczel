@@ -200,7 +200,7 @@ const SupportCreatePage = () => {
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             {/* Message Form */}
             <div className="lg:col-span-2">
-              <div className="bg-[#1565c0] rounded-2xl p-8 border border-blue-800 shadow-lg">
+              <div className="rounded-2xl p-8 border shadow-lg" style={{backgroundColor: '#0d47a1', borderColor: '#0d47a1'}}>
                 <h2 className="text-2xl font-semibold text-white mb-8 text-center">Create Support Ticket</h2>
 
                 <form onSubmit={handleSubmit} className="space-y-6">
@@ -209,8 +209,8 @@ const SupportCreatePage = () => {
                     <label className="block text-blue-100 text-sm font-medium mb-2">
                       Member ID
                     </label>
-                    <div className="bg-blue-800/80 rounded-lg p-4 border border-blue-900">
-                      <div className="text-white font-semibold text-lg">{formData.memberId}</div>
+                    <div className="rounded-lg p-4 border" style={{backgroundColor: '#fff', borderColor: '#e0e0e0'}}>
+                      <div className="font-semibold text-lg" style={{color: '#0d47a1'}}>{formData.memberId}</div>
                     </div>
                   </div>
 
@@ -225,7 +225,8 @@ const SupportCreatePage = () => {
                       value={formData.subject}
                       onChange={handleInputChange}
                       placeholder="Enter Subject"
-                      className="w-full px-4 py-4 bg-blue-800/80 text-white border border-blue-900 rounded-lg text-base focus:outline-none focus:border-blue-400 transition-colors placeholder-blue-200"
+                      className="w-full px-4 py-4 border rounded-lg text-base focus:outline-none transition-colors"
+                      style={{backgroundColor: '#fff', color: '#0d47a1', borderColor: '#e0e0e0'}}
                       required
                     />
                   </div>
@@ -240,7 +241,8 @@ const SupportCreatePage = () => {
                         name="category"
                         value={formData.category}
                         onChange={handleInputChange}
-                        className="w-full px-4 py-4 bg-blue-800/80 text-white border border-blue-900 rounded-lg text-base focus:outline-none focus:border-blue-400 transition-colors"
+                        className="w-full px-4 py-4 border rounded-lg text-base focus:outline-none transition-colors"
+                        style={{backgroundColor: '#fff', color: '#0d47a1', borderColor: '#e0e0e0'}}
                       >
                         <option value="General">General</option>
                         <option value="Technical">Technical</option>
@@ -259,7 +261,8 @@ const SupportCreatePage = () => {
                         name="priority"
                         value={formData.priority}
                         onChange={handleInputChange}
-                        className="w-full px-4 py-4 bg-blue-800/80 text-white border border-blue-900 rounded-lg text-base focus:outline-none focus:border-blue-400 transition-colors"
+                        className="w-full px-4 py-4 border rounded-lg text-base focus:outline-none transition-colors"
+                        style={{backgroundColor: '#fff', color: '#0d47a1', borderColor: '#e0e0e0'}}
                       >
                         <option value="low">Low</option>
                         <option value="medium">Medium</option>
@@ -280,7 +283,8 @@ const SupportCreatePage = () => {
                       onChange={handleInputChange}
                       placeholder="Enter Your Issue"
                       rows={6}
-                      className="w-full px-4 py-4 bg-blue-800/80 text-white border border-blue-900 rounded-lg text-base focus:outline-none focus:border-blue-400 transition-colors placeholder-blue-200 resize-none"
+                      className="w-full px-4 py-4 border rounded-lg text-base focus:outline-none transition-colors resize-none"
+                      style={{backgroundColor: '#fff', color: '#0d47a1', borderColor: '#e0e0e0'}}
                       required
                     />
                   </div>

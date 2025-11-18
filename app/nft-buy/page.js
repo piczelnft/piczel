@@ -242,7 +242,7 @@ export default function NFTBuyPage() {
                   Back to Dashboard
                 </Link>
                 <h1 className="text-2xl sm:text-3xl font-bold text-[#1565c0]">
-                  NFT Collection
+                  Meme NFT Collection
                 </h1>
                 <p className="text-[#1565c0] mt-2 text-sm sm:text-base">
                   Buy NFTs in order from A1 to J1. After buying one, the next NFT becomes available in 5 minutes (demo mode).
@@ -294,12 +294,12 @@ export default function NFTBuyPage() {
             <div className="flex items-center justify-between mb-3">
               <h3 className="text-lg sm:text-xl font-bold text-white">Total Holding Wallet</h3>
               <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center" style={{backgroundColor:'rgba(34,197,94,0.2)', border:'1px solid rgba(34,197,94,0.3)'}}>
-                <svg className="w-4 h-4 sm:w-5 sm:h-5 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-4 h-4 sm:w-5 sm:h-5 text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
                 </svg>
               </div>
             </div>
-            <div className="text-2xl sm:text-3xl font-bold text-green-400 mb-2">
+            <div className="text-2xl sm:text-3xl font-bold text-yellow-400 mb-2">
               ${(() => {
                 // All A1-A100, ..., J1-J100, not paid
                 const unpaid = nftPurchases.filter(p => {
@@ -341,12 +341,12 @@ export default function NFTBuyPage() {
             <div className="flex items-center justify-between mb-3">
               <h3 className="text-lg sm:text-xl font-bold text-white">Total Profit Value</h3>
               <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center" style={{backgroundColor:'rgba(168,85,247,0.2)', border:'1px solid rgba(168,85,247,0.3)'}}>
-                <svg className="w-4 h-4 sm:w-5 sm:h-5 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-4 h-4 sm:w-5 sm:h-5 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
                 </svg>
               </div>
             </div>
-            <div className="text-2xl sm:text-3xl font-bold text-purple-400 mb-2">
+            <div className="text-2xl sm:text-3xl font-bold text-green-400 mb-2">
               ${(() => {
                 // All A1-A100, ..., J1-J100, paid
                 const paid = nftPurchases.filter(p => {

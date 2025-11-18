@@ -39,8 +39,8 @@ export async function GET(request) {
       await dbConnect();
       console.log("Database connected successfully");
 
-      // Get current user
-      const user = await User.findById(decoded.userId).select('memberId name _id');
+      // Get current user - include isActivated to check if user was active
+      const user = await User.findById(decoded.userId).select('memberId name _id isActivated');
       if (!user) {
         return NextResponse.json(
           { error: "User not found" },
@@ -51,7 +51,7 @@ export async function GET(request) {
         );
       }
 
-      console.log(`Getting spot income history for user: ${user.memberId}`);
+      console.log(`Getting spot income history for user: ${user.memberId}, Active: ${user.isActivated}`);
 
       const spotIncomeEntries = [];
 
@@ -86,22 +86,53 @@ export async function GET(request) {
             console.log(`Referral ${referral.memberId} (Level ${level}) has ${nftPurchases.length} NFT purchases`);
 
             // Create spot income entry for each purchase
+            // Note: Spot income is only paid if the current user was ACTIVE at the time of purchase
+            // Since we don't have historical activation data, we show all purchases but note
+            // that inactive users don't receive income
             for (const purchase of nftPurchases) {
-              spotIncomeEntries.push({
-                level: level,
-                referral: {
-                  memberId: referral.memberId,
-                  name: referral.name,
-                  email: referral.email,
-                  avatar: referral.avatar
-                },
-                spotIncome: spotIncomeByLevel[level] || 0,
-                nftPurchaseId: purchase._id,
-                nftCode: purchase.code,
-                nftPrice: purchase.price || 0,
-                purchaseDate: purchase.purchasedAt || purchase.createdAt,
-                purchasedAt: purchase.purchasedAt || purchase.createdAt
-              });
+              // Check if user meets conditions for this level
+              let meetsCondition = true;
+              let conditionNote = '';
+              
+              if (level === 1) {
+                // L1: Must have at least one NFT
+                const userHasNft = await NftPurchase.exists({ userId: user._id });
+                meetsCondition = userHasNft !== null;
+                if (!meetsCondition) conditionNote = 'No NFT purchased';
+              } else if (level === 2) {
+                // L2: Must have at least 3 direct members
+                const directCount = await User.countDocuments({ sponsor: user._id });
+                meetsCondition = directCount >= 3;
+                if (!meetsCondition) conditionNote = `Only ${directCount} directs (need 3)`;
+              } else if (level === 3) {
+                // L3: Must have at least 5 direct members
+                const directCount = await User.countDocuments({ sponsor: user._id });
+                meetsCondition = directCount >= 5;
+                if (!meetsCondition) conditionNote = `Only ${directCount} directs (need 5)`;
+              }
+              
+              // Only add entry if user was/is active AND meets conditions
+              // Inactive users don't receive spot income
+              if (user.isActivated && meetsCondition) {
+                spotIncomeEntries.push({
+                  level: level,
+                  referral: {
+                    memberId: referral.memberId,
+                    name: referral.name,
+                    email: referral.email,
+                    avatar: referral.avatar
+                  },
+                  spotIncome: spotIncomeByLevel[level] || 0,
+                  nftPurchaseId: purchase._id,
+                  nftCode: purchase.code,
+                  nftPrice: purchase.price || 0,
+                  purchaseDate: purchase.purchasedAt || purchase.createdAt,
+                  purchasedAt: purchase.purchasedAt || purchase.createdAt,
+                  received: true
+                });
+              } else {
+                console.log(`Skipping entry for ${referral.memberId} L${level}: Active=${user.isActivated}, Condition=${meetsCondition} ${conditionNote}`);
+              }
             }
           } catch (err) {
             console.error(`Error processing referral ${referral.memberId}:`, err);

@@ -147,15 +147,15 @@ export default function ProfileSummary() {
   return (
     <div className="min-h-screen" style={{background: '#fff', fontFamily: 'var(--default-font-family)'}}>
       {/* Header */}
-      <div className="border-b" style={{backgroundColor: '#1565c0', borderColor: '#1565c0'}}>
+      <div className="border-b" style={{backgroundColor: '#fff', borderColor: '#e0e0e0'}}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex items-center justify-between">
-            <Link href="/" className="transition-colors text-white hover:text-blue-200">
+            <Link href="/" className="transition-colors hover:text-blue-300" style={{color: '#1565c0'}}>
               ← Back to Dashboard
             </Link>
             <div className="text-center">
-              <h1 className="text-2xl font-bold text-white">Profile Settings</h1>
-              <p className="text-white text-sm">Update your profile settings</p>
+              <h1 className="text-2xl font-bold" style={{color: '#1565c0'}}>Profile Settings</h1>
+              <p className="text-sm" style={{color: '#64b5f6'}}>Update your profile settings</p>
               <div className="mt-2">
                 <button 
                   onClick={fetchProfileData}

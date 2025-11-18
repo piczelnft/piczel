@@ -100,9 +100,9 @@ export default function AdminDashboard() {
             <div className="flex items-center justify-between">
               <div>
                 <h3 className="text-lg font-medium text-gray-900">Total Members</h3>
-                <p className="text-3xl font-bold text-blue-600 mt-2">{formatNumber(stats?.members?.total || 0)}</p>
+                <p className="text-3xl font-bold text-green-600 mt-2">{formatNumber(stats?.members?.total || 0)}</p>
               </div>
-              <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
+              <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
                 <span className="text-2xl">👥</span>
               </div>
             </div>
@@ -124,11 +124,11 @@ export default function AdminDashboard() {
             <div className="flex items-center justify-between">
               <div>
                 <h3 className="text-lg font-medium text-gray-900">Total Inactive</h3>
-                <p className="text-3xl font-bold text-yellow-600 mt-2">
+                <p className="text-3xl font-bold text-green-600 mt-2">
                   {formatNumber(stats?.members?.inactive || 0)}
                 </p>
               </div>
-              <div className="w-12 h-12 bg-yellow-100 rounded-lg flex items-center justify-center">
+              <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
                 <span className="text-2xl">⏸️</span>
               </div>
             </div>
@@ -150,9 +150,9 @@ export default function AdminDashboard() {
             <div className="flex items-center justify-between">
               <div>
                 <h3 className="text-lg font-medium text-gray-900">Today&apos;s Activation</h3>
-                <p className="text-3xl font-bold text-purple-600 mt-2">{formatNumber(stats?.members?.todayActivation || 0)}</p>
+                <p className="text-3xl font-bold text-green-600 mt-2">{formatNumber(stats?.members?.todayActivation || 0)}</p>
               </div>
-              <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
+              <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
                 <span className="text-2xl">📈</span>
               </div>
             </div>
@@ -180,9 +180,9 @@ export default function AdminDashboard() {
             <div className="flex items-center justify-between">
               <div>
                 <h3 className="text-lg font-medium text-gray-900">Today&apos;s Withdrawal</h3>
-                <p className="text-2xl font-bold text-red-600 mt-2">{formatCurrency(stats?.financial?.todayWithdrawal || 0)}</p>
+                <p className="text-2xl font-bold text-green-600 mt-2">{formatCurrency(stats?.financial?.todayWithdrawal || 0)}</p>
               </div>
-              <div className="w-12 h-12 bg-red-100 rounded-lg flex items-center justify-center">
+              <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
                 <span className="text-2xl">⬇️</span>
               </div>
             </div>
@@ -192,9 +192,9 @@ export default function AdminDashboard() {
             <div className="flex items-center justify-between">
               <div>
                 <h3 className="text-lg font-medium text-gray-900">Total Withdrawal Amount</h3>
-                <p className="text-2xl font-bold text-orange-600 mt-2">{formatCurrency(stats?.financial?.totalWithdrawal || 0)}</p>
+                <p className="text-2xl font-bold text-green-600 mt-2">{formatCurrency(stats?.financial?.totalWithdrawal || 0)}</p>
               </div>
-              <div className="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center">
+              <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
                 <span className="text-2xl">💸</span>
               </div>
             </div>
@@ -204,14 +204,14 @@ export default function AdminDashboard() {
             <div className="flex items-center justify-between">
               <div>
                 <h3 className="text-lg font-medium text-gray-900">Total Wallet Balance</h3>
-                <p className="text-2xl font-bold text-blue-600 mt-2">
+                <p className="text-2xl font-bold text-green-600 mt-2">
                   {formatCurrency(
                     (stats?.financial?.totalNftPurchaseAmount || 0) - 
                     ((stats?.financial?.totalWithdrawal || 0) - ((stats?.financial?.totalWithdrawal || 0) * 0.10))
                   )}
                 </p>
               </div>
-              <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
+              <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
                 <span className="text-2xl">💰</span>
               </div>
             </div>
@@ -263,9 +263,9 @@ export default function AdminDashboard() {
             <div className="flex items-center justify-between">
               <div>
                 <h3 className="text-lg font-medium text-gray-900">Today&apos;s Purchase</h3>
-                <p className="text-2xl font-bold text-blue-600 mt-2">{formatCurrency(stats?.financial?.todayNftPurchaseAmount || 0)}</p>
+                <p className="text-2xl font-bold text-green-600 mt-2">{formatCurrency(stats?.financial?.todayNftPurchaseAmount || 0)}</p>
               </div>
-              <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
+              <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
                 <span className="text-2xl">⬆️</span>
               </div>
             </div>
@@ -275,9 +275,9 @@ export default function AdminDashboard() {
             <div className="flex items-center justify-between">
               <div>
                 <h3 className="text-lg font-medium text-gray-900">Total Payout</h3>
-                <p className="text-2xl font-bold text-purple-600 mt-2">{formatCurrency(stats?.financial?.totalPayout || 0)}</p>
+                <p className="text-2xl font-bold text-green-600 mt-2">{formatCurrency(stats?.financial?.totalPayout || 0)}</p>
               </div>
-              <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
+              <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
                 <span className="text-2xl">💰</span>
               </div>
             </div>
@@ -375,9 +375,9 @@ export default function AdminDashboard() {
             <div className="flex items-center justify-between">
               <div>
                 <h3 className="text-lg font-medium text-gray-900">Total Level Income</h3>
-                <p className="text-2xl font-bold text-blue-600 mt-2">{formatCurrency(stats?.income?.levelIncome || 0)}</p>
+                <p className="text-2xl font-bold text-green-600 mt-2">{formatCurrency(stats?.income?.levelIncome || 0)}</p>
               </div>
-              <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
+              <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
                 <span className="text-2xl">📊</span>
               </div>
             </div>

@@ -167,10 +167,10 @@ export default function WithdrawalHistoryPage() {
         <div className="max-w-6xl mx-auto">
           {/* Header */}
           <div className="text-center mb-6 sm:mb-8">
-            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-white mb-2" style={{color:'black'}}>
+            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-2" style={{color:'#1565c0'}}>
               Withdrawal History
             </h1>
-            <p className="text-white text-sm sm:text-base" style={{color:'black'}}>
+            <p className="text-sm sm:text-base" style={{color:'#64b5f6'}}>
               Track all your withdrawal requests and their status
             </p>
           </div>

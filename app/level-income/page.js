@@ -142,7 +142,7 @@ export default function LevelIncomePage() {
         <div className="mb-8">
           <h1 className="text-4xl font-bold text-[#1565c0] mb-2">Level Income Details</h1>
           <p className="text-[#1565c0]/80">
-            Track your income from users who used your sponsor ID and their NFT purchases
+            Level is conditional upon maintaining an active trade
           </p>
         </div>
 
@@ -170,7 +170,7 @@ export default function LevelIncomePage() {
                 <div className="text-2xl font-bold text-white mb-2">
                   {formatCurrency(levelIncomeData.summary.totalDailyAmount)}
                 </div>
-                <div className="text-sm text-white/80">Daily Amount</div>
+                <div className="text-sm text-white/80">Daily Bonus</div>
               </div>
             </div>
           </div>
@@ -192,9 +192,9 @@ export default function LevelIncomePage() {
                 <tr>
                   <th className="px-6 py-4 text-white font-semibold">S.No</th>
                   <th className="px-6 py-4 text-white font-semibold">Level</th>
-                  <th className="px-6 py-4 text-white font-semibold">Referral Name</th>
-                  <th className="px-6 py-4 text-white font-semibold">Number of NFT Purchase</th>
-                  <th className="px-6 py-4 text-white font-semibold">Last Payment</th>
+                  <th className="px-6 py-4 text-white font-semibold">Referrals</th>
+                  <th className="px-6 py-4 text-white font-semibold">Number of NFT Purchased</th>
+                  <th className="px-6 py-4 text-white font-semibold">Date</th>
                 </tr>
               </thead>
               <tbody>

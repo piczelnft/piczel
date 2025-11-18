@@ -425,11 +425,11 @@ export default function Home() {
               <div className="font-bold text-lg text-white">{data.status}</div>
               {deactivationCountdown && data.status === 'Active' && (
                 <div className="mt-2">
-                  <div className="text-xs" style={{color: 'rgba(255, 255, 255, 0.7)'}}>Deactivating in:</div>
+                  <div className="text-xs font-semibold" style={{color: 'rgba(255, 255, 255, 0.7)'}}>Deactivating in:</div>
                   <div 
                     className="font-bold text-xl mt-1" 
                     style={{
-                      color: '#ff1744',
+                      color: '#ffd600',
                       animation: 'pulse 1s ease-in-out infinite'
                     }}
                   >

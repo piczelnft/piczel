@@ -96,6 +96,12 @@ export default function SpotIncomeHistoryPage() {
         <div className="mb-8 text-center">
           <h1 className="text-4xl font-bold text-[#1565c0] mb-2">Spot Income History</h1>
           <p className="text-[#1565c0]/80">See spot income from L1, L2, and L3 referrals and when they purchased NFTs</p>
+          {/* <div className="mt-3 mb-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+            <p className="text-sm text-yellow-800">
+              <strong>Note:</strong> Spot income is only received when your account is active (isActivated: true). 
+              Inactive users do not receive spot income from referral purchases.
+            </p>
+          </div> */}
           <div className="mt-4">
             <button
               onClick={fetchSpotIncome}
@@ -158,7 +164,6 @@ export default function SpotIncomeHistoryPage() {
                   <th className="px-6 py-4 text-white font-semibold">S.No</th>
                   <th className="px-6 py-4 text-white font-semibold">Level</th>
                   <th className="px-6 py-4 text-white font-semibold">Referral Name</th>
-                  <th className="px-6 py-4 text-white font-semibold">Member ID</th>
                   <th className="px-6 py-4 text-white font-semibold">Spot Income</th>
                   <th className="px-6 py-4 text-white font-semibold">NFT Code</th>
                   <th className="px-6 py-4 text-white font-semibold">Date</th>
@@ -178,7 +183,6 @@ export default function SpotIncomeHistoryPage() {
                         </span>
                       </td>
                       <td className="px-6 py-4 text-white font-medium">{item?.referral?.name || "Unknown"}</td>
-                      <td className="px-6 py-4 text-white/80">{item?.referral?.memberId || "-"}</td>
                       <td className="px-6 py-4 font-medium text-white">{formatCurrency(item?.spotIncome)}</td>
                       <td className="px-6 py-4 text-white/80">
                         <span className="text-xs font-mono">{item?.nftCode || "-"}</span>
@@ -188,7 +192,7 @@ export default function SpotIncomeHistoryPage() {
                   ))
                 ) : (
                   <tr>
-                    <td className="px-6 py-8 text-center text-white/80" colSpan={7}>
+                    <td className="px-6 py-8 text-center text-white/80" colSpan={6}>
                       No spot income history available
                     </td>
                   </tr>
