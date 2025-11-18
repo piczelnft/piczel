@@ -254,6 +254,15 @@ export default function Sidebar({ isOpen, onClose }) {
 
   return (
     <>
+      {/* Overlay for mobile - clicking outside closes sidebar */}
+      {isOpen && (
+        <div 
+          className="fixed inset-0  bg-opacity-50 z-30 lg:hidden"
+          onClick={onClose}
+          style={{top: '3rem'}}
+        />
+      )}
+      
       {/* Sidebar */}
       <div className="fixed left-0 top-12 bottom-0 w-64 border-r shadow-2xl flex flex-col animate-fadeInLeft z-40" style={{borderColor: '#1565c0', backgroundColor: '#1565c0', height: 'calc(100vh - 3rem)'}}>
         {/* Header */}
@@ -344,9 +353,14 @@ export default function Sidebar({ isOpen, onClose }) {
                     onClick={() => handleItemClick(item.name, item.hasDropdown, item.isLogout)}
                     className={`w-full flex items-center space-x-3 px-3 py-2 rounded-lg transition-all duration-300 group hover-lift-enhanced ${
                       activeItem === item.name
-                        ? 'glass-card border border-slate-500/50 shadow-lg glow-border'
-                        : 'hover:glass-card hover:border hover:border-slate-500/30 hover-glow'
+                        ? 'border shadow-lg'
+                        : 'hover:border'
                     }`}
+                    style={{
+                      borderColor: '#1565c0',
+                      backgroundColor: activeItem === item.name ? '#0d47a1' : 'transparent',
+                      color: '#fff'
+                    }}
                   >
                     <div className={`text-white transition-transform duration-300 group-hover:scale-110 ${
                       activeItem === item.name ? 'animate-pulse' : ''
@@ -372,10 +386,15 @@ export default function Sidebar({ isOpen, onClose }) {
                         onClick={() => handleDropdownItemClick(dropdownItem.name)}
                         className={`w-full flex items-center space-x-3 px-4 py-2 rounded-lg transition-all duration-300 group hover-lift-enhanced ${
                           activeItem === dropdownItem.name
-                            ? 'glass-card border border-slate-500/30 glow-border'
-                            : 'hover:glass-card hover:border hover:border-slate-500/20 hover-glow'
+                            ? 'border shadow-lg'
+                            : 'hover:border'
                         }`}
-                        style={{animationDelay: `${dropdownIndex * 0.05}s`}}
+                        style={{
+                          animationDelay: `${dropdownIndex * 0.05}s`,
+                          borderColor: '#1565c0',
+                          backgroundColor: activeItem === dropdownItem.name ? '#0d47a1' : 'transparent',
+                          color: '#fff'
+                        }}
                       >
                         <div className="text-white group-hover:scale-110 transition-transform duration-300">
                           {renderIcon(dropdownItem.icon, "w-5 h-5")}

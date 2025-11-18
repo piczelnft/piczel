@@ -149,7 +149,7 @@
 }
 
 .glow-border:hover {
-  box-shadow: 0 0 20px rgba(0, 255, 190, 0.4), 0 0 40px rgba(0, 255, 190, 0.2);
+  box-shadow: 0 0 20px rgba(13, 71, 161, 0.6), 0 0 40px rgba(13, 71, 161, 0.4);
 }
 
 .glow-border-blue:hover {
