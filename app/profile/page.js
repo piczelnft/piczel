@@ -192,13 +192,13 @@ export default function ProfilePage() {
                   <h2 className="text-lg sm:text-xl font-semibold text-white">
                     Personal Information
                   </h2>
-                  <button
+                  {/* <button
                     onClick={() => setIsEditing(!isEditing)}
                     className="px-4 py-2 rounded-lg transition-colors w-full sm:w-auto hover:bg-blue-50 border border-white"
                     style={{backgroundColor: 'white', color: '#1565c0'}}
                   >
                     {isEditing ? "Cancel" : "Edit"}
-                  </button>
+                  </button> */}
                 </div>
 
                 {isEditing ? (

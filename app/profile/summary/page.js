@@ -155,9 +155,9 @@ export default function ProfileSummary() {
             </Link>
             <div className="text-center">
               <h1 className="text-2xl font-bold" style={{color: '#1565c0'}}>Profile Settings</h1>
-              <p className="text-sm" style={{color: '#64b5f6'}}>Update your profile settings</p>
+              {/* <p className="text-sm" style={{color: '#64b5f6'}}>Update your profile settings</p> */}
               <div className="mt-2">
-                <button 
+                {/* <button 
                   onClick={fetchProfileData}
                   className="px-3 py-1 text-white text-xs flex items-center space-x-1 mx-auto rounded-lg transition-all duration-200 hover:bg-blue-900"
                   disabled={loading}
@@ -167,7 +167,7 @@ export default function ProfileSummary() {
                     {loading ? '⟳' : '↻'}
                   </span>
                   <span>Refresh</span>
-                </button>
+                </button> */}
               </div>
             </div>
             <div className="w-24"></div> {/* Spacer for centering */}
@@ -179,7 +179,7 @@ export default function ProfileSummary() {
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Profile Card */}
         <div className="rounded-2xl p-8 shadow-2xl animate-fadeInUp" style={{backgroundColor: '#1565c0', color: '#fff'}}>
-          <div className="flex items-center justify-between mb-8">
+          {/* <div className="flex items-center justify-between mb-8">
             <h2 className="text-2xl font-bold text-white">Profile Information</h2>
             <button
               onClick={() => setIsEditing(!isEditing)}
@@ -194,7 +194,7 @@ export default function ProfileSummary() {
             >
               {isEditing ? 'Cancel' : 'Edit Profile'}
             </button>
-          </div>
+          </div> */}
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             {/* Profile Image Section */}
@@ -313,7 +313,7 @@ export default function ProfileSummary() {
                 </div>
 
                 {/* Country */}
-                <div>
+                {/* <div>
                   <label className="block text-sm font-medium text-white mb-2">
                     Country:
                   </label>
@@ -343,7 +343,7 @@ export default function ProfileSummary() {
                       {profileData.country}
                     </div>
                   )}
-                </div>
+                </div> */}
               </div>
             </div>
           </div>
