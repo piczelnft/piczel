@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { useAuth } from '@/contexts/AuthContext';
 import { useEffect, useState, useCallback } from 'react';
 import { useAuthGuard } from '../lib/auth-utils';
+import DisclaimerPopup from './components/DisclaimerPopup';
 
 export default function Home() {
   const { user, token } = useAuth();
@@ -297,6 +298,7 @@ export default function Home() {
   };
   return (
     <div className="relative overflow-hidden bg-white min-h-screen">
+        <DisclaimerPopup />
         {/* Animated Background */}
         {/* Removed animated background for clean white look */}
 

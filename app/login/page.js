@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { useAuth } from "@/contexts/AuthContext";
 import { useRedirectIfAuthenticated } from "../../lib/auth-utils";
+import ForgotPasswordModal from "../components/ForgotPasswordModal";
 
 // Login Form Component that uses useSearchParams
 function LoginForm() {
@@ -19,6 +20,7 @@ function LoginForm() {
   const [message, setMessage] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [prefilledInfo, setPrefilledInfo] = useState(null);
+  const [showForgotPassword, setShowForgotPassword] = useState(false);
   const router = useRouter();
   const searchParams = useSearchParams();
   const { login } = useAuth();
@@ -488,15 +490,15 @@ function LoginForm() {
                   </label>
                 </div>
 
-                {/* <div className="text-sm">
-                  <Link
-                    href="/forgot-password"
-                    className="transition-colors duration-200"
-                    style={{ color: "var(--primary-color)" }}
+                <div className="text-sm">
+                  <button
+                    type="button"
+                    onClick={() => setShowForgotPassword(true)}
+                    className="text-blue-600 hover:text-blue-800 font-semibold transition-colors"
                   >
-                    Forgot your password?
-                  </Link>
-                </div> */}
+                    Forgot Password?
+                  </button>
+                </div>
               </div>
 
               <div>
@@ -528,6 +530,12 @@ function LoginForm() {
                 </Link>
               </div>
             </form>
+
+            {/* Forgot Password Modal */}
+            <ForgotPasswordModal 
+              isOpen={showForgotPassword}
+              onClose={() => setShowForgotPassword(false)}
+            />
           </div>
         </div>
       </div>

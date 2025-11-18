@@ -71,6 +71,12 @@ const navigation = [
     current: false,
   },
   {
+    name: "Disclaimer",
+    href: "/admin/disclaimer",
+    icon: "⚠️",
+    current: false,
+  },
+  {
     name: "NFT Market Withdrawal",
     icon: "🖼️",
     hasDropdown: true,
