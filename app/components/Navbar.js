@@ -228,13 +228,13 @@ export default function Navbar() {
               {/* Logo */}
               <div className="flex items-center space-x-2 group">
                 <Link href="/" className="flex items-center space-x-2 group-hover:scale-105 transition-transform duration-300">
-                  <div className="relative w-12 h-12 bg-white rounded-full flex items-center justify-center">
+                  <div className="relative w-12 h-12 bg-white rounded-full overflow-hidden">
                     <Image
                       src="/picl.png"
                       alt="Piczel Logo"
-                      width={52}
-                      height={52}
-                      className="w-full h-full object-contain animate-cardFloat"
+                      fill
+                      sizes="48px"
+                      className="object-cover scale-150"
                     />
                   </div>
                   <div className="text-2xl font-bold text-white">

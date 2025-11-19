@@ -154,13 +154,43 @@ export async function GET() {
         return totalHolding;
       };
 
+      // Calculate profit for each NFT
+      const calculateNftProfit = (nftCode) => {
+        const number = parseInt(nftCode.substring(1)); // Extract number from code (A2 -> 2)
+        
+        // Calculate profit based on NFT number
+        let profit = 0;
+        if (number === 1) {
+          profit = 5; // $5 profit for A1-J1
+        } else if (number === 2) {
+          profit = 10; // $10 profit for A2
+        } else if (number === 3) {
+          profit = 15; // $15 profit for A3
+        } else if (number >= 4 && number <= 100) {
+          profit = 20; // $20 profit for A4-A100
+        }
+        
+        return profit;
+      };
+
+      let totalNftProfitGenerated = 0;
+      let totalNftProfitPaid = 0;
+
       allNftPurchases.forEach(purchase => {
         totalNftPurchaseAmount += purchase.price || 0;
         
+        const nftCode = purchase.code || purchase.series || 'A1';
+        const profit = calculateNftProfit(nftCode);
+        
+        // Add to total profit generated
+        totalNftProfitGenerated += profit;
+        
         // Calculate total payout for NFTs that haven't been paid out yet
         if (purchase.payoutStatus !== 'paid') {
-          const nftCode = purchase.code || purchase.series || 'A1';
           totalPayout += calculateHoldingAmount(nftCode);
+        } else {
+          // If paid, add to total profit paid
+          totalNftProfitPaid += profit;
         }
         
         // Check if purchase was made today
@@ -201,7 +231,9 @@ export async function GET() {
           totalFundBalance: totalFundBalance,
           totalNftPurchaseAmount: totalNftPurchaseAmount,
           todayNftPurchaseAmount: todayNftPurchaseAmount,
-          totalPayout: totalPayout
+          totalPayout: totalPayout,
+          totalNftProfitGenerated: totalNftProfitGenerated,
+          totalNftProfitPaid: totalNftProfitPaid
         },
         coins: {
           buyCoin: buyCoin,

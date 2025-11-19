@@ -217,6 +217,30 @@ export default function AdminDashboard() {
             </div>
           </div>
 
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="text-lg font-medium text-gray-900">Total NFT Profit Generated</h3>
+                <p className="text-2xl font-bold text-green-600 mt-2">{formatCurrency(stats?.financial?.totalNftProfitGenerated || 0)}</p>
+              </div>
+              <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
+                <span className="text-2xl">📊</span>
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="text-lg font-medium text-gray-900">Total NFT Profit Paid</h3>
+                <p className="text-2xl font-bold text-green-600 mt-2">{formatCurrency(stats?.financial?.totalNftProfitPaid || 0)}</p>
+              </div>
+              <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
+                <span className="text-2xl">✅</span>
+              </div>
+            </div>
+          </div>
+
           {/* <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
             <div className="flex items-center justify-between">
               <div>

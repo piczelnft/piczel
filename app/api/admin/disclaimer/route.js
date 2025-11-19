@@ -105,11 +105,22 @@ export async function PUT(request) {
     const { title, sections } = body;
     
     console.log('Request body:', { title, sectionsCount: sections?.length });
+    console.log('Sections data:', JSON.stringify(sections, null, 2));
 
     if (!title || !sections || sections.length === 0) {
       console.log('Invalid data - missing title or sections');
       return NextResponse.json(
         { error: 'Title and at least one section are required' },
+        { status: 400 }
+      );
+    }
+
+    // Validate sections structure
+    const hasInvalidSection = sections.some(s => !s.heading || !s.content);
+    if (hasInvalidSection) {
+      console.log('Invalid section structure detected');
+      return NextResponse.json(
+        { error: 'All sections must have heading and content' },
         { status: 400 }
       );
     }

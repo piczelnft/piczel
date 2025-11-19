@@ -39,8 +39,8 @@ export async function GET(request) {
       await dbConnect();
       console.log("Database connected successfully");
 
-      // Get current user - include isActivated to check if user was active
-      const user = await User.findById(decoded.userId).select('memberId name _id isActivated');
+      // Get current user - include isActivated and activatedAt to check activation status
+      const user = await User.findById(decoded.userId).select('memberId name _id isActivated activatedAt');
       if (!user) {
         return NextResponse.json(
           { error: "User not found" },
@@ -51,7 +51,7 @@ export async function GET(request) {
         );
       }
 
-      console.log(`Getting spot income history for user: ${user.memberId}, Active: ${user.isActivated}`);
+      console.log(`Getting spot income history for user: ${user.memberId}, Active: ${user.isActivated}, ActivatedAt: ${user.activatedAt}`);
 
       const spotIncomeEntries = [];
 
@@ -86,10 +86,24 @@ export async function GET(request) {
             console.log(`Referral ${referral.memberId} (Level ${level}) has ${nftPurchases.length} NFT purchases`);
 
             // Create spot income entry for each purchase
-            // Note: Spot income is only paid if the current user was ACTIVE at the time of purchase
-            // Since we don't have historical activation data, we show all purchases but note
-            // that inactive users don't receive income
+            // Note: Spot income is only paid if the user was ACTIVE at the time of purchase
+            // We only show purchases that happened AFTER the user's activation date
             for (const purchase of nftPurchases) {
+              const purchaseDate = new Date(purchase.purchasedAt || purchase.createdAt);
+              
+              // Skip if user is not currently active
+              if (!user.isActivated) {
+                console.log(`Skipping ${referral.memberId} L${level}: User is currently inactive`);
+                continue;
+              }
+              
+              // Skip if purchase happened before user's activation date
+              // This ensures we only show income from purchases made while user was active
+              if (user.activatedAt && purchaseDate < new Date(user.activatedAt)) {
+                console.log(`Skipping ${referral.memberId} L${level}: Purchase (${purchaseDate.toISOString()}) before activation (${user.activatedAt})`);
+                continue;
+              }
+              
               // Check if user meets conditions for this level
               let meetsCondition = true;
               let conditionNote = '';
@@ -111,9 +125,8 @@ export async function GET(request) {
                 if (!meetsCondition) conditionNote = `Only ${directCount} directs (need 5)`;
               }
               
-              // Only add entry if user was/is active AND meets conditions
-              // Inactive users don't receive spot income
-              if (user.isActivated && meetsCondition) {
+              // Only add entry if user meets conditions
+              if (meetsCondition) {
                 spotIncomeEntries.push({
                   level: level,
                   referral: {
@@ -131,7 +144,7 @@ export async function GET(request) {
                   received: true
                 });
               } else {
-                console.log(`Skipping entry for ${referral.memberId} L${level}: Active=${user.isActivated}, Condition=${meetsCondition} ${conditionNote}`);
+                console.log(`Skipping entry for ${referral.memberId} L${level}: Condition not met - ${conditionNote}`);
               }
             }
           } catch (err) {
