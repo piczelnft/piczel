@@ -71,7 +71,7 @@ export async function POST(request) {
 
           // If holding balance is 0 or less and user is active, schedule deactivation
           if (calculatedHoldingBalance <= 0 && user.isActivated) {
-            const scheduleTime = new Date(Date.now() + 10 * 60 * 1000);
+            const scheduleTime = new Date(Date.now() + 48 * 60 * 60 * 1000);
             await User.findByIdAndUpdate(user._id, {
               $set: {
                 deactivationScheduledAt: scheduleTime

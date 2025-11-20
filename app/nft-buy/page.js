@@ -123,9 +123,9 @@ export default function NFTBuyPage() {
     const lastPurchaseTime = new Date(previousNftPurchase.purchasedAt).getTime();
     const now = Date.now();
     const diffMs = now - lastPurchaseTime;
-    const fiveMinutesPassed = diffMs >= 5 * 60 * 1000;
+    const twentyFourHoursPassed = diffMs >= 24 * 60 * 60 * 1000;
 
-    if (fiveMinutesPassed) {
+    if (twentyFourHoursPassed) {
       return { owned: false, available: true, locked: false };
     } else {
       return { owned: false, available: false, locked: true };
@@ -245,7 +245,7 @@ export default function NFTBuyPage() {
                   Meme NFT Collection
                 </h1>
                 <p className="text-[#1565c0] mt-2 text-sm sm:text-base">
-                  Buy NFTs in order from A1 to J1. After buying one, the next NFT becomes available in 5 minutes (demo mode).
+                  Buy NFTs in order from A1 to J1. After buying one, the next NFT becomes available in 24 hours.
                 </p>
               </div>
             </div>
@@ -587,7 +587,7 @@ export default function NFTBuyPage() {
                 
                 {!available && !owned && (
                   <p className="mt-1 sm:mt-2 text-xs text-center text-white">
-                    Buy previous NFT first and wait 5 minutes.
+                    Buy previous NFT first and wait 24 hours.
                   </p>
                 )}
                 {owned && (

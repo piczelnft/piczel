@@ -372,10 +372,10 @@ export async function POST(request) {
       }
 
       const totalCommission = nftReward * rate;
-      const TOTAL_INTERVALS = 365; // Represents 30 hours and 25 minutes (365 * 5 minutes)
-      const dailyAmount = totalCommission / TOTAL_INTERVALS; // Distribute over new total intervals
+      const TOTAL_INTERVALS = 365; // Represents 365 days (24-hour intervals)
+      const dailyAmount = totalCommission / TOTAL_INTERVALS; // Distribute over 365 days
       const startDate = new Date();
-      const endDate = new Date(Date.now() + (TOTAL_INTERVALS * 5 * 60 * 1000)); // Total duration: 365 * 5 minutes
+      const endDate = new Date(Date.now() + (TOTAL_INTERVALS * 24 * 60 * 60 * 1000)); // Total duration: 365 days
 
       // Create daily commission record
       const dailyCommission = new DailyCommission({
@@ -395,7 +395,7 @@ export async function POST(request) {
         status: 'active',
         startDate: startDate,
         endDate: endDate,
-        nextPaymentDate: new Date(Date.now() + 5 * 60 * 1000) // Next payment in 5 minutes
+        nextPaymentDate: new Date(Date.now() + 24 * 60 * 60 * 1000) // Next payment in 24 hours
       });
 
       await dailyCommission.save();

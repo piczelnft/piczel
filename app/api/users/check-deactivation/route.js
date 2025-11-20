@@ -36,11 +36,11 @@ export async function POST(request) {
     await dbConnect();
 
     const now = new Date();
-    const tenMinutesAgo = new Date(now.getTime() - 10 * 60 * 1000);
+    const fortyEightHoursAgo = new Date(now.getTime() - 48 * 60 * 60 * 1000);
 
     console.log("🔍 Checking for users to deactivate...");
     console.log(`Current time: ${now.toISOString()}`);
-    console.log(`10 minutes ago: ${tenMinutesAgo.toISOString()}`);
+    console.log(`48 hours ago: ${fortyEightHoursAgo.toISOString()}`);
 
     // Get all active users
     const activeUsers = await User.find({ isActivated: true })
@@ -66,7 +66,7 @@ export async function POST(request) {
 
       // STEP 1: If balance is 0 and no schedule, create one
       if (actualBalance <= 0 && !user.deactivationScheduledAt) {
-        const scheduleTime = new Date(now.getTime() + 10 * 60 * 1000);
+        const scheduleTime = new Date(now.getTime() + 48 * 60 * 60 * 1000);
         console.log(`⏰ Scheduling deactivation for ${user.memberId} at ${scheduleTime.toISOString()}`);
         
         await User.findByIdAndUpdate(user._id, {
@@ -128,7 +128,7 @@ export async function GET(request) {
     await dbConnect();
 
     const now = new Date();
-    const tenMinutesAgo = new Date(now.getTime() - 10 * 60 * 1000);
+    const fortyEightHoursAgo = new Date(now.getTime() - 48 * 60 * 60 * 1000);
 
     // Find users scheduled for deactivation
     const scheduledUsers = await User.find({
@@ -138,12 +138,12 @@ export async function GET(request) {
     }).select("memberId name holdingWalletBalance deactivationScheduledAt");
 
     const usersToDeactivateNow = scheduledUsers.filter(user => 
-      user.deactivationScheduledAt && user.deactivationScheduledAt <= tenMinutesAgo
+      user.deactivationScheduledAt && user.deactivationScheduledAt <= fortyEightHoursAgo
     );
 
     return NextResponse.json({
       currentTime: now.toISOString(),
-      tenMinutesAgo: tenMinutesAgo.toISOString(),
+      fortyEightHoursAgo: fortyEightHoursAgo.toISOString(),
       totalScheduled: scheduledUsers.length,
       readyToDeactivate: usersToDeactivateNow.length,
       scheduledUsers: scheduledUsers.map(u => ({
@@ -151,8 +151,8 @@ export async function GET(request) {
         name: u.name,
         holdingBalance: u.holdingWalletBalance,
         scheduledAt: u.deactivationScheduledAt?.toISOString(),
-        minutesUntilDeactivation: u.deactivationScheduledAt 
-          ? Math.round((u.deactivationScheduledAt.getTime() + 10 * 60 * 1000 - now.getTime()) / 60000)
+        hoursUntilDeactivation: u.deactivationScheduledAt 
+          ? Math.round((u.deactivationScheduledAt.getTime() - now.getTime()) / (60 * 60 * 1000))
           : null
       }))
     }, { status: 200 });

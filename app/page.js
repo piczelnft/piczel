@@ -160,15 +160,22 @@ export default function Home() {
       const diff = deactivationScheduledAt.getTime() - now.getTime();
       
       if (diff <= 0) {
-        setDeactivationCountdown('00:00');
+        setDeactivationCountdown('00:00:00');
         // Refresh dashboard data to get updated status
         fetchDashboardData();
         return;
       }
 
-      const minutes = Math.floor(diff / 60000);
-      const seconds = Math.floor((diff % 60000) / 1000);
-      setDeactivationCountdown(`${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`);
+      const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+      const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+      const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+      const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+      
+      if (days > 0) {
+        setDeactivationCountdown(`${days}d ${hours.toString().padStart(2, '0')}h ${minutes.toString().padStart(2, '0')}m`);
+      } else {
+        setDeactivationCountdown(`${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`);
+      }
     };
 
     updateCountdown();

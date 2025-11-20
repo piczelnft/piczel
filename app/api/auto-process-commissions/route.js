@@ -22,12 +22,12 @@ export async function GET(request) {
     const now = new Date();
     console.log(`Current time: ${now.toISOString()}`);
 
-    // Find all active daily commissions that need payment now (only 5-minute demo commissions)
+    // Find all active daily commissions that need payment now
     const commissionsToProcess = await DailyCommission.find({
       status: 'active',
       nextPaymentDate: { $lte: now },
       daysRemaining: { $gt: 0 },
-      totalDays: 365, // Only process 365 (30h 25m) total day commissions
+      totalDays: 365, // Only process 365 day commissions
       dailyAmount: { $gte: 0.001 } // Only process commissions with meaningful amounts
     });
 
@@ -65,12 +65,12 @@ export async function GET(request) {
         // Check if sponsor is active - skip payment if inactive
         if (!sponsorUser.isActivated) {
           console.log(`⏭️ Skipping commission for inactive sponsor: ${sponsorUser.memberId} (${sponsorUser.name})`);
-          // Update next payment date to check again in 5 minutes
+          // Update next payment date to check again in 24 hours
           await DailyCommission.findOneAndUpdate(
             { _id: commission._id },
             {
               $set: {
-                nextPaymentDate: new Date(Date.now() + 5 * 60 * 1000)
+                nextPaymentDate: new Date(Date.now() + 24 * 60 * 60 * 1000)
               }
             }
           );
@@ -119,7 +119,7 @@ export async function GET(request) {
             },
             $set: {
               lastPaymentDate: new Date(),
-              nextPaymentDate: new Date(Date.now() + 5 * 60 * 1000), // Next 5 minutes for demo
+              nextPaymentDate: new Date(Date.now() + 24 * 60 * 60 * 1000), // Next payment in 24 hours
               status: commission.daysRemaining === 1 ? 'completed' : 'active'
             }
           },
