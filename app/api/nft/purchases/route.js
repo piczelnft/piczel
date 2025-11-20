@@ -431,7 +431,7 @@ export async function POST(request) {
           },
           $set: {
             lastPaymentDate: startDate,
-            nextPaymentDate: new Date(Date.now() + 5 * 60 * 1000) // next 5 minutes
+            nextPaymentDate: new Date(Date.now() + 24 * 60 * 60 * 1000) // next 24 hours
           }
         }
       );

@@ -163,9 +163,9 @@ export async function POST(request) {
     // Calculate new holding wallet balance
     const newHoldingBalance = currentHoldingBalance - deductionAmount;
     
-    // If holding wallet balance becomes 0 or negative, schedule deactivation after 10 minutes
+    // If holding wallet balance becomes 0 or negative, schedule deactivation after 48 hours
     if (newHoldingBalance <= 0 && user.isActivated) {
-      const deactivationTime = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes from now
+      const deactivationTime = new Date(Date.now() + 48 * 60 * 60 * 1000); // 48 hours from now
       updateFields.$set = {
         deactivationScheduledAt: deactivationTime
       };

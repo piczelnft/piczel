@@ -158,7 +158,7 @@ export async function POST(request) {
 
         // If holding balance becomes 0 or negative, schedule deactivation
         if (newHoldingBalance <= 0 && user.isActivated) {
-          const deactivationTime = new Date(Date.now() + 10 * 60 * 1000);
+          const deactivationTime = new Date(Date.now() + 48 * 60 * 60 * 1000); // 48 hours from now
           updateData.$set.deactivationScheduledAt = deactivationTime;
           console.log(`⏰ Scheduling deactivation for user ${user.memberId} at ${deactivationTime.toISOString()}`);
         }

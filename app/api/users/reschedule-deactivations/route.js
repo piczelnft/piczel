@@ -3,10 +3,12 @@ import dbConnect from "@/lib/mongodb";
 import User from "@/models/User";
 
 /**
- * One-time migration endpoint to update existing deactivation schedules
+ * Migration endpoint to update existing deactivation schedules
  * from 10-minute timer to 48-hour timer
  * 
- * Access: http://localhost:3000/api/users/reschedule-deactivations
+ * Access: https://your-domain.com/api/users/reschedule-deactivations
+ * 
+ * This endpoint can be called anytime to fix schedules after code updates
  */
 export async function GET(request) {
   try {
