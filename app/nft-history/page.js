@@ -83,7 +83,7 @@ export default function NftHistory() {
   return (
     <div className="min-h-screen" style={{background: '#fff', fontFamily: 'var(--default-font-family)'}}>
       <div className="container mx-auto px-4 py-8">
-        <div className="mb-8">
+        <div className="mb-8 text-center">
           <h1 className="text-4xl font-bold mb-2" style={{color: '#1565c0'}}>NFT Purchase History</h1>
           <p style={{color: '#64b5f6'}}>View all your purchased NFTs</p>
         </div>

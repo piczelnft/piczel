@@ -139,10 +139,10 @@ export default function LevelIncomePage() {
     <div className="min-h-screen bg-white">
       <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-6 md:py-8">
         {/* Header */}
-        <div className="mb-4 sm:mb-6 md:mb-8">
+        <div className="mb-4 sm:mb-6 md:mb-8 text-center">
           <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-[#1565c0] mb-2">Level Income Details</h1>
           <p className="text-sm sm:text-base text-[#1565c0]/80 px-2 sm:px-0">
-            Level is conditional upon maintaining an active trade
+            Level is conditional upon maintaining an active trade centre
           </p>
         </div>
 

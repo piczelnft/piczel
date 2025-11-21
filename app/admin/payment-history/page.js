@@ -80,6 +80,11 @@ export default function PaymentHistory() {
     });
   };
 
+  // Calculate payout amount after 10% company deduction
+  const calculatePayoutAmount = (netAmount) => {
+    return netAmount * 0.9; // 90% of net amount
+  };
+
   const renderPagination = () => {
     if (!pagination.totalPages || pagination.totalPages <= 1) return null;
 
@@ -246,7 +251,7 @@ export default function PaymentHistory() {
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{payment.memberName || 'N/A'}</td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{formatCurrency(payment.gross)}</td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{formatCurrency(payment.charges)}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-gray-900">{formatCurrency(payment.net)}</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-gray-900">{formatCurrency(calculatePayoutAmount(parseFloat(payment.net)))}</td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{formatDate(payment.paymentDate)}</td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                     {payment.transactionHash ? (
@@ -295,7 +300,7 @@ export default function PaymentHistory() {
               <div className="text-sm text-gray-700"><strong>Name:</strong> {payment.memberName || 'N/A'}</div>
               <div className="text-sm text-gray-700"><strong>Gross:</strong> {formatCurrency(payment.gross)}</div>
               <div className="text-sm text-gray-700"><strong>Charges:</strong> {formatCurrency(payment.charges)}</div>
-              <div className="text-sm text-gray-700"><strong>Net:</strong> {formatCurrency(payment.net)}</div>
+              <div className="text-sm text-gray-700"><strong>Net:</strong> {formatCurrency(calculatePayoutAmount(parseFloat(payment.net)))}</div>
               <div className="text-sm text-gray-700"><strong>Request Date:</strong> {formatDate(payment.requestDate)}</div>
               <div className="text-sm text-gray-700"><strong>Payment Date:</strong> {formatDate(payment.paymentDate)}</div>
               <div className="text-sm text-gray-700"><strong>Transaction:</strong> {payment.transactionHash ? payment.transactionHash.slice(0, 10)+'...' : 'N/A'}</div>

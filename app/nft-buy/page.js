@@ -230,17 +230,17 @@ export default function NFTBuyPage() {
         {/* Header */}
         <div className="pt-8 pb-6">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="flex items-center justify-between mb-4 sm:mb-6">
-              <div>
-                <Link 
-                  href="/"
-                  className="inline-flex items-center text-[#1565c0] hover:underline transition-colors duration-200 mb-2 text-sm sm:text-base"
-                >
-                  <svg className="w-4 h-4 sm:w-5 sm:h-5 mr-2" fill="none" stroke="#1565c0" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-                  </svg>
-                  Back to Dashboard
-                </Link>
+            <div className="mb-4 sm:mb-6">
+              <Link 
+                href="/"
+                className="inline-flex items-center text-[#1565c0] hover:underline transition-colors duration-200 mb-4 text-sm sm:text-base"
+              >
+                <svg className="w-4 h-4 sm:w-5 sm:h-5 mr-2" fill="none" stroke="#1565c0" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                </svg>
+                Back to Dashboard
+              </Link>
+              <div className="text-center">
                 <h1 className="text-2xl sm:text-3xl font-bold text-[#1565c0]">
                   Meme NFT Collection
                 </h1>

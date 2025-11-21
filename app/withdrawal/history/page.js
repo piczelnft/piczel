@@ -305,7 +305,7 @@ export default function WithdrawalHistoryPage() {
                             </td>
                             <td className="py-4 px-6">
                               <span className="text-white/80 capitalize">
-                                {withdrawal.paymentMethod}
+                                {withdrawal.paymentMethod === 'crypto' ? 'USDT' : withdrawal.paymentMethod}
                               </span>
                             </td>
                             <td className="py-4 px-6">
@@ -358,7 +358,7 @@ export default function WithdrawalHistoryPage() {
                       <div>
                         <p className="text-white/60 text-xs uppercase tracking-wide">Method</p>
                         <p className="text-white capitalize text-sm">
-                          {withdrawal.paymentMethod}
+                          {withdrawal.paymentMethod === 'crypto' ? 'USDT' : withdrawal.paymentMethod}
                         </p>
                       </div>
                       <div>

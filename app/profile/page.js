@@ -9,7 +9,7 @@ export default function ProfilePage() {
   const [formData, setFormData] = useState({
     name: user?.name || "",
     email: user?.email || "",
-    phone: user?.profile?.phone || "",
+    phone: user?.mobile || "",
     country: user?.profile?.country || "",
   });
 
@@ -262,7 +262,7 @@ export default function ProfilePage() {
                       />
                     </div>
 
-                    <div>
+                    {/* <div>
                       <label className="block text-gray-200 text-sm font-medium mb-2">
                         Country
                       </label>
@@ -279,7 +279,7 @@ export default function ProfilePage() {
                           focusRingColor: 'var(--primary-color)'
                         }}
                       />
-                    </div>
+                    </div> */}
 
                     <button
                       type="submit"
@@ -306,15 +306,15 @@ export default function ProfilePage() {
                     <div className="flex justify-between items-center py-3 border-b border-white/10">
                       <span className="text-gray-300">Phone</span>
                       <span className="text-white font-medium">
-                        {user?.profile?.phone || "Not set"}
+                        {user?.mobile || "Not set"}
                       </span>
                     </div>
-                    <div className="flex justify-between items-center py-3 border-b border-white/10">
+                    {/* <div className="flex justify-between items-center py-3 border-b border-white/10">
                       <span className="text-gray-300">Country</span>
                       <span className="text-white font-medium">
                         {user?.profile?.country || "Not set"}
                       </span>
-                    </div>
+                    </div> */}
                     
                   </div>
                 )}

@@ -618,12 +618,12 @@ export default function NewWithdrawalRequests() {
         )}
 
         {/* Desktop Table View */}
-        <div className="hidden lg:block">
-          <div className="overflow-x-auto">
+        <div className="hidden lg:block overflow-x-auto">
+          <div className="inline-block min-w-full align-middle">
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50">
                 <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     <input
                       type="checkbox"
                       checked={
@@ -639,37 +639,37 @@ export default function NewWithdrawalRequests() {
                       className="h-4 w-4 text-purple-600 focus:ring-purple-500 border-gray-300 rounded"
                     />
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     S.No
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Request Date
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Request Id
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Member Id
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Wallet Address
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Gross
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Charges
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Net
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Gateway
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Status
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Action
                   </th>
                 </tr>
@@ -687,7 +687,7 @@ export default function NewWithdrawalRequests() {
                 ) : (
                   withdrawalRequests.map((request, index) => (
                     <tr key={request.requestId} className="hover:bg-gray-50">
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      <td className="px-3 py-3 whitespace-nowrap text-sm text-gray-900">
                         <input
                           type="checkbox"
                           checked={selectedRequests.has(request.requestId)}
@@ -696,19 +696,19 @@ export default function NewWithdrawalRequests() {
                           className="h-4 w-4 text-purple-600 focus:ring-purple-500 border-gray-300 rounded disabled:opacity-50 disabled:cursor-not-allowed"
                         />
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      <td className="px-3 py-3 whitespace-nowrap text-sm text-gray-900">
                         {(currentPage - 1) * limit + index + 1}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      <td className="px-3 py-3 whitespace-nowrap text-sm text-gray-900">
                         {formatDate(request.requestDate)}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                      <td className="px-3 py-3 whitespace-nowrap text-sm font-medium text-gray-900">
                         {request.requestId}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      <td className="px-3 py-3 whitespace-nowrap text-sm text-gray-900">
                         {request.memberId}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      <td className="px-3 py-3 whitespace-nowrap text-sm text-gray-900">
                         <code className="text-xs bg-gray-100 px-2 py-1 rounded">
                           {request.walletAddress
                             ? `${request.walletAddress.slice(
@@ -718,19 +718,19 @@ export default function NewWithdrawalRequests() {
                             : "N/A"}
                         </code>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      <td className="px-3 py-3 whitespace-nowrap text-sm text-gray-900">
                         {formatCurrency(request.gross)}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      <td className="px-3 py-3 whitespace-nowrap text-sm text-gray-900">
                         {formatCurrency(request.charges)}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-gray-900">
-                        {formatCurrency(request.net)}
+                      <td className="px-3 py-3 whitespace-nowrap text-sm font-semibold text-gray-900">
+                        {formatCurrency(calculatePayoutAmount(parseFloat(request.net)))}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      <td className="px-3 py-3 whitespace-nowrap text-sm text-gray-900">
                         {request.gateway || "N/A"}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm">
+                      <td className="px-3 py-3 whitespace-nowrap text-sm">
                         <span
                           className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
                             request.status === "pending"
@@ -750,7 +750,7 @@ export default function NewWithdrawalRequests() {
                             request.status?.slice(1) || "Unknown"}
                         </span>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                      <td className="px-3 py-3 whitespace-nowrap text-sm font-medium">
                         <div className="flex space-x-2">
                           {request.status === "pending" && (
                             <>

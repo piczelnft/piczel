@@ -192,7 +192,7 @@ export default function AdminDashboard() {
             <div className="flex items-center justify-between">
               <div>
                 <h3 className="text-lg font-medium text-gray-900">Total Withdrawal Amount</h3>
-                <p className="text-2xl font-bold text-green-600 mt-2">{formatCurrency(stats?.financial?.totalWithdrawal || 0)}</p>
+                <p className="text-2xl font-bold text-green-600 mt-2">{formatCurrency((stats?.financial?.totalWithdrawal || 0) * 0.9)}</p>
               </div>
               <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
                 <span className="text-2xl">💸</span>

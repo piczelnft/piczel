@@ -87,20 +87,25 @@ export async function GET(request) {
 
             // Create spot income entry for each purchase
             // Note: Spot income is only paid if the user was ACTIVE at the time of purchase
-            // We only show purchases that happened AFTER the user's activation date
+            // We only show purchases that happened while the user was active (not before or after deactivation)
             for (const purchase of nftPurchases) {
               const purchaseDate = new Date(purchase.purchasedAt || purchase.createdAt);
               
-              // Skip if user is not currently active
-              if (!user.isActivated) {
-                console.log(`Skipping ${referral.memberId} L${level}: User is currently inactive`);
+              // CRITICAL: Check if user was ACTIVE at the TIME of this purchase
+              // This means:
+              // 1. User must have been activated before the purchase
+              // 2. User must still be active OR purchase happened before deactivation
+              
+              // Skip if user was not yet activated when purchase happened
+              if (!user.activatedAt || purchaseDate < new Date(user.activatedAt)) {
+                console.log(`Skipping ${referral.memberId} L${level}: Purchase (${purchaseDate.toISOString()}) before user activation (${user.activatedAt})`);
                 continue;
               }
               
-              // Skip if purchase happened before user's activation date
-              // This ensures we only show income from purchases made while user was active
-              if (user.activatedAt && purchaseDate < new Date(user.activatedAt)) {
-                console.log(`Skipping ${referral.memberId} L${level}: Purchase (${purchaseDate.toISOString()}) before activation (${user.activatedAt})`);
+              // If user is currently inactive, only show purchases that happened BEFORE deactivation
+              // This ensures that if user was deactivated, they don't get credit for purchases after that
+              if (!user.isActivated) {
+                console.log(`Skipping ${referral.memberId} L${level}: User is currently inactive, no spot income for any purchases`);
                 continue;
               }
               
