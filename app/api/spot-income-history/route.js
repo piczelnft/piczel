@@ -176,15 +176,15 @@ export async function GET(request) {
                 meetsCondition = userHasNft !== null;
                 if (!meetsCondition) conditionNote = 'No NFT purchased';
               } else if (level === 2) {
-                // L2: Must have at least 3 direct members
-                const directCount = await User.countDocuments({ sponsor: user._id });
-                meetsCondition = directCount >= 3;
-                if (!meetsCondition) conditionNote = `Only ${directCount} directs (need 3)`;
+                // L2: Must have at least 3 ACTIVE direct members
+                const activeDirectCount = await User.countDocuments({ sponsor: user._id, isActivated: true });
+                meetsCondition = activeDirectCount >= 3;
+                if (!meetsCondition) conditionNote = `Only ${activeDirectCount} active directs (need 3 active)`;
               } else if (level === 3) {
-                // L3: Must have at least 5 direct members
-                const directCount = await User.countDocuments({ sponsor: user._id });
-                meetsCondition = directCount >= 5;
-                if (!meetsCondition) conditionNote = `Only ${directCount} directs (need 5)`;
+                // L3: Must have at least 5 ACTIVE direct members
+                const activeDirectCount = await User.countDocuments({ sponsor: user._id, isActivated: true });
+                meetsCondition = activeDirectCount >= 5;
+                if (!meetsCondition) conditionNote = `Only ${activeDirectCount} active directs (need 5 active)`;
               }
               
               // Only add entry if user meets conditions
