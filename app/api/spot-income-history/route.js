@@ -166,28 +166,72 @@ export async function GET(request) {
                 }
               }
               
-              // Check if user meets conditions for this level
+              // CRITICAL: Check if user met the conditions AT THE TIME of this purchase
+              // We need to count how many active directs existed BEFORE this purchase date
               let meetsCondition = true;
               let conditionNote = '';
               
               if (level === 1) {
-                // L1: Must have at least one NFT
-                const userHasNft = await NftPurchase.exists({ userId: user._id });
+                // L1: Must have at least one NFT purchased BEFORE this purchase
+                const userHasNft = await NftPurchase.exists({ 
+                  userId: user._id,
+                  $or: [
+                    { purchasedAt: { $lt: purchaseDate } },
+                    { createdAt: { $lt: purchaseDate } }
+                  ]
+                });
                 meetsCondition = userHasNft !== null;
-                if (!meetsCondition) conditionNote = 'No NFT purchased';
+                if (!meetsCondition) conditionNote = 'No NFT purchased before this purchase';
               } else if (level === 2) {
-                // L2: Must have at least 3 ACTIVE direct members
-                const activeDirectCount = await User.countDocuments({ sponsor: user._id, isActivated: true });
-                meetsCondition = activeDirectCount >= 3;
-                if (!meetsCondition) conditionNote = `Only ${activeDirectCount} active directs (need 3 active)`;
+                // L2: Must have had at least 3 ACTIVE direct members AT THE TIME of purchase
+                // Count direct members who were:
+                // 1. Created before this purchase
+                // 2. Were active at the time (activated before purchase and still active OR deactivated after purchase)
+                const activeDirectsAtPurchaseTime = await User.countDocuments({
+                  sponsor: user._id,
+                  createdAt: { $lt: purchaseDate },
+                  $or: [
+                    // Either currently active and was activated before purchase
+                    {
+                      isActivated: true,
+                      activatedAt: { $lt: purchaseDate }
+                    },
+                    // Or was active at time of purchase but deactivated later
+                    {
+                      isActivated: false,
+                      activatedAt: { $lt: purchaseDate },
+                      deactivationScheduledAt: { $gt: purchaseDate }
+                    }
+                  ]
+                });
+                meetsCondition = activeDirectsAtPurchaseTime >= 3;
+                if (!meetsCondition) conditionNote = `Only ${activeDirectsAtPurchaseTime} active directs at time of purchase (need 3 active)`;
+                console.log(`L2 check for ${referral.memberId}: User had ${activeDirectsAtPurchaseTime} active directs at purchase time ${purchaseDate.toISOString()}`);
               } else if (level === 3) {
-                // L3: Must have at least 5 ACTIVE direct members
-                const activeDirectCount = await User.countDocuments({ sponsor: user._id, isActivated: true });
-                meetsCondition = activeDirectCount >= 5;
-                if (!meetsCondition) conditionNote = `Only ${activeDirectCount} active directs (need 5 active)`;
+                // L3: Must have had at least 5 ACTIVE direct members AT THE TIME of purchase
+                const activeDirectsAtPurchaseTime = await User.countDocuments({
+                  sponsor: user._id,
+                  createdAt: { $lt: purchaseDate },
+                  $or: [
+                    // Either currently active and was activated before purchase
+                    {
+                      isActivated: true,
+                      activatedAt: { $lt: purchaseDate }
+                    },
+                    // Or was active at time of purchase but deactivated later
+                    {
+                      isActivated: false,
+                      activatedAt: { $lt: purchaseDate },
+                      deactivationScheduledAt: { $gt: purchaseDate }
+                    }
+                  ]
+                });
+                meetsCondition = activeDirectsAtPurchaseTime >= 5;
+                if (!meetsCondition) conditionNote = `Only ${activeDirectsAtPurchaseTime} active directs at time of purchase (need 5 active)`;
+                console.log(`L3 check for ${referral.memberId}: User had ${activeDirectsAtPurchaseTime} active directs at purchase time ${purchaseDate.toISOString()}`);
               }
               
-              // Only add entry if user meets conditions
+              // Only add entry if user met conditions AT THE TIME of purchase
               if (meetsCondition) {
                 spotIncomeEntries.push({
                   level: level,
