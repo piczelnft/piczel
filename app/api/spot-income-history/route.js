@@ -62,8 +62,52 @@ export async function GET(request) {
         3: 1.00    // L3 spot income per purchase
       };
 
+      // Helper function to check if all sponsors in the chain from user to referral are active
+      const areAllIntermediateSponsorsActive = async (userId, referralId, level) => {
+        console.log(`Checking sponsor chain from ${userId} to ${referralId} at level ${level}`);
+        
+        // Build the chain from referral back to user
+        const chain = [];
+        let currentUser = await User.findById(referralId).select('_id memberId sponsor isActivated');
+        
+        // Traverse up the chain until we reach the original user
+        while (currentUser && currentUser._id.toString() !== userId.toString()) {
+          chain.push({
+            id: currentUser._id.toString(),
+            memberId: currentUser.memberId,
+            isActivated: currentUser.isActivated
+          });
+          
+          if (!currentUser.sponsor) break;
+          currentUser = await User.findById(currentUser.sponsor).select('_id memberId sponsor isActivated');
+        }
+        
+        console.log(`Chain from referral to user:`, chain.map(u => `${u.memberId}(${u.isActivated ? 'active' : 'inactive'})`).join(' -> '));
+        
+        // The chain should have exactly 'level' members (excluding the user at the top)
+        if (chain.length !== level) {
+          console.log(`Chain length mismatch: expected ${level}, got ${chain.length}`);
+          return false;
+        }
+        
+        // Check if all members in the chain are active
+        // For L2+, we need to check that all intermediate sponsors are active
+        if (level > 1) {
+          // For L2: Check if the direct referral (1 member in chain excluding the actual referral) is active
+          // For L3: Check if both intermediate sponsors are active
+          for (let i = 1; i < chain.length; i++) {
+            if (!chain[i].isActivated) {
+              console.log(`Intermediate sponsor ${chain[i].memberId} is inactive - spot income blocked`);
+              return false;
+            }
+          }
+        }
+        
+        return true;
+      };
+
       // Start with L1: direct referrals
-      let currentLevelUsers = await User.find({ sponsor: user._id }).select('memberId name email avatar _id');
+      let currentLevelUsers = await User.find({ sponsor: user._id }).select('memberId name email avatar _id sponsor isActivated');
       console.log(`L1: Found ${currentLevelUsers.length} direct referrals`);
 
       // Traverse L1, L2, L3
@@ -107,6 +151,19 @@ export async function GET(request) {
               if (!user.isActivated) {
                 console.log(`Skipping ${referral.memberId} L${level}: User is currently inactive, no spot income for any purchases`);
                 continue;
+              }
+              
+              // CRITICAL: For L2 and L3, check if ALL intermediate sponsors are active
+              // For example, if A -> B -> C -> D -> E:
+              // - A gets L1 income from B (direct)
+              // - A gets L2 income from C only if B is active
+              // - A gets L3 income from D only if B AND C are active
+              if (level > 1) {
+                const chainIsActive = await areAllIntermediateSponsorsActive(user._id, referral._id, level);
+                if (!chainIsActive) {
+                  console.log(`Skipping ${referral.memberId} L${level}: One or more intermediate sponsors are inactive`);
+                  continue;
+                }
               }
               
               // Check if user meets conditions for this level
@@ -159,7 +216,7 @@ export async function GET(request) {
 
         // Find next level users (those sponsored by current level users)
         const currentLevelIds = currentLevelUsers.map(u => u._id);
-        const nextLevelUsers = await User.find({ sponsor: { $in: currentLevelIds } }).select('memberId name email avatar _id');
+        const nextLevelUsers = await User.find({ sponsor: { $in: currentLevelIds } }).select('memberId name email avatar _id sponsor isActivated');
         console.log(`Next level (L${level + 1}) will have ${nextLevelUsers.length} users`);
         currentLevelUsers = nextLevelUsers;
       }
