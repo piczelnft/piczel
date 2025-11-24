@@ -97,13 +97,13 @@ export async function GET(request) {
             skipReason = `Only ${activeDirectCount} active direct members (needs 3 active)`;
             console.log(`⏭️ Skipping L2 commission for ${sponsorUser.memberId}: ${skipReason}`);
           }
-        } else if (commission.level === 3) {
-          // L3: Must have at least 5 ACTIVE direct members
+        } else if (commission.level >= 3 && commission.level <= 10) {
+          // L3-L10: ALL Must have at least 5 ACTIVE direct members
           const activeDirectCount = await User.countDocuments({ sponsor: sponsorUser._id, isActivated: true });
           if (activeDirectCount < 5) {
             canReceivePayment = false;
             skipReason = `Only ${activeDirectCount} active direct members (needs 5 active)`;
-            console.log(`⏭️ Skipping L3 commission for ${sponsorUser.memberId}: ${skipReason}`);
+            console.log(`⏭️ Skipping L${commission.level} commission for ${sponsorUser.memberId}: ${skipReason}`);
           }
         }
 

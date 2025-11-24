@@ -106,7 +106,7 @@ export async function GET(request) {
 
           // Check level-specific conditions at the time of purchase
           // L2 income only starts when 3rd active member joins
-          // L3 income only starts when 5th active member joins
+          // L3-L10 income only starts when 5th active member joins
           if (level === 2) {
             // L2: Must have had at least 3 ACTIVE direct members at time of purchase
             // Get all direct members who joined and were active before this purchase
@@ -133,8 +133,8 @@ export async function GET(request) {
               shouldShowEntry = false;
               console.log(`Hiding L2 commission for ${referralUser?.memberId}: Only ${activeCount} active directs at purchase time ${purchaseDate.toISOString()} (need 3 active)`);
             }
-          } else if (level === 3) {
-            // L3: Must have had at least 5 ACTIVE direct members at time of purchase
+          } else if (level >= 3 && level <= 10) {
+            // L3-L10: ALL Must have had at least 5 ACTIVE direct members at time of purchase
             const directMembers = await User.find({
               sponsor: user._id,
               createdAt: { $lt: purchaseDate }
@@ -156,7 +156,7 @@ export async function GET(request) {
 
             if (activeCount < 5) {
               shouldShowEntry = false;
-              console.log(`Hiding L3 commission for ${referralUser?.memberId}: Only ${activeCount} active directs at purchase time ${purchaseDate.toISOString()} (need 5 active)`);
+              console.log(`Hiding L${level} commission for ${referralUser?.memberId}: Only ${activeCount} active directs at purchase time ${purchaseDate.toISOString()} (need 5 active)`);
             }
           }
 

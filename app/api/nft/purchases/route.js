@@ -327,16 +327,19 @@ export async function POST(request) {
           conditionNotMet = 'needs 3 active direct members';
           console.log(`Level 2 sponsor ${sponsorUser.memberId} skipped: Has only ${activeDirectMemberCount} active direct members (needs 3 active)`);
         }
-      } else if (level === 3) {
-        // Level 3 requires 5 ACTIVE direct members
+      } else if (level >= 3 && level <= 10) {
+        // Level 3-10 ALL require 5 ACTIVE direct members
         const activeDirectMemberCount = await User.countDocuments({ sponsor: sponsorUser._id, isActivated: true });
         if (activeDirectMemberCount < 5) {
           canReceiveCommission = false;
           conditionNotMet = 'needs 5 active direct members';
-          console.log(`Level 3 sponsor ${sponsorUser.memberId} skipped: Has only ${activeDirectMemberCount} active direct members (needs 5 active)`);
+          console.log(`Level ${level} sponsor ${sponsorUser.memberId} skipped: Has only ${activeDirectMemberCount} active direct members (needs 5 active)`);
         }
-      } else if (level >= 4 && level <= 10) {
-        // Levels 4-10 require active trade (NFT purchased within last 48 hours)
+      }
+      
+      // Additional check for levels 4-10: active trade (NFT within 48 hours)
+      if (level >= 4 && level <= 10 && canReceiveCommission) {
+        // Levels 4-10 also require active trade (NFT purchased within last 48 hours)
         const NftPurchase = (await import("@/models/NftPurchase")).default;
         const fortyEightHoursAgo = new Date(Date.now() - 48 * 60 * 60 * 1000);
         const recentPurchase = await NftPurchase.findOne({
@@ -346,7 +349,7 @@ export async function POST(request) {
         
         if (!recentPurchase) {
           canReceiveCommission = false;
-          conditionNotMet = 'needs active trade (NFT within 48h)';
+          conditionNotMet = 'needs active trade (NFT within 48h) + 5 active directs';
           console.log(`Level ${level} sponsor ${sponsorUser.memberId} skipped: No NFT purchased within last 48 hours`);
         }
       }
