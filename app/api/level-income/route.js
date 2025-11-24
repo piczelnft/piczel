@@ -104,27 +104,59 @@ export async function GET(request) {
           const purchaseDate = new Date(dailyComm.nftPurchaseId?.createdAt || dailyComm.nftPurchaseId?.purchasedAt || dailyComm.createdAt);
           let shouldShowEntry = true;
 
-          // Check level-specific conditions - must have required ACTIVE direct members NOW
-          // (This ensures we only show commissions where conditions are currently met)
+          // Check level-specific conditions at the time of purchase
+          // L2 income only starts when 3rd active member joins
+          // L3 income only starts when 5th active member joins
           if (level === 2) {
-            // L2: Must have at least 3 ACTIVE direct members currently
-            const activeDirectsNow = await User.countDocuments({ 
-              sponsor: user._id, 
-              isActivated: true 
-            });
-            if (activeDirectsNow < 3) {
+            // L2: Must have had at least 3 ACTIVE direct members at time of purchase
+            // Get all direct members who joined and were active before this purchase
+            const directMembers = await User.find({
+              sponsor: user._id,
+              createdAt: { $lt: purchaseDate }
+            }).select('createdAt activatedAt isActivated deactivationScheduledAt').sort({ createdAt: 1 });
+
+            // Count how many were active at the time of purchase
+            let activeCount = 0;
+            for (const member of directMembers) {
+              // Member was active at purchase time if:
+              // 1. They were activated before the purchase
+              // 2. Either still active OR deactivated after the purchase
+              if (member.activatedAt && new Date(member.activatedAt) < purchaseDate) {
+                if (member.isActivated || 
+                    (member.deactivationScheduledAt && new Date(member.deactivationScheduledAt) > purchaseDate)) {
+                  activeCount++;
+                }
+              }
+            }
+
+            if (activeCount < 3) {
               shouldShowEntry = false;
-              console.log(`Hiding L2 commission for ${referralUser?.memberId}: Only ${activeDirectsNow} active directs currently (need 3 active)`);
+              console.log(`Hiding L2 commission for ${referralUser?.memberId}: Only ${activeCount} active directs at purchase time ${purchaseDate.toISOString()} (need 3 active)`);
             }
           } else if (level === 3) {
-            // L3: Must have at least 5 ACTIVE direct members currently
-            const activeDirectsNow = await User.countDocuments({ 
-              sponsor: user._id, 
-              isActivated: true 
-            });
-            if (activeDirectsNow < 5) {
+            // L3: Must have had at least 5 ACTIVE direct members at time of purchase
+            const directMembers = await User.find({
+              sponsor: user._id,
+              createdAt: { $lt: purchaseDate }
+            }).select('createdAt activatedAt isActivated deactivationScheduledAt').sort({ createdAt: 1 });
+
+            // Count how many were active at the time of purchase
+            let activeCount = 0;
+            for (const member of directMembers) {
+              // Member was active at purchase time if:
+              // 1. They were activated before the purchase
+              // 2. Either still active OR deactivated after the purchase
+              if (member.activatedAt && new Date(member.activatedAt) < purchaseDate) {
+                if (member.isActivated || 
+                    (member.deactivationScheduledAt && new Date(member.deactivationScheduledAt) > purchaseDate)) {
+                  activeCount++;
+                }
+              }
+            }
+
+            if (activeCount < 5) {
               shouldShowEntry = false;
-              console.log(`Hiding L3 commission for ${referralUser?.memberId}: Only ${activeDirectsNow} active directs currently (need 5 active)`);
+              console.log(`Hiding L3 commission for ${referralUser?.memberId}: Only ${activeCount} active directs at purchase time ${purchaseDate.toISOString()} (need 5 active)`);
             }
           }
 
