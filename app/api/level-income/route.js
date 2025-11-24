@@ -100,30 +100,61 @@ export async function GET(request) {
           };
           const commissionRate = defaultCommissionRates[level] || 0;
 
-          levelIncomeDetails.push({
-            level: level,
-            referral: {
-              memberId: referralUser?.memberId || 'Unknown',
-              name: referralUser?.name || 'Unknown',
-              email: referralUser?.email || 'N/A',
-              avatar: referralUser?.avatar || null
-            },
-            commissionRate: `${(commissionRate * 100).toFixed(1)}%`,
-            totalCommission: dailyComm.totalCommission.toFixed(4),
-            totalPaid: dailyComm.totalPaid.toFixed(4),
-            remainingAmount: dailyComm.remainingAmount.toFixed(4),
-            dailyAmount: dailyComm.dailyAmount.toString(),
-            daysRemaining: dailyComm.daysRemaining,
-            daysPaid: dailyComm.daysPaid,
-            lastPayment: dailyComm.lastPaymentDate || null,
-            nextPayment: dailyComm.nextPaymentDate || null,
-            nftPurchaseId: dailyComm.nftPurchaseId?._id || dailyComm.nftPurchaseId,
-            nftPrice: dailyComm.nftPurchaseId?.price || 0,
-            purchaseDate: dailyComm.nftPurchaseId?.createdAt || dailyComm.createdAt,
-            status: dailyComm.status,
-            createdAt: dailyComm.createdAt,
-            hasPurchases: true
-          });
+          // CRITICAL: Verify if user met the conditions at the time of this purchase
+          const purchaseDate = new Date(dailyComm.nftPurchaseId?.createdAt || dailyComm.nftPurchaseId?.purchasedAt || dailyComm.createdAt);
+          let shouldShowEntry = true;
+
+          // Check level-specific conditions - must have required ACTIVE direct members NOW
+          // (This ensures we only show commissions where conditions are currently met)
+          if (level === 2) {
+            // L2: Must have at least 3 ACTIVE direct members currently
+            const activeDirectsNow = await User.countDocuments({ 
+              sponsor: user._id, 
+              isActivated: true 
+            });
+            if (activeDirectsNow < 3) {
+              shouldShowEntry = false;
+              console.log(`Hiding L2 commission for ${referralUser?.memberId}: Only ${activeDirectsNow} active directs currently (need 3 active)`);
+            }
+          } else if (level === 3) {
+            // L3: Must have at least 5 ACTIVE direct members currently
+            const activeDirectsNow = await User.countDocuments({ 
+              sponsor: user._id, 
+              isActivated: true 
+            });
+            if (activeDirectsNow < 5) {
+              shouldShowEntry = false;
+              console.log(`Hiding L3 commission for ${referralUser?.memberId}: Only ${activeDirectsNow} active directs currently (need 5 active)`);
+            }
+          }
+
+          // Only add entry if conditions were met at time of purchase
+          if (shouldShowEntry) {
+            levelIncomeDetails.push({
+              level: level,
+              referral: {
+                memberId: referralUser?.memberId || 'Unknown',
+                name: referralUser?.name || 'Unknown',
+                email: referralUser?.email || 'N/A',
+                avatar: referralUser?.avatar || null
+              },
+              commissionRate: `${(commissionRate * 100).toFixed(1)}%`,
+              totalCommission: dailyComm.totalCommission.toFixed(4),
+              totalPaid: dailyComm.totalPaid.toFixed(4),
+              remainingAmount: dailyComm.remainingAmount.toFixed(4),
+              dailyAmount: dailyComm.dailyAmount.toString(),
+              daysRemaining: dailyComm.daysRemaining,
+              daysPaid: dailyComm.daysPaid,
+              lastPayment: dailyComm.lastPaymentDate || null,
+              nextPayment: dailyComm.nextPaymentDate || null,
+              nftPurchaseId: dailyComm.nftPurchaseId?._id || dailyComm.nftPurchaseId,
+              nftPrice: dailyComm.nftPurchaseId?.price || 0,
+              purchaseDate: dailyComm.nftPurchaseId?.createdAt || dailyComm.createdAt,
+              status: dailyComm.status,
+              createdAt: dailyComm.createdAt,
+              hasPurchases: true
+            });
+          }
         }
 
         // Find next level users (those sponsored by current level users)

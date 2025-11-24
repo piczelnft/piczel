@@ -86,20 +86,20 @@ async function distributeSpotIncome(sponsorId, actionMemberId, actionType = 'nft
         conditionNotMet = 'no NFT purchased';
       }
     } else if (condition === '3_directs') {
-      // Level 2: Check if sponsor has at least 3 direct members
-      const directMemberCount = await User.countDocuments({ sponsor: sponsor._id });
-      console.log(`L2 Sponsor ${sponsor.memberId}: Direct members count = ${directMemberCount}, needs >= 3`);
-      meetsCondition = directMemberCount >= 3;
+      // Level 2: Check if sponsor has at least 3 ACTIVE direct members
+      const activeDirectMemberCount = await User.countDocuments({ sponsor: sponsor._id, isActivated: true });
+      console.log(`L2 Sponsor ${sponsor.memberId}: Active direct members count = ${activeDirectMemberCount}, needs >= 3`);
+      meetsCondition = activeDirectMemberCount >= 3;
       if (!meetsCondition) {
-        conditionNotMet = `only ${directMemberCount} direct members (needs 3)`;
+        conditionNotMet = `only ${activeDirectMemberCount} active direct members (needs 3 active)`;
       }
     } else if (condition === '5_directs') {
-      // Level 3: Check if sponsor has at least 5 direct members
-      const directMemberCount = await User.countDocuments({ sponsor: sponsor._id });
-      console.log(`L3 Sponsor ${sponsor.memberId}: Direct members count = ${directMemberCount}, needs >= 5`);
-      meetsCondition = directMemberCount >= 5;
+      // Level 3: Check if sponsor has at least 5 ACTIVE direct members
+      const activeDirectMemberCount = await User.countDocuments({ sponsor: sponsor._id, isActivated: true });
+      console.log(`L3 Sponsor ${sponsor.memberId}: Active direct members count = ${activeDirectMemberCount}, needs >= 5`);
+      meetsCondition = activeDirectMemberCount >= 5;
       if (!meetsCondition) {
-        conditionNotMet = `only ${directMemberCount} direct members (needs 5)`;
+        conditionNotMet = `only ${activeDirectMemberCount} active direct members (needs 5 active)`;
       }
     }
 
@@ -320,20 +320,20 @@ export async function POST(request) {
           console.log(`Level 1 sponsor ${sponsorUser.memberId} skipped: Has ${sponsorNftCount} NFT purchases (needs at least 1)`);
         }
       } else if (level === 2) {
-        // Level 2 requires 3 direct members
-        const directMemberCount = await User.countDocuments({ sponsor: sponsorUser._id });
-        if (directMemberCount < 3) {
+        // Level 2 requires 3 ACTIVE direct members
+        const activeDirectMemberCount = await User.countDocuments({ sponsor: sponsorUser._id, isActivated: true });
+        if (activeDirectMemberCount < 3) {
           canReceiveCommission = false;
-          conditionNotMet = 'needs 3 direct members';
-          console.log(`Level 2 sponsor ${sponsorUser.memberId} skipped: Has only ${directMemberCount} direct members (needs 3)`);
+          conditionNotMet = 'needs 3 active direct members';
+          console.log(`Level 2 sponsor ${sponsorUser.memberId} skipped: Has only ${activeDirectMemberCount} active direct members (needs 3 active)`);
         }
       } else if (level === 3) {
-        // Level 3 requires 2 direct members
-        const directMemberCount = await User.countDocuments({ sponsor: sponsorUser._id });
-        if (directMemberCount < 5) {
+        // Level 3 requires 5 ACTIVE direct members
+        const activeDirectMemberCount = await User.countDocuments({ sponsor: sponsorUser._id, isActivated: true });
+        if (activeDirectMemberCount < 5) {
           canReceiveCommission = false;
-          conditionNotMet = 'needs 5 direct members';
-          console.log(`Level 3 sponsor ${sponsorUser.memberId} skipped: Has only ${directMemberCount} direct members (needs 5)`);
+          conditionNotMet = 'needs 5 active direct members';
+          console.log(`Level 3 sponsor ${sponsorUser.memberId} skipped: Has only ${activeDirectMemberCount} active direct members (needs 5 active)`);
         }
       } else if (level >= 4 && level <= 10) {
         // Levels 4-10 require active trade (NFT purchased within last 48 hours)

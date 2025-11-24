@@ -85,6 +85,49 @@ export async function GET(request) {
           continue;
         }
 
+        // Check level-specific conditions before payment
+        let canReceivePayment = true;
+        let skipReason = '';
+
+        if (commission.level === 2) {
+          // L2: Must have at least 3 ACTIVE direct members
+          const activeDirectCount = await User.countDocuments({ sponsor: sponsorUser._id, isActivated: true });
+          if (activeDirectCount < 3) {
+            canReceivePayment = false;
+            skipReason = `Only ${activeDirectCount} active direct members (needs 3 active)`;
+            console.log(`⏭️ Skipping L2 commission for ${sponsorUser.memberId}: ${skipReason}`);
+          }
+        } else if (commission.level === 3) {
+          // L3: Must have at least 5 ACTIVE direct members
+          const activeDirectCount = await User.countDocuments({ sponsor: sponsorUser._id, isActivated: true });
+          if (activeDirectCount < 5) {
+            canReceivePayment = false;
+            skipReason = `Only ${activeDirectCount} active direct members (needs 5 active)`;
+            console.log(`⏭️ Skipping L3 commission for ${sponsorUser.memberId}: ${skipReason}`);
+          }
+        }
+
+        if (!canReceivePayment) {
+          // Update next payment date to check again in 24 hours
+          await DailyCommission.findOneAndUpdate(
+            { _id: commission._id },
+            {
+              $set: {
+                nextPaymentDate: new Date(Date.now() + 24 * 60 * 60 * 1000)
+              }
+            }
+          );
+          
+          skippedCommissions.push({
+            sponsorId: sponsorUser.memberId,
+            sponsorName: sponsorUser.name,
+            level: commission.level,
+            reason: skipReason
+          });
+          
+          continue;
+        }
+
         // Calculate the payment amount
         const paymentAmount = commission.dailyAmount;
         const currentBalance = sponsorUser.wallet?.balance || sponsorUser.walletBalance || 0;
