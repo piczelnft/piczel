@@ -4,6 +4,7 @@ import { useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { useAuth } from "@/contexts/AuthContext";
+import { useWallet } from "@/contexts/WalletContext";
 import { useRedirectIfAuthenticated } from "../../lib/auth-utils";
 import ForgotPasswordModal from "../components/ForgotPasswordModal";
 
@@ -15,8 +16,6 @@ function LoginForm() {
   });
   const [errors, setErrors] = useState({});
   const [isLoading, setIsLoading] = useState(false);
-  const [walletConnected, setWalletConnected] = useState(false);
-  const [walletAddress, setWalletAddress] = useState("");
   const [message, setMessage] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [prefilledInfo, setPrefilledInfo] = useState(null);
@@ -24,6 +23,7 @@ function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { login } = useAuth();
+  const { walletAddress, isConnected: walletConnected, connectWallet: connectWalletContext } = useWallet();
   const { isAuthenticated, isLoading: authLoading } =
     useRedirectIfAuthenticated();
 
@@ -82,23 +82,13 @@ function LoginForm() {
     return newErrors;
   };
 
-  // Lightweight wallet connect (no backend save required before auth)
+  // Connect wallet using WalletContext
   const connectWallet = async () => {
-    try {
-      if (typeof window === "undefined" || !window.ethereum) {
-        alert("Please install MetaMask to continue.");
-        return;
-      }
-      const accounts = await window.ethereum.request({ method: "eth_requestAccounts" });
-      if (accounts && accounts.length > 0) {
-        setWalletAddress(accounts[0]);
-        setWalletConnected(true);
-      }
-    } catch (e) {
-      console.error("Wallet connect error:", e);
-      setWalletConnected(false);
-      setWalletAddress("");
-      alert(e?.message || "Failed to connect wallet.");
+    const result = await connectWalletContext();
+    if (!result.success) {
+      alert(result.error || "Failed to connect wallet. Please install MetaMask or TokenPocket.");
+    } else {
+      alert(`✅ Wallet Connected Successfully!\n\nAddress: ${result.address}\n\nYour wallet address has been saved and will be used for NFT purchases and payouts.`);
     }
   };
 
@@ -120,6 +110,33 @@ function LoginForm() {
 
       if (result.success) {
         setMessage("Login successful! Redirecting...");
+        
+        // If wallet was already connected before login, save it to backend now
+        if (walletConnected && walletAddress) {
+          try {
+            const token = localStorage.getItem("token");
+            if (token) {
+              const response = await fetch("/api/wallet/connect", {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json",
+                  "Authorization": `Bearer ${token}`,
+                },
+                body: JSON.stringify({
+                  walletAddress: walletAddress,
+                  network: "Connected before login",
+                }),
+              });
+              
+              if (response.ok) {
+                console.log("Wallet address saved to backend after login");
+              }
+            }
+          } catch (err) {
+            console.error("Error saving wallet after login:", err);
+          }
+        }
+        
         setTimeout(() => {
           router.push("/");
         }, 1000);

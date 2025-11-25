@@ -159,7 +159,9 @@ export async function POST(request) {
     }
 
     const body = await request.json().catch(() => ({}));
-    const { code, series, price, purchasedAt } = body || {};
+    const { code, series, price, purchasedAt, walletAddress, txHash } = body || {};
+
+    console.log('NFT Purchase Request:', { code, series, walletAddress, txHash });
 
     if (!code || !series) {
       return NextResponse.json({ error: "code and series are required" }, { status: 400, headers: corsHeaders() });
@@ -171,7 +173,7 @@ export async function POST(request) {
       return NextResponse.json({ error: "User not found" }, { status: 404, headers: corsHeaders() });
     }
 
-    // Create NFT purchase record
+    // Create NFT purchase record with wallet address and transaction hash
     const doc = await NftPurchase.create({
       userId,
       memberId: user.memberId || "",
@@ -179,6 +181,8 @@ export async function POST(request) {
       series,
       price: typeof price === "number" ? price : 100, // Default price to $100
       purchasedAt: purchasedAt ? new Date(purchasedAt) : new Date(),
+      walletAddress: walletAddress || null,
+      txHash: txHash || null,
     });
 
     // Calculate NFT reward and multi-level commissions (10 levels)

@@ -5,18 +5,24 @@ import { useParams, useRouter } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useAuth } from '@/contexts/AuthContext';
+import { useWallet } from '@/contexts/WalletContext';
 import { useAuthGuard } from '../../../lib/auth-utils';
+
+// Payment recipient wallet address
+const PAYMENT_RECIPIENT = "0xf5993810E11c280D9B4382392E4E46D032782042";
 
 export default function NFTDetailPage() {
   const params = useParams();
   const router = useRouter();
   const { user, token } = useAuth();
   const { isAuthenticated, isLoading } = useAuthGuard();
+  const { walletAddress, isConnected, connectWallet, sendUSDT, isLoading: walletLoading } = useWallet();
   const [userBalance, setUserBalance] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [purchases, setPurchases] = useState([]);
   const [purchaseData, setPurchaseData] = useState([]); // Store full purchase objects with payoutStatus
+  const [processingPayment, setProcessingPayment] = useState(false);
 
   const series = params.series; // A1, B1, C1, etc.
   const baseSeries = series?.charAt(0); // A, B, C, etc.
@@ -209,23 +215,71 @@ export default function NFTDetailPage() {
     if (status.status !== 'available') return;
 
     try {
-      // Confirm purchase similar to swap buy flow
-      const usdPrice = 100;
-      const message = `Buy ${nftCode} for $${usdPrice}?`;
-      if (!confirm(message)) return;
-
       // Require auth token
       if (!token) {
         alert('Please log in to make a purchase.');
         return;
       }
 
+      // Check if wallet is connected
+      if (!isConnected) {
+        const shouldConnect = confirm(`To purchase ${nftCode}, you need to connect your wallet and pay 100 USDT. Connect wallet now?`);
+        if (!shouldConnect) return;
+        
+        const connectResult = await connectWallet();
+        if (!connectResult.success) {
+          alert(`Failed to connect wallet:\n\n${connectResult.error}\n\nPlease:\n1. Check if MetaMask/TokenPocket is installed\n2. Unlock your wallet\n3. Try refreshing the page`);
+          return;
+        }
+      }
+
+      // Confirm purchase with payment details
+      const usdPrice = 100;
+      const message = `Purchase ${nftCode} for ${usdPrice} USDT?\n\nAmount: ${usdPrice} USDT\nRecipient: ${PAYMENT_RECIPIENT.slice(0, 6)}...${PAYMENT_RECIPIENT.slice(-4)}\n\nThis will open your TokenPocket/MetaMask wallet.`;
+      if (!confirm(message)) return;
+
+      setProcessingPayment(true);
+
+      // Send USDT payment
+      const paymentResult = await sendUSDT("100");
+      
+      if (!paymentResult.success) {
+        throw new Error(paymentResult.error || 'Payment failed');
+      }
+
+      console.log('Payment successful:', paymentResult.txHash);
+
+      // Get wallet address - check multiple sources
+      let purchaseWalletAddress = walletAddress;
+      if (!purchaseWalletAddress) {
+        // Try to get from localStorage as fallback
+        purchaseWalletAddress = localStorage.getItem('walletAddress');
+      }
+      if (!purchaseWalletAddress && window.ethereum) {
+        // Try to get directly from MetaMask
+        try {
+          const accounts = await window.ethereum.request({ method: 'eth_accounts' });
+          if (accounts.length > 0) {
+            purchaseWalletAddress = accounts[0];
+          }
+        } catch (err) {
+          console.error('Error getting wallet address:', err);
+        }
+      }
+
+      console.log('Recording purchase with wallet address:', purchaseWalletAddress);
+
+      // Record purchase in backend with transaction hash
       const body = {
         code: nftCode,
         purchasedAt: new Date().toISOString(),
         series: baseSeries,
-        price: 100
+        price: 100,
+        txHash: paymentResult.txHash,
+        paymentAmount: 100,
+        walletAddress: purchaseWalletAddress
       };
+
       const res = await fetch('/api/nft/purchases', {
         method: 'POST',
         headers: {
@@ -234,9 +288,10 @@ export default function NFTDetailPage() {
         },
         body: JSON.stringify(body),
       });
+
       if (!res.ok) {
-        const data = await res.json().catch(() => ({ error: 'Purchase failed' }));
-        throw new Error(data.error || 'Purchase failed');
+        const data = await res.json().catch(() => ({ error: 'Purchase recording failed' }));
+        throw new Error(data.error || 'Purchase recording failed');
       }
 
       const data = await res.json();
@@ -244,8 +299,8 @@ export default function NFTDetailPage() {
       // Update purchaseData with the new purchase
       setPurchaseData(prev => [...prev, { code: nftCode, payoutStatus: 'pending' }]);
       
-      // Display success message
-      const successMessage = `Purchase Successful ${nftCode}`;
+      // Display success message with transaction hash
+      const successMessage = `Purchase Successful!\n\nNFT: ${nftCode}\nTransaction: ${paymentResult.txHash.slice(0, 10)}...${paymentResult.txHash.slice(-8)}`;
       
       alert(successMessage);
       
@@ -255,7 +310,9 @@ export default function NFTDetailPage() {
       }, 2000);
     } catch (err) {
       console.error('Purchase error:', err);
-      alert('Purchase failed. Please try again.');
+      alert(err.message || 'Purchase failed. Please try again.');
+    } finally {
+      setProcessingPayment(false);
     }
   };
 

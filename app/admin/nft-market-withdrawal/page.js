@@ -3,9 +3,11 @@
 import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import AdminLayout from "../components/AdminLayout";
+import { useWallet } from "@/contexts/WalletContext";
 
 export default function NFTMarketWithdrawal() {
   const router = useRouter();
+  const { walletAddress, isConnected, connectWallet, sendUSDT } = useWallet();
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -17,6 +19,7 @@ export default function NFTMarketWithdrawal() {
   const [selectedPayouts, setSelectedPayouts] = useState(new Set()); // Changed from selectedUsers
   const [selectAll, setSelectAll] = useState(false);
   const [nftCodeFilter, setNftCodeFilter] = useState(""); // Filter by NFT code (A, B, C, etc.)
+  const [processingPayout, setProcessingPayout] = useState(false);
 
   // Fetch NFT purchases for all users
   const fetchNftPurchases = useCallback(async (userIds) => {
@@ -87,12 +90,53 @@ export default function NFTMarketWithdrawal() {
         const userEmail = purchase.user?.email || purchase.userEmail || 'No email';
         const memberId = purchase.user?.memberId || purchase.memberId || 'N/A';
         
+        // Debug: Log the user object to see what we're getting
+        console.log('Purchase user object:', {
+          userId,
+          userName,
+          userEmail,
+          memberId,
+          metamaskWallet: purchase.user?.metamaskWallet,
+          metamaskWalletAddress: purchase.user?.metamaskWallet?.address,
+          purchaseWalletAddress: purchase.walletAddress,
+          rawUserObject: purchase.user
+        });
+        
+        // Extract wallet address from multiple possible sources
+        // Check if metamaskWallet is an object with address property or if it IS the address
+        let userWalletAddress = null;
+        
+        if (purchase.user?.metamaskWallet) {
+          const mw = purchase.user.metamaskWallet;
+          // Check if metamaskWallet has an address property (and it's not empty)
+          if (typeof mw === 'object' && mw.address && mw.address.trim() !== '') {
+            userWalletAddress = mw.address;
+          } 
+          // Check if metamaskWallet itself is a string (the address)
+          else if (typeof mw === 'string' && mw.trim() !== '') {
+            userWalletAddress = mw;
+          }
+          // Check for nested structure like { metamaskWallet: { metamaskWallet: { address: '...' } } }
+          else if (typeof mw === 'object' && mw.metamaskWallet?.address && mw.metamaskWallet.address.trim() !== '') {
+            userWalletAddress = mw.metamaskWallet.address;
+          }
+        }
+        
+        // Fallback to direct walletAddress field
+        if (!userWalletAddress && purchase.user?.walletAddress && purchase.user.walletAddress.trim() !== '') {
+          userWalletAddress = purchase.user.walletAddress;
+        }
+        
+        console.log('Extracted wallet address:', userWalletAddress);
+        
         if (!userMap.has(userId)) {
           userMap.set(userId, {
             _id: userId,
             name: userName,
             email: userEmail,
             memberId: memberId,
+            walletAddress: userWalletAddress,
+            metamaskWallet: purchase.user?.metamaskWallet,  // Keep full object for debugging
             nftPurchases: []
           });
         }
@@ -101,7 +145,9 @@ export default function NFTMarketWithdrawal() {
           code: purchase.code,
           series: purchase.series,
           purchasedAt: purchase.purchasedAt,
-          payoutStatus: purchase.payoutStatus || 'pending'
+          payoutStatus: purchase.payoutStatus || 'pending',
+          walletAddress: purchase.walletAddress || userWalletAddress || null,
+          txHash: purchase.txHash || null
         });
       });
       
@@ -113,6 +159,13 @@ export default function NFTMarketWithdrawal() {
           const dateA = new Date(a.purchasedAt || 0);
           const dateB = new Date(b.purchasedAt || 0);
           return dateA - dateB; // oldest to newest
+        });
+        
+        // Debug log for each user's wallet info
+        console.log(`User ${user.memberId} wallet info:`, {
+          walletAddress: user.walletAddress,
+          metamaskWallet: user.metamaskWallet,
+          nftPurchasesCount: user.nftPurchases.length
         });
       });
       
@@ -213,7 +266,7 @@ export default function NFTMarketWithdrawal() {
   };
 
   // Handle individual payout
-  const handleIndividualPayout = async (userId, nftCode, amount, userName) => {
+  const handleIndividualPayout = async (userId, nftCode, amount, userName, txHash = null) => {
     try {
       const adminToken = localStorage.getItem("adminToken");
       if (!adminToken) {
@@ -229,14 +282,14 @@ export default function NFTMarketWithdrawal() {
         },
         body: JSON.stringify({
           userId: userId,
-          nftCode: nftCode
+          nftCode: nftCode,
+          txHash: txHash
         })
       });
 
       const data = await response.json();
 
       if (response.ok && data.success) {
-        alert(`Payout of ${formatCurrency(amount)} processed successfully for ${nftCode} to ${userName || 'User'}.\n\nThe holding wallet amount has been reduced.`);
         // Refresh the data
         fetchUsers();
       } else {
@@ -373,6 +426,8 @@ This action will transfer the holding wallet amounts for the selected NFTs.`
           totalHolding: holdingData.totalHolding,
           purchasedAt: nft.purchasedAt || new Date().toISOString(),
           payoutStatus: nft.payoutStatus || 'pending',
+          walletAddress: nft.walletAddress || user.walletAddress || null,
+          txHash: nft.txHash || null,
           user: user
         };
       });
@@ -542,6 +597,9 @@ This action will transfer the holding wallet amounts for the selected NFTs.`
                     NFT Code
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Wallet Address
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Purchase Price
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -561,7 +619,7 @@ This action will transfer the holding wallet amounts for the selected NFTs.`
               <tbody className="bg-white divide-y divide-gray-200">
                 {users.length === 0 && !loading && (
                   <tr>
-                    <td colSpan={8} className="px-6 py-8 text-center text-gray-500">
+                    <td colSpan={9} className="px-6 py-8 text-center text-gray-500">
                       No NFT payouts found
                     </td>
                   </tr>
@@ -607,6 +665,45 @@ This action will transfer the holding wallet amounts for the selected NFTs.`
                         <div className="text-xs text-gray-500">NFT #{payoutIndex + 1}</div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
+                        {payout.walletAddress ? (
+                          <div>
+                            <div className="text-sm font-mono text-blue-600">
+                              {payout.walletAddress.slice(0, 6)}...{payout.walletAddress.slice(-4)}
+                            </div>
+                            <button
+                              onClick={() => {
+                                navigator.clipboard.writeText(payout.walletAddress);
+                                alert('Wallet address copied!');
+                              }}
+                              className="text-xs text-gray-500 hover:text-blue-600"
+                            >
+                              📋 Copy
+                            </button>
+                          </div>
+                        ) : payout.user?.walletAddress ? (
+                          <div>
+                            <div className="text-sm font-mono text-orange-600">
+                              {payout.user.walletAddress.slice(0, 6)}...{payout.user.walletAddress.slice(-4)}
+                            </div>
+                            <div className="text-xs text-orange-500">User wallet</div>
+                            <button
+                              onClick={() => {
+                                navigator.clipboard.writeText(payout.user.walletAddress);
+                                alert('Wallet address copied!');
+                              }}
+                              className="text-xs text-gray-500 hover:text-blue-600"
+                            >
+                              📋 Copy
+                            </button>
+                          </div>
+                        ) : (
+                          <div>
+                            <div className="text-sm text-red-500">⚠️ No wallet</div>
+                            <div className="text-xs text-gray-500">User needs to connect</div>
+                          </div>
+                        )}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
                         <div className="text-sm font-medium text-blue-600">
                           {formatCurrency(payout.purchasePrice)}
                         </div>
@@ -635,16 +732,56 @@ This action will transfer the holding wallet amounts for the selected NFTs.`
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                         <button
                           className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed"
-                          onClick={() => {
+                          disabled={(!payout.walletAddress && !payout.user?.walletAddress) || processingPayout}
+                          onClick={async () => {
+                            const recipientWallet = payout.walletAddress || payout.user?.walletAddress;
+                            if (!recipientWallet) {
+                              alert('No wallet address found. User needs to connect their wallet.');
+                              return;
+                            }
+
+                            // Check if admin wallet is connected
+                            if (!isConnected) {
+                              const shouldConnect = confirm('Connect your admin wallet to process payout?');
+                              if (!shouldConnect) return;
+                              
+                              const connectResult = await connectWallet();
+                              if (!connectResult.success) {
+                                alert(`Failed to connect wallet:\n\n${connectResult.error}\n\nPlease check your MetaMask/TokenPocket.`);
+                                return;
+                              }
+                            }
+
                             const confirmed = window.confirm(
-                              `Process payout of ${formatCurrency(payout.totalHolding)} for ${payout.nftCode} to ${payout.user?.name || payout.user?.email || 'User'}?\n\nThis action will transfer the holding wallet amount for this specific NFT to the user.`
+                              `Process payout of ${formatCurrency(payout.totalHolding)} USDT?\n\nNFT: ${payout.nftCode}\nUser: ${payout.user?.name || payout.user?.email || 'User'}\nTo Wallet: ${recipientWallet}${!payout.walletAddress ? ' (User Wallet)' : ''}\n\nThis will open your MetaMask/TokenPocket to send USDT.`
                             );
+                            
                             if (confirmed) {
-                              handleIndividualPayout(payout.user?._id, payout.nftCode, payout.totalHolding, payout.user?.name || payout.user?.email);
+                              setProcessingPayout(true);
+                              try {
+                                // Send USDT through wallet
+                                const paymentResult = await sendUSDT(payout.totalHolding.toFixed(2), recipientWallet);
+                                
+                                if (!paymentResult.success) {
+                                  throw new Error(paymentResult.error || 'Payment failed');
+                                }
+
+                                console.log('Payout successful:', paymentResult.txHash);
+
+                                // Update backend with transaction hash
+                                await handleIndividualPayout(payout.user?._id, payout.nftCode, payout.totalHolding, payout.user?.name || payout.user?.email, paymentResult.txHash);
+                                
+                                alert(`Payout Successful!\n\nAmount: ${formatCurrency(payout.totalHolding)} USDT\nTransaction: ${paymentResult.txHash.slice(0, 10)}...${paymentResult.txHash.slice(-8)}`);
+                              } catch (err) {
+                                console.error('Payout error:', err);
+                                alert(`Payout failed:\n\n${err.message}`);
+                              } finally {
+                                setProcessingPayout(false);
+                              }
                             }
                           }}
                         >
-                          💰 Payout {formatCurrency(payout.totalHolding)}
+                          {processingPayout ? '⏳ Processing...' : `💰 Payout ${formatCurrency(payout.totalHolding)}`}
                         </button>
                       </td>
                     </tr>
@@ -693,8 +830,46 @@ This action will transfer the holding wallet amounts for the selected NFTs.`
                         <span className="text-sm font-medium text-gray-900">{payout.nftCode}</span>
                         <span className="text-xs text-gray-500">NFT #{payoutIndex + 1}</span>
                       </div>
-                      <div className="text-xs text-gray-500">
+                      <div className="text-xs text-gray-500 mb-2">
                         Purchased: {new Date(payout.purchasedAt).toLocaleDateString()} at {new Date(payout.purchasedAt).toLocaleTimeString()}
+                      </div>
+                      <div className="text-xs text-gray-600 mt-2 pt-2 border-t">
+                        {payout.walletAddress ? (
+                          <>
+                            <span className="font-semibold">Wallet: </span>
+                            <span className="font-mono text-blue-600">
+                              {payout.walletAddress.slice(0, 6)}...{payout.walletAddress.slice(-4)}
+                            </span>
+                            <button
+                              onClick={() => {
+                                navigator.clipboard.writeText(payout.walletAddress);
+                                alert('Wallet address copied!');
+                              }}
+                              className="ml-2 text-blue-600 hover:text-blue-800"
+                            >
+                              📋
+                            </button>
+                          </>
+                        ) : payout.user?.walletAddress ? (
+                          <>
+                            <span className="font-semibold">Wallet: </span>
+                            <span className="font-mono text-orange-600">
+                              {payout.user.walletAddress.slice(0, 6)}...{payout.user.walletAddress.slice(-4)}
+                            </span>
+                            <span className="text-orange-500 ml-1">(User)</span>
+                            <button
+                              onClick={() => {
+                                navigator.clipboard.writeText(payout.user.walletAddress);
+                                alert('Wallet address copied!');
+                              }}
+                              className="ml-2 text-blue-600 hover:text-blue-800"
+                            >
+                              📋
+                            </button>
+                          </>
+                        ) : (
+                          <span className="text-red-500">⚠️ No wallet - User needs to connect</span>
+                        )}
                       </div>
                     </div>
                     
@@ -716,16 +891,56 @@ This action will transfer the holding wallet amounts for the selected NFTs.`
                     <div className="mt-4 pt-3 border-t border-gray-200">
                       <button
                         className="w-full bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                        onClick={() => {
+                        disabled={(!payout.walletAddress && !payout.user?.walletAddress) || processingPayout}
+                        onClick={async () => {
+                          const recipientWallet = payout.walletAddress || payout.user?.walletAddress;
+                          if (!recipientWallet) {
+                            alert('No wallet address found. User needs to connect their wallet.');
+                            return;
+                          }
+
+                          // Check if admin wallet is connected
+                          if (!isConnected) {
+                            const shouldConnect = confirm('Connect your admin wallet to process payout?');
+                            if (!shouldConnect) return;
+                            
+                            const connectResult = await connectWallet();
+                            if (!connectResult.success) {
+                              alert(`Failed to connect wallet:\n\n${connectResult.error}\n\nPlease check your MetaMask/TokenPocket.`);
+                              return;
+                            }
+                          }
+
                           const confirmed = window.confirm(
-                            `Process payout of ${formatCurrency(payout.totalHolding)} for ${payout.nftCode} to ${payout.user?.name || payout.user?.email || 'User'}?\n\nThis action will transfer the holding wallet amount for this specific NFT to the user.`
+                            `Process payout of ${formatCurrency(payout.totalHolding)} USDT?\n\nNFT: ${payout.nftCode}\nUser: ${payout.user?.name || payout.user?.email || 'User'}\nTo Wallet: ${recipientWallet}${!payout.walletAddress ? ' (User Wallet)' : ''}\n\nThis will open your MetaMask/TokenPocket to send USDT.`
                           );
+                          
                           if (confirmed) {
-                            handleIndividualPayout(payout.user?._id, payout.nftCode, payout.totalHolding, payout.user?.name || payout.user?.email);
+                            setProcessingPayout(true);
+                            try {
+                              // Send USDT through wallet
+                              const paymentResult = await sendUSDT(payout.totalHolding.toFixed(2), recipientWallet);
+                              
+                              if (!paymentResult.success) {
+                                throw new Error(paymentResult.error || 'Payment failed');
+                              }
+
+                              console.log('Payout successful:', paymentResult.txHash);
+
+                              // Update backend with transaction hash
+                              await handleIndividualPayout(payout.user?._id, payout.nftCode, payout.totalHolding, payout.user?.name || payout.user?.email, paymentResult.txHash);
+                              
+                              alert(`Payout Successful!\n\nAmount: ${formatCurrency(payout.totalHolding)} USDT\nTransaction: ${paymentResult.txHash.slice(0, 10)}...${paymentResult.txHash.slice(-8)}`);
+                            } catch (err) {
+                              console.error('Payout error:', err);
+                              alert(`Payout failed:\n\n${err.message}`);
+                            } finally {
+                              setProcessingPayout(false);
+                            }
                           }
                         }}
                       >
-                        💰 Payout {formatCurrency(payout.totalHolding)}
+                        {processingPayout ? '⏳ Processing...' : `💰 Payout ${formatCurrency(payout.totalHolding)}`}
                       </button>
                     </div>
                   </div>

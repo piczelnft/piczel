@@ -2,8 +2,10 @@
 
 import { useState, useEffect, useCallback } from "react";
 import AdminLayout from "../components/AdminLayout";
+import { useWallet } from "@/contexts/WalletContext";
 
 export default function NewWithdrawalRequests() {
+  const { walletAddress, isConnected, connectWallet, sendUSDT } = useWallet();
   const [withdrawalRequests, setWithdrawalRequests] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -297,41 +299,77 @@ export default function NewWithdrawalRequests() {
       const payoutAmount = calculatePayoutAmount(netAmount);
       const deduction = calculateCompanyDeduction(netAmount);
 
+      // Validate wallet address
+      if (!request.walletAddress || request.walletAddress.trim() === '') {
+        alert('No wallet address found for this withdrawal request. User needs to connect their wallet.');
+        setProcessingPayment(null);
+        return;
+      }
+
+      // Check if admin wallet is connected
+      if (!isConnected) {
+        const shouldConnect = confirm(
+          `Connect your admin wallet to process this payment?\n\n` +
+          `Amount: $${payoutAmount.toFixed(2)} USDT\n` +
+          `To: ${request.walletAddress}\n` +
+          `Member: ${request.memberId}`
+        );
+        
+        if (!shouldConnect) {
+          setProcessingPayment(null);
+          return;
+        }
+        
+        const connectResult = await connectWallet();
+        if (!connectResult.success) {
+          alert(`Failed to connect wallet:\n\n${connectResult.error}\n\nPlease check your MetaMask/TokenPocket.`);
+          setProcessingPayment(null);
+          return;
+        }
+      }
+
       // Show confirmation dialog
       const confirmMessage =
-        `Are you sure you want to process this payment?\n\n` +
+        `Process payment through your wallet?\n\n` +
         `Requested Amount: $${netAmount.toFixed(2)}\n` +
         `Company Deduction (10%): -$${deduction.toFixed(2)}\n` +
-        `Payout Amount: $${payoutAmount.toFixed(2)}\n\n` +
-        `To: ${request.walletAddress}\n` +
+        `Payout Amount: $${payoutAmount.toFixed(2)} USDT\n\n` +
+        `To Wallet: ${request.walletAddress}\n` +
         `Member: ${request.memberId}\n\n` +
-        `Note: You will pay 90% of the requested amount (10% company deduction).\n` +
-        `This will mark the request as paid and move it to payment history.`;
+        `This will open your MetaMask/TokenPocket to send USDT.`;
 
       if (!confirm(confirmMessage)) {
         setProcessingPayment(null);
         return;
       }
 
-      // Generate a demo transaction hash for testing
-      const demoTxHash = `0x${Math.random().toString(16).substr(2, 64)}`;
+      // Send USDT payment through wallet
+      const paymentResult = await sendUSDT(payoutAmount.toFixed(2), request.walletAddress);
+      
+      if (!paymentResult.success) {
+        throw new Error(paymentResult.error || 'Payment failed');
+      }
 
-      console.log("Processing payment with demo transaction hash:", demoTxHash);
+      console.log('Payment successful:', paymentResult.txHash);
 
-      // Update withdrawal status directly to completed with demo transaction hash
-      await handleWithdrawalAction(request.requestId, "completed", demoTxHash);
+      // Update withdrawal status with real transaction hash
+      await handleWithdrawalAction(request.requestId, "completed", paymentResult.txHash);
 
       alert(
-        `Payment processed successfully!\n\n` +
+        `💰 Payment Successful!\n\n` +
         `Requested Amount: $${netAmount.toFixed(2)}\n` +
         `Company Deduction (10%): -$${deduction.toFixed(2)}\n` +
-        `Paid Amount: $${payoutAmount.toFixed(2)}\n\n` +
-        `Member: ${request.memberId}\n\n` +
+        `Paid Amount: $${payoutAmount.toFixed(2)} USDT\n\n` +
+        `Member: ${request.memberId}\n` +
+        `Transaction: ${paymentResult.txHash.slice(0, 10)}...${paymentResult.txHash.slice(-8)}\n\n` +
         `The payment has been moved to payment history.`
       );
+      
+      // Refresh the list
+      await fetchWithdrawalRequests();
     } catch (error) {
       console.error("Payment error:", error);
-      alert(`Payment failed: ${error.message}`);
+      alert(`Payment failed:\n\n${error.message}`);
     } finally {
       setProcessingPayment(null);
     }
@@ -484,23 +522,7 @@ export default function NewWithdrawalRequests() {
         <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">
           New Withdrawal Requests
         </h1>
-        <p className="mt-2 text-gray-600 text-sm sm:text-base">New Withdrawal Requests to verify</p>
-        <div className="mt-4 p-3 sm:p-4 bg-blue-50 border border-blue-200 rounded-lg">
-          <div className="flex items-start">
-            <div className="flex-shrink-0">
-              <span className="text-blue-400 text-sm sm:text-base">ℹ️</span>
-            </div>
-            <div className="ml-3">
-              <h3 className="text-sm font-medium text-blue-800">Demo Mode</h3>
-              <div className="mt-1 text-xs sm:text-sm text-blue-700">
-                <p>
-                  Click &quot;Pay&quot; to process withdrawal requests directly.
-                  Approved payments will be moved to the payment history page.
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
+        <p className="mt-2 text-gray-600 text-sm sm:text-base">Process withdrawal requests and send USDT payments</p>
       </div>
 
       {/* Main Content */}

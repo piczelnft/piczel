@@ -92,14 +92,26 @@ export async function GET(request) {
     const userIds = [...new Set(items.map((i) => String(i.userId)))];
     const usersById = Object.fromEntries(
       (await User.find({ _id: { $in: userIds } })
-        .select("_id memberId name email")
+        .select("_id memberId name email metamaskWallet")
         .lean()).map((u) => [String(u._id), u])
     );
 
-    const results = items.map((i) => ({
-      ...i,
-      user: usersById[String(i.userId)] || null,
-    }));
+    const results = items.map((i) => {
+      const user = usersById[String(i.userId)] || null;
+      
+      // Debug: Log user wallet info
+      if (user) {
+        console.log(`User ${user.memberId} wallet from DB:`, {
+          metamaskWallet: user.metamaskWallet,
+          hasAddress: !!user.metamaskWallet?.address
+        });
+      }
+      
+      return {
+        ...i,
+        user: user,
+      };
+    });
 
     return NextResponse.json(
       {

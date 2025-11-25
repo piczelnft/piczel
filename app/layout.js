@@ -3,6 +3,7 @@ import "./globals.css";
 import ConditionalLayout from "./components/ConditionalLayout";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { SidebarProvider } from "./contexts/SidebarContext";
+import { WalletProvider } from "@/contexts/WalletContext";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -34,11 +35,13 @@ export default function RootLayout({ children }) {
         style={{fontFamily: 'var(--font-rajdhani)', background: 'var(--default-body-bg-color)'}}
       >
         <AuthProvider>
-          <SidebarProvider>
-            <ConditionalLayout>
-              {children}
-            </ConditionalLayout>
-          </SidebarProvider>
+          <WalletProvider>
+            <SidebarProvider>
+              <ConditionalLayout>
+                {children}
+              </ConditionalLayout>
+            </SidebarProvider>
+          </WalletProvider>
         </AuthProvider>
       </body>
     </html>

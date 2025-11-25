@@ -1,17 +1,72 @@
 "use client";
 
 import { useAuth } from "@/contexts/AuthContext";
+import { useWallet } from "@/contexts/WalletContext";
 import { useState } from "react";
 
 export default function ProfilePage() {
   const { user, isAuthenticated, updateUser } = useAuth();
+  const { walletAddress, isConnected, connectWallet, networkName } = useWallet();
   const [isEditing, setIsEditing] = useState(false);
+  const [connectingWallet, setConnectingWallet] = useState(false);
   const [formData, setFormData] = useState({
     name: user?.name || "",
     email: user?.email || "",
     phone: user?.mobile || "",
     country: user?.profile?.country || "",
   });
+
+  const handleConnectWallet = async () => {
+    setConnectingWallet(true);
+    try {
+      const result = await connectWallet();
+      console.log('Connect wallet result:', result);
+      
+      if (result.success) {
+        // Force save to backend
+        const token = localStorage.getItem("token");
+        if (token && result.address) {
+          try {
+            console.log('Saving wallet to backend:', result.address);
+            const response = await fetch("/api/wallet/connect", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${token}`,
+              },
+              body: JSON.stringify({
+                walletAddress: result.address,
+                network: "Manual Save",
+              }),
+            });
+
+            const data = await response.json();
+            console.log('Backend save response:', data);
+
+            if (response.ok) {
+              alert(`✅ Wallet Connected & Saved Successfully!\n\nAddress: ${result.address}\n\nYour wallet address has been saved to the database and will be used for NFT purchases and payouts.`);
+              // Refresh the page to update the display
+              window.location.reload();
+            } else {
+              alert(`Wallet connected but failed to save:\n\n${data.error}\n\nPlease try again.`);
+            }
+          } catch (err) {
+            console.error('Error saving to backend:', err);
+            alert(`Wallet connected but failed to save:\n\n${err.message}`);
+          }
+        } else {
+          alert(`✅ Wallet Connected Successfully!\n\nAddress: ${result.address}\n\nYour wallet address has been saved and will be used for NFT purchases and payouts.`);
+        }
+      } else {
+        alert(`Failed to connect wallet:\n\n${result.error}\n\nPlease:\n1. Check if MetaMask/TokenPocket is installed\n2. Unlock your wallet\n3. Try refreshing the page`);
+      }
+    } catch (err) {
+      console.error('Connect wallet error:', err);
+      alert("Error connecting wallet: " + err.message);
+    } finally {
+      setConnectingWallet(false);
+    }
+  };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -178,6 +233,123 @@ export default function ProfilePage() {
                         {user?.memberId || "PIC123456"}
                       </span>
                     </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* ----------------- WALLET CONNECTION SECTION ----------------- */}
+            <div className="mt-6 mb-10">
+              <div className="max-w-2xl mx-auto">
+                <div
+                  className="p-6 rounded-2xl border hover-lift-enhanced"
+                  style={{
+                    backgroundColor: "rgba(0,0,0,0.1)",
+                    backdropFilter: "blur(10px)",
+                    borderColor: "var(--default-border)",
+                  }}
+                >
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className="text-lg font-semibold text-white">
+                      🔗 Wallet Connection
+                    </h3>
+                    <span
+                      className={`px-3 py-1 rounded-full text-xs font-medium ${
+                        isConnected || (user?.metamaskWallet?.address)
+                          ? "bg-green-500/20 text-green-400 border border-green-500/30"
+                          : "bg-red-500/20 text-red-400 border border-red-500/30"
+                      }`}
+                    >
+                      {isConnected || (user?.metamaskWallet?.address) ? "Connected" : "Not Connected"}
+                    </span>
+                  </div>
+
+                  <div className="space-y-4">
+                    {(isConnected || walletAddress || user?.metamaskWallet?.address) ? (
+                      <>
+                        <div>
+                          <label
+                            className="block text-sm font-medium mb-2"
+                            style={{ color: "rgba(255,255,255,0.7)" }}
+                          >
+                            Wallet Address:
+                          </label>
+                          <div className="flex items-center space-x-2">
+                            <input
+                              type="text"
+                              value={walletAddress || user?.metamaskWallet?.address || "Not connected"}
+                              readOnly
+                              className="flex-1 px-3 py-2 rounded-lg text-sm border text-white font-mono"
+                              style={{ backgroundColor: "#1565c0", borderColor: "#1976d2" }}
+                            />
+                            <button
+                              onClick={() => {
+                                const address = walletAddress || user?.metamaskWallet?.address;
+                                if (address) {
+                                  navigator.clipboard.writeText(address);
+                                  alert("Wallet address copied!");
+                                }
+                              }}
+                              className="px-4 py-2 rounded-lg text-sm font-medium text-white transition-all duration-200 hover:scale-105"
+                              style={{
+                                backgroundColor: "rgba(59,130,246,0.8)",
+                                border: "1px solid rgba(59,130,246,0.3)",
+                              }}
+                            >
+                              Copy
+                            </button>
+                          </div>
+                        </div>
+                        {networkName && (
+                          <div className="flex items-center justify-between text-sm">
+                            <span style={{ color: "rgba(255,255,255,0.6)" }}>
+                              Network:
+                            </span>
+                            <span className="font-semibold text-white">
+                              {networkName}
+                            </span>
+                          </div>
+                        )}
+                        <p className="text-xs text-white/60">
+                          ℹ️ This wallet will be used for NFT purchases and receiving payouts
+                        </p>
+                        
+                        {/* Update Wallet Button - force save current wallet to database */}
+                        <div className="mt-4 pt-4 border-t border-white/20">
+                          <button
+                            onClick={handleConnectWallet}
+                            disabled={connectingWallet}
+                            className="w-full px-4 py-2 rounded-lg text-sm font-medium text-white transition-all duration-200 hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed"
+                            style={{
+                              backgroundColor: "rgba(251,146,60,0.8)",
+                              border: "1px solid rgba(251,146,60,0.3)",
+                            }}
+                          >
+                            {connectingWallet ? "Updating..." : "🔄 Update/Reconnect Wallet"}
+                          </button>
+                          <p className="text-xs text-white/50 mt-2 text-center">
+                            Click to refresh your wallet connection and save it to the database
+                          </p>
+                        </div>
+                      </>
+                    ) : (
+                      <div className="text-center py-4">
+                        <p className="text-white/70 mb-4">
+                          Connect your MetaMask or TokenPocket wallet to enable NFT purchases and receive payouts
+                        </p>
+                        <button
+                          onClick={handleConnectWallet}
+                          disabled={connectingWallet}
+                          className="px-6 py-3 rounded-lg text-sm font-medium text-white transition-all duration-200 hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed"
+                          style={{
+                            backgroundColor: "rgba(34,197,94,0.8)",
+                            border: "1px solid rgba(34,197,94,0.3)",
+                          }}
+                        >
+                          {connectingWallet ? "Connecting..." : "🔗 Connect Wallet"}
+                        </button>
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>

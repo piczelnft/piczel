@@ -3,17 +3,24 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { useAuth } from '@/contexts/AuthContext';
+import { useWallet } from '@/contexts/WalletContext';
 import { useEffect, useState, useCallback } from 'react';
 import { useAuthGuard } from '../../lib/auth-utils';
+
+// Payment recipient wallet address
+const PAYMENT_RECIPIENT = "0xf5993810E11c280D9B4382392E4E46D032782042";
 
 export default function NFTBuyPage() {
   const { user, token } = useAuth();
   const { isAuthenticated, isLoading } = useAuthGuard();
+  const { walletAddress, isConnected, connectWallet, sendUSDT, getUSDTBalance, networkName, isLoading: walletLoading, error: walletError } = useWallet();
   const [dashboardData, setDashboardData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [dashboardLoading, setDashboardLoading] = useState(false);
   const [error, setError] = useState(null);
   const [nftPurchases, setNftPurchases] = useState([]);
+  const [processingPayment, setProcessingPayment] = useState(false);
+  const [usdtBalance, setUsdtBalance] = useState(null);
 
   const NFT_SERIES = [
     'A1','B1','C1','D1','E1','F1','G1','H1','I1','J1'
@@ -63,11 +70,27 @@ export default function NFTBuyPage() {
     }
   }, [token]);
 
+  // Fetch USDT balance when wallet is connected
+  const fetchUSDTBalance = useCallback(async () => {
+    if (isConnected && getUSDTBalance) {
+      const result = await getUSDTBalance();
+      if (result.success) {
+        setUsdtBalance(result.balance);
+      }
+    }
+  }, [isConnected, getUSDTBalance]);
+
   useEffect(() => {
     if (isAuthenticated && token) {
       fetchDashboardData();
     }
   }, [isAuthenticated, token, fetchDashboardData]);
+
+  useEffect(() => {
+    if (isConnected) {
+      fetchUSDTBalance();
+    }
+  }, [isConnected, fetchUSDTBalance]);
 
   // ===== NFT Series (A1..J1) sequential daily gating =====
 
@@ -135,26 +158,103 @@ export default function NFTBuyPage() {
   const handleBuyNft = async (code) => {
     const status = getNftStatus(code);
     if (!status.available) return;
+    
     try {
-      const message = `Buy ${code}?`;
-      if (!confirm(message)) return;
-
       if (!token) {
         alert('Please log in to make a purchase.');
         return;
       }
+
+      // Check if wallet is connected
+      if (!isConnected) {
+        const shouldConnect = confirm(`To purchase ${code}, you need to connect your wallet and pay 100 USDT. Connect wallet now?`);
+        if (!shouldConnect) return;
+        
+        const connectResult = await connectWallet();
+        if (!connectResult.success) {
+          alert(`Failed to connect wallet:\n\n${connectResult.error}\n\nPlease:\n1. Check if MetaMask/TokenPocket is installed\n2. Unlock your wallet\n3. Try refreshing the page`);
+          return;
+        }
+        
+        // Fetch balance after connecting
+        await fetchUSDTBalance();
+      }
+
+      // Check USDT balance
+      const balanceResult = await getUSDTBalance();
+      const hasBalance = balanceResult.success && parseFloat(balanceResult.balance) >= 100;
+
+      // Require sufficient balance
+      if (!hasBalance) {
+        const currentBalance = balanceResult.success ? balanceResult.balance : '0';
+        alert(
+          `⚠️ INSUFFICIENT USDT BALANCE\n\n` +
+          `Your Balance: ${currentBalance} USDT\n` +
+          `Required: 100 USDT\n` +
+          `Network: ${networkName || 'Unknown'}\n\n` +
+          `Please add USDT to your wallet and try again.`
+        );
+        return;
+      }
+
+      // Confirm purchase
+      const message = `Purchase ${code} for 100 USDT?\n\nAmount: 100 USDT\nYour Balance: ${balanceResult.balance} USDT\nNetwork: ${networkName}\nRecipient: ${PAYMENT_RECIPIENT.slice(0, 6)}...${PAYMENT_RECIPIENT.slice(-4)}\n\nThis will open your TokenPocket/MetaMask wallet.`;
+      
+      if (!confirm(message)) return;
+
+      setProcessingPayment(true);
+
+      // Send USDT payment
+      const paymentResult = await sendUSDT("100");
+      
+      if (!paymentResult.success) {
+        throw new Error(paymentResult.error || 'Payment failed');
+      }
+
+      console.log('Payment successful:', paymentResult.txHash);
+
+      // Get wallet address - check multiple sources
+      let purchaseWalletAddress = walletAddress;
+      if (!purchaseWalletAddress) {
+        // Try to get from localStorage as fallback
+        purchaseWalletAddress = localStorage.getItem('walletAddress');
+      }
+      if (!purchaseWalletAddress && window.ethereum) {
+        // Try to get directly from MetaMask
+        try {
+          const accounts = await window.ethereum.request({ method: 'eth_accounts' });
+          if (accounts.length > 0) {
+            purchaseWalletAddress = accounts[0];
+          }
+        } catch (err) {
+          console.error('Error getting wallet address:', err);
+        }
+      }
+
+      console.log('Recording purchase with wallet address:', purchaseWalletAddress);
+
+      // Record purchase in backend with transaction hash
       const res = await fetch('/api/nft/purchases', {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ code, series: code.charAt(0), purchasedAt: new Date().toISOString() }),
+        body: JSON.stringify({ 
+          code, 
+          series: code.charAt(0), 
+          purchasedAt: new Date().toISOString(),
+          txHash: paymentResult.txHash,
+          paymentAmount: 100,
+          walletAddress: purchaseWalletAddress
+        }),
       });
+
       if (!res.ok) {
-        const data = await res.json().catch(() => ({ error: 'Purchase failed' }));
-        throw new Error(data.error || 'Purchase failed');
+        const data = await res.json().catch(() => ({ error: 'Purchase recording failed' }));
+        throw new Error(data.error || 'Purchase recording failed');
       }
+
       const data = await res.json();
       const next = [...nftPurchases, { 
         code, 
@@ -163,17 +263,25 @@ export default function NFTBuyPage() {
       }];
       setNftPurchases(next);
       
-      // Display success message
-      const successMessage = `Purchase Successful ${code}`;
+      // Display success message with transaction hash
+      const successMessage = `✅ Purchase Successful!\n\nNFT: ${code}\nTransaction: ${paymentResult.txHash.slice(0, 10)}...${paymentResult.txHash.slice(-8)}\nNetwork: ${networkName}`;
       
       alert(successMessage);
+      
+      // Refresh USDT balance
+      setTimeout(() => {
+        fetchUSDTBalance();
+      }, 2000);
       
       // Refresh dashboard data to update wallet balance display
       setTimeout(() => {
         fetchDashboardData();
       }, 2000);
     } catch (e) {
+      console.error('Purchase error:', e);
       alert(e.message || 'Purchase failed');
+    } finally {
+      setProcessingPayment(false);
     }
   };
 
@@ -240,6 +348,61 @@ export default function NFTBuyPage() {
                 </svg>
                 Back to Dashboard
               </Link>
+              
+              {/* Wallet Connection Status */}
+              {isConnected && (
+                <div className="mb-4 p-4 rounded-lg border border-blue-200 bg-blue-50">
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+                    <div className="flex items-center gap-2">
+                      <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></div>
+                      <span className="text-sm font-medium text-[#1565c0]">Wallet Connected</span>
+                      <span className="text-xs font-mono text-gray-600">{walletAddress?.slice(0, 6)}...{walletAddress?.slice(-4)}</span>
+                    </div>
+                    <div className="flex items-center gap-4">
+                      <div className="text-sm">
+                        <span className="text-gray-600">Network: </span>
+                        <span className="font-medium text-[#1565c0]">{networkName || 'Unknown'}</span>
+                      </div>
+                      {usdtBalance !== null && (
+                        <div className="text-sm">
+                          <span className="text-gray-600">USDT Balance: </span>
+                          <span className="font-bold text-green-600">{parseFloat(usdtBalance).toFixed(2)} USDT</span>
+                        </div>
+                      )}
+                      <button
+                        onClick={fetchUSDTBalance}
+                        className="text-xs px-2 py-1 rounded bg-[#1565c0] text-white hover:bg-[#1976d2]"
+                        disabled={walletLoading}
+                      >
+                        {walletLoading ? '⟳' : '↻'} Refresh
+                      </button>
+                    </div>
+                  </div>
+                  {usdtBalance !== null && parseFloat(usdtBalance) < 100 && (
+                    <div className="mt-2 text-xs text-orange-600">
+                      ⚠️ Low USDT balance. You need at least 100 USDT to purchase NFTs. Please add USDT to your wallet.
+                    </div>
+                  )}
+                </div>
+              )}
+              
+              {!isConnected && (
+                <div className="mb-4 p-4 rounded-lg border border-yellow-200 bg-yellow-50">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm text-yellow-800">⚠️ Wallet not connected. Connect to purchase NFTs with USDT.</span>
+                    </div>
+                    <button
+                      onClick={connectWallet}
+                      className="text-sm px-4 py-2 rounded bg-[#1565c0] text-white hover:bg-[#1976d2] font-semibold"
+                      disabled={walletLoading}
+                    >
+                      {walletLoading ? 'Connecting...' : 'Connect Wallet'}
+                    </button>
+                  </div>
+                </div>
+              )}
+              
               <div className="text-center">
                 <h1 className="text-2xl sm:text-3xl font-bold text-[#1565c0]">
                   Meme NFT Collection
