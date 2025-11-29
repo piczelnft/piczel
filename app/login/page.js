@@ -86,7 +86,7 @@ function LoginForm() {
   const connectWallet = async () => {
     const result = await connectWalletContext();
     if (!result.success) {
-      alert(result.error || "Failed to connect wallet. Please install MetaMask or TokenPocket.");
+      alert(result.error || "Failed to connect wallet. Please install TokenPocket.");
     } else {
       alert(`✅ Wallet Connected Successfully!\n\nAddress: ${result.address}\n\nYour wallet address has been saved and will be used for NFT purchases and payouts.`);
     }

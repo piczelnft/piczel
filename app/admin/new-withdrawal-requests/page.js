@@ -322,7 +322,7 @@ export default function NewWithdrawalRequests() {
         
         const connectResult = await connectWallet();
         if (!connectResult.success) {
-          alert(`Failed to connect wallet:\n\n${connectResult.error}\n\nPlease check your MetaMask/TokenPocket.`);
+          alert(`Failed to connect wallet:\n\n${connectResult.error}\n\nPlease check your TokenPocket.`);
           setProcessingPayment(null);
           return;
         }
@@ -336,7 +336,7 @@ export default function NewWithdrawalRequests() {
         `Payout Amount: $${payoutAmount.toFixed(2)} USDT\n\n` +
         `To Wallet: ${request.walletAddress}\n` +
         `Member: ${request.memberId}\n\n` +
-        `This will open your MetaMask/TokenPocket to send USDT.`;
+        `This will open your TokenPocket to send USDT.`;
 
       if (!confirm(confirmMessage)) {
         setProcessingPayment(null);

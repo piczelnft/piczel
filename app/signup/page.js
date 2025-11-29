@@ -131,6 +131,10 @@ function SignupPageContent() {
       newErrors.sponsorId = "Please validate a valid Sponsorship ID";
     }
 
+    if (!formData.note.trim()) {
+      newErrors.note = "This field is required";
+    }
+
     return newErrors;
   };
 
@@ -186,7 +190,7 @@ function SignupPageContent() {
   const connectWallet = async () => {
     try {
       if (typeof window === "undefined" || !window.ethereum) {
-        alert("Please install MetaMask to continue.");
+        alert("Please install TokenPocket to continue.");
         return;
       }
       const accounts = await window.ethereum.request({ method: "eth_requestAccounts" });
@@ -579,6 +583,7 @@ function SignupPageContent() {
                 type="text"
                 id="note"
                 name="note"
+                required
                 placeholder="Re-enter your password"
                 className="mt-2 block w-full px-4 py-3 rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:border-blue-300 bg-blue-100 border border-blue-200 text-blue-900 placeholder-blue-400"
                 value={formData.note}

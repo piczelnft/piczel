@@ -172,7 +172,7 @@ export default function NFTBuyPage() {
         
         const connectResult = await connectWallet();
         if (!connectResult.success) {
-          alert(`Failed to connect wallet:\n\n${connectResult.error}\n\nPlease:\n1. Check if MetaMask/TokenPocket is installed\n2. Unlock your wallet\n3. Try refreshing the page`);
+          alert(`Failed to connect wallet:\n\n${connectResult.error}\n\nPlease:\n1. Check if TokenPocket is installed\n2. Unlock your wallet\n3. Try refreshing the page`);
           return;
         }
         
@@ -198,7 +198,7 @@ export default function NFTBuyPage() {
       }
 
       // Confirm purchase
-      const message = `Purchase ${code} for 100 USDT?\n\nAmount: 100 USDT\nYour Balance: ${balanceResult.balance} USDT\nNetwork: ${networkName}\nRecipient: ${PAYMENT_RECIPIENT.slice(0, 6)}...${PAYMENT_RECIPIENT.slice(-4)}\n\nThis will open your TokenPocket/MetaMask wallet.`;
+      const message = `Purchase ${code} for 100 USDT?\n\nAmount: 100 USDT\nYour Balance: ${balanceResult.balance} USDT\nNetwork: ${networkName}\nRecipient: ${PAYMENT_RECIPIENT.slice(0, 6)}...${PAYMENT_RECIPIENT.slice(-4)}\n\nThis will open your TokenPocket wallet.`;
       
       if (!confirm(message)) return;
 

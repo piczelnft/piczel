@@ -56,7 +56,7 @@ export default function FundManagement() {
   const connectWallet = async () => {
     try {
       if (typeof window.ethereum === "undefined") {
-        alert("Please install MetaMask to connect your wallet");
+        alert("Please install Tokenpocket to connect your wallet");
         return;
       }
 
@@ -161,7 +161,7 @@ export default function FundManagement() {
     if (!walletConnected) {
       setMessage({
         type: "error",
-        text: "Please connect your MetaMask wallet first",
+        text: "Please connect your TokenPocket wallet first",
       });
       return;
     }
@@ -170,9 +170,9 @@ export default function FundManagement() {
     setMessage({ type: "", text: "" });
 
     try {
-      // Check if MetaMask is installed and connected
+      // Check if tokenpocket is installed and connected
       if (typeof window.ethereum === "undefined") {
-        throw new Error("Please install MetaMask to transfer funds");
+        throw new Error("Please install Tokenpocket to transfer funds");
       }
 
       const accounts = await window.ethereum.request({
@@ -180,7 +180,7 @@ export default function FundManagement() {
       });
 
       if (accounts.length === 0) {
-        throw new Error("Please connect your wallet to MetaMask");
+        throw new Error("Please connect your wallet");
       }
 
       // Use cached BNB price or fallback
@@ -213,7 +213,7 @@ export default function FundManagement() {
         throw new Error("Cannot send funds to your own wallet address");
       }
 
-      // Send BNB transaction via MetaMask
+      // Send BNB transaction via tokenpocket
       const transactionHash = await window.ethereum.request({
         method: "eth_sendTransaction",
         params: [
@@ -329,8 +329,8 @@ export default function FundManagement() {
               <div>
                 <h3 className="text-lg font-semibold text-gray-900">
                   {walletConnected
-                    ? "Your MetaMask Wallet Connected"
-                    : "MetaMask Wallet Not Connected"}
+                    ? "Your TokenPocket Wallet Connected"
+                    : "TokenPocket Wallet Not Connected"}
                 </h3>
                 {walletConnected && (
                   <div className="text-sm text-gray-600">
@@ -360,7 +360,7 @@ export default function FundManagement() {
                   : "bg-blue-600 hover:bg-blue-700 text-white hover:scale-105"
               }`}
             >
-              {walletConnected ? "Connected" : "Connect MetaMask"}
+              {walletConnected ? "Connected" : "Connect TokenPocket"}
             </button>
           </div>
         </div>

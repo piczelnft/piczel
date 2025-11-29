@@ -747,7 +747,7 @@ This action will transfer the holding wallet amounts for the selected NFTs.`
                               
                               const connectResult = await connectWallet();
                               if (!connectResult.success) {
-                                alert(`Failed to connect wallet:\n\n${connectResult.error}\n\nPlease check your MetaMask/TokenPocket.`);
+                                alert(`Failed to connect wallet:\n\n${connectResult.error}\n\nPlease check your TokenPocket.`);
                                 return;
                               }
                             }
@@ -906,7 +906,7 @@ This action will transfer the holding wallet amounts for the selected NFTs.`
                             
                             const connectResult = await connectWallet();
                             if (!connectResult.success) {
-                              alert(`Failed to connect wallet:\n\n${connectResult.error}\n\nPlease check your MetaMask/TokenPocket.`);
+                              alert(`Failed to connect wallet:\n\n${connectResult.error}\n\nPlease check your TokenPocket.`);
                               return;
                             }
                           }
