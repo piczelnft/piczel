@@ -191,14 +191,14 @@ export default function NFTBuyPage() {
           `⚠️ INSUFFICIENT USDT BALANCE\n\n` +
           `Your Balance: ${currentBalance} USDT\n` +
           `Required: 100 USDT\n` +
-          `Network: ${networkName || 'Unknown'}\n\n` +
+          `Network: BSC/BEP20\n\n` +
           `Please add USDT to your wallet and try again.`
         );
         return;
       }
 
       // Confirm purchase
-      const message = `Purchase ${code} for 100 USDT?\n\nAmount: 100 USDT\nYour Balance: ${balanceResult.balance} USDT\nNetwork: ${networkName}\nRecipient: ${PAYMENT_RECIPIENT.slice(0, 6)}...${PAYMENT_RECIPIENT.slice(-4)}\n\nThis will open your TokenPocket wallet.`;
+      const message = `Purchase ${code} for 100 USDT?\n\nAmount: 100 USDT\nYour Balance: ${balanceResult.balance} USDT\nNetwork: BSC/BEP20\nRecipient: ${PAYMENT_RECIPIENT.slice(0, 6)}...${PAYMENT_RECIPIENT.slice(-4)}\n\nThis will open your TokenPocket wallet.`;
       
       if (!confirm(message)) return;
 
@@ -264,7 +264,7 @@ export default function NFTBuyPage() {
       setNftPurchases(next);
       
       // Display success message with transaction hash
-      const successMessage = `✅ Purchase Successful!\n\nNFT: ${code}\nTransaction: ${paymentResult.txHash.slice(0, 10)}...${paymentResult.txHash.slice(-8)}\nNetwork: ${networkName}`;
+      const successMessage = `✅ Purchase Successful!\n\nNFT: ${code}\nTransaction: ${paymentResult.txHash.slice(0, 10)}...${paymentResult.txHash.slice(-8)}\nNetwork: BSC/BEP20`;
       
       alert(successMessage);
       
@@ -361,7 +361,9 @@ export default function NFTBuyPage() {
                     <div className="flex items-center gap-4">
                       <div className="text-sm">
                         <span className="text-gray-600">Network: </span>
-                        <span className="font-medium text-[#1565c0]">{networkName || 'Unknown'}</span>
+                        <span className="font-medium text-[#1565c0]">
+                          {/* {networkName || 'Unknown'} */}BSC/BEP20
+                          </span>
                       </div>
                       {usdtBalance !== null && (
                         <div className="text-sm">

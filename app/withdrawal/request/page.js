@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
+import { useWallet } from "@/contexts/WalletContext";
 
 // Format currency to show 4 decimal places without unnecessary trailing zeros
 const formatCurrency4Digits = (value) => {
@@ -28,7 +29,6 @@ const formatCurrency4Digits = (value) => {
 export default function WithdrawalRequestPage() {
   const [formData, setFormData] = useState({
     amount: "",
-    walletAddress: "",
     paymentMethod: "crypto",
     withdrawalType: "spot", // "spot" or "level"
     notes: ""
@@ -42,6 +42,7 @@ export default function WithdrawalRequestPage() {
   const [spotIncome, setSpotIncome] = useState(0);
   const [walletAddresses, setWalletAddresses] = useState([]);
   const { token, user } = useAuth();
+  const { walletAddress, isConnected } = useWallet();
 
   // Calculate available balance based on withdrawal type
   const getAvailableBalance = () => {
@@ -115,10 +116,8 @@ export default function WithdrawalRequestPage() {
       newErrors.amount = "Minimum withdrawal amount is $5";
     }
 
-    if (!formData.walletAddress.trim()) {
-      newErrors.walletAddress = "Wallet address is required";
-    } else if (formData.walletAddress.length < 20) {
-      newErrors.walletAddress = "Please enter a valid wallet address";
+    if (!walletAddress || !isConnected) {
+      newErrors.walletAddress = "Please connect your wallet before making a withdrawal";
     }
 
     if (!formData.paymentMethod) {
@@ -154,7 +153,7 @@ export default function WithdrawalRequestPage() {
         },
         body: JSON.stringify({
           amount: parseFloat(formData.amount),
-          walletAddress: formData.walletAddress,
+          walletAddress: walletAddress,
           paymentMethod: formData.paymentMethod,
           withdrawalType: formData.withdrawalType,
           notes: formData.notes
@@ -166,7 +165,6 @@ export default function WithdrawalRequestPage() {
         setMessage("Withdrawal request submitted successfully! We will process it within 24-48 hours.");
         setFormData({
           amount: "",
-          walletAddress: "",
           paymentMethod: "crypto",
           withdrawalType: "spot",
           notes: ""
@@ -452,21 +450,17 @@ export default function WithdrawalRequestPage() {
                 <label htmlFor="walletAddress" className="block text-sm font-medium mb-2" style={{color: '#fff'}}>
                   Wallet Address
                 </label>
-                <textarea
+                <div
                   id="walletAddress"
-                  name="walletAddress"
-                  rows="3"
-                  required
-                  value={formData.walletAddress}
-                  onChange={handleChange}
-                  className="w-full px-3 sm:px-4 py-2 sm:py-3 rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:border-transparent text-sm sm:text-base"
+                  className="w-full px-3 sm:px-4 py-2 sm:py-3 rounded-lg text-sm sm:text-base break-all"
                   style={{
                     backgroundColor: '#0d47a1',
                     border: '1px solid #fff',
                     color: '#fff',
                   }}
-                  placeholder="Enter your wallet address"
-                />
+                >
+                  {walletAddress && isConnected ? walletAddress : 'No wallet connected'}
+                </div>
                 {errors.walletAddress && (
                   <p className="mt-1 text-sm" style={{color: 'rgb(var(--danger-rgb))'}}>{errors.walletAddress}</p>
                 )}

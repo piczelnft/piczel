@@ -306,7 +306,7 @@ export default function ProfilePage() {
                               Network:
                             </span>
                             <span className="font-semibold text-white">
-                              {networkName}
+                              {/* {networkName} */}BSC/BEP20
                             </span>
                           </div>
                         )}
